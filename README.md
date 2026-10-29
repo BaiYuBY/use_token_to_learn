@@ -20,6 +20,7 @@
 | 02 词嵌入 Embedding | [中文](docs/02-embedding/README.md) · [EN](docs/02-embedding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/02-embedding/interactive/embedding.html) | [embedding.py](docs/02-embedding/code/embedding.py) |
 | 03 位置编码 Positional Encoding | [中文](docs/03-positional-encoding/README.md) · [EN](docs/03-positional-encoding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/03-positional-encoding/interactive/positional.html) | [positional.py](docs/03-positional-encoding/code/positional.py) |
 | 04 注意力机制 Attention | [中文](docs/04-attention/README.md) · [EN](docs/04-attention/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html) | [attention.py](docs/04-attention/code/attention.py) |
+| 05 Transformer 结构 Block | [中文](docs/05-transformer/README.md) · [EN](docs/05-transformer/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/05-transformer/interactive/transformer.html) | [transformer.py](docs/05-transformer/code/transformer.py) |
 
 完整的大纲和路线图见 [PLAN.md](PLAN.md)，写作规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 

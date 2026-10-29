@@ -1,0 +1,605 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Transformer 结构交互演示 · Transformer Block Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --c-embedding: #7986cb;
+    --c-attention: #3f51b5;
+    --c-ffn: #e8710a;
+    --c-norm: #188038;
+    --c-output: #9aa0a6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --c-embedding: #b3bcf5;
+      --c-attention: #8c9eff;
+      --c-ffn: #ffa149;
+      --c-norm: #6dd58c;
+      --c-output: #6b7280;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select, input[type=number] {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px;
+  }
+  button, select { cursor: pointer; }
+  input[type=number] { width: 96px; padding: 3px 6px; }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .card { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 12px; }
+  .ok { color: var(--good); font-weight: 700; }
+  .diff { color: var(--bad); font-weight: 700; }
+
+  /* block diagram */
+  svg.diagram { width: 100%; max-width: 340px; height: auto; display: block; margin: 0 auto; }
+  svg.diagram .box { cursor: pointer; }
+  svg.diagram .box rect { stroke-width: 2; transition: all .2s; }
+  svg.diagram .box text { font-size: 13px; font-weight: 600; pointer-events: none; }
+  svg.diagram .box.sel rect { stroke-width: 4; }
+  svg.diagram .wire { fill: none; stroke: var(--muted); stroke-width: 2; }
+  svg.diagram .wire.res { stroke-dasharray: 6 4; }
+  .shape { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .88rem; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+
+  /* charts */
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .bars { display: grid; grid-template-columns: 24px 1fr 1fr; gap: 3px 10px; align-items: center; font-size: .8rem; }
+  .bar-wrap { position: relative; height: 18px; border-left: 1px solid var(--muted); }
+  .bar { position: absolute; top: 2px; height: 14px; border-radius: 2px; }
+  .stack { display: flex; height: 26px; border-radius: 6px; overflow: hidden; margin: 6px 0 2px; }
+  .stack span { display: block; height: 100%; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: .85rem; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  pre.sample { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; white-space: pre-wrap; font-size: .85rem; min-height: 6.5em; margin: 8px 0 0; }
+
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">Transformer 结构 · 交互演示</span><span lang="en">Transformer Block · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">把分词、嵌入、位置编码和注意力组装起来：一个 Transformer 块里到底有什么？</span>
+        <span lang="en">Putting tokenization, embeddings, positions and attention together: what is inside a Transformer block?</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. block -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">一个 Transformer 块</span><span lang="en">One Transformer block</span></h2>
+    <p class="hint">
+      <span lang="zh">点击图中的每个部件，查看它做什么、张量形状和参数量。虚线是残差连接：每个子层的结果都<b>加</b>回到主干上，而不是替换它。点“逐步播放”跟着数据走一遍。</span>
+      <span lang="en">Click each part of the diagram to see what it does, its tensor shapes and its parameter count. Dashed lines are residual connections: each sub-layer's result is <b>added</b> back to the main stream instead of replacing it. Press “step through” to follow the data.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模型</span><span lang="en">model</span> <select id="b-preset"></select></label>
+      <label>T <input id="b-T" type="number" min="1" max="131072" value="1024"></label>
+      <button id="b-play"><span lang="zh">▶ 逐步播放</span><span lang="en">▶ Step through</span></button>
+    </div>
+    <div class="row">
+      <div class="col" style="flex:1 1 280px"><svg class="diagram" id="diagram" viewBox="0 0 300 560"></svg></div>
+      <div class="col" style="flex:1.4 1 360px"><div class="card" id="b-detail"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. residual -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">残差连接：让梯度传得回去</span><span lang="en">Residual connections: letting gradients get back</span></h2>
+    <p class="hint">
+      <span lang="zh">一叠随机初始化的层（每层 h → tanh(W·h)）。柱子是反向传播时每一层收到的梯度大小（相对于最顶层，对数刻度）。不加残差时，梯度每往下一层就被乘一次，很快消失；加上残差 h → h + tanh(W·h)，每一层都有一条“直通”的路。</span>
+      <span lang="en">A stack of randomly initialised layers (each h → tanh(W·h)). Bars show the gradient each layer receives during backprop (relative to the top layer, log scale). Without residuals the gradient is multiplied once per layer and quickly vanishes; with residuals, h → h + tanh(W·h), every layer has a direct path.</span>
+    </p>
+    <div class="controls">
+      <button id="r-res" class="on"><span lang="zh">残差连接</span><span lang="en">Residual connections</span></button>
+      <label><span lang="zh">层数</span><span lang="en">layers</span> <input id="r-depth" type="range" min="4" max="64" value="32"><span id="r-depth-v" class="mono"></span></label>
+      <label><span lang="zh">权重大小</span><span lang="en">weight scale</span> <input id="r-gain" type="range" min="0.2" max="1.6" step="0.05" value="0.6"><span id="r-gain-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="r-chart" viewBox="0 0 640 220"></svg>
+    <div class="callout" id="r-note"></div>
+  </section>
+
+  <!-- 3. norm -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">LayerNorm 与 RMSNorm</span><span lang="en">LayerNorm vs RMSNorm</span></h2>
+    <p class="hint">
+      <span lang="zh">归一化把每个词元的向量拉回到稳定的数值范围。LayerNorm 先减去均值再除以标准差；RMSNorm 省掉了减均值，只除以均方根（RMS），更简单也更快，Llama 等模型都用它。试试几个按钮。</span>
+      <span lang="en">Normalization pulls each token's vector back into a stable range. LayerNorm subtracts the mean and divides by the standard deviation; RMSNorm skips the mean and only divides by the root-mean-square, which is simpler and faster and is used by Llama and others. Try the buttons.</span>
+    </p>
+    <div class="controls">
+      <button id="n-shift">+3</button>
+      <button id="n-scale">×5</button>
+      <button id="n-rand"><span lang="zh">随机</span><span lang="en">Random</span></button>
+      <button id="n-reset"><span lang="zh">重置</span><span lang="en">Reset</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><div class="bars" id="n-bars"></div></div>
+      <div class="col"><div class="kv" id="n-stats"></div><div class="callout" id="n-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. FFN -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">前馈网络与 SwiGLU</span><span lang="en">The feed-forward network and SwiGLU</span></h2>
+    <p class="hint">
+      <span lang="zh">注意力负责在词元之间“交流”，前馈网络（FFN）则对每个词元<b>单独</b>加工：先把 d 维升到更宽的 d_ff，经过非线性，再压回 d 维。SwiGLU 用两条支路：一条经过 SiLU 作为“门”，另一条作为“值”，两者相乘。拖动滑块看门怎样控制信号。</span>
+      <span lang="en">Attention lets tokens “talk to each other”; the feed-forward network (FFN) processes each token <b>on its own</b>: widen from d to d_ff, apply a non-linearity, project back to d. SwiGLU has two branches: one goes through SiLU as a “gate”, the other is the “value”, and they are multiplied. Drag the sliders to see the gate at work.</span>
+    </p>
+    <div class="row">
+      <div class="col"><svg class="chart" id="act-chart" viewBox="0 0 400 240"></svg></div>
+      <div class="col">
+        <div class="controls">
+          <label>gate g <input id="g" type="range" min="-4" max="4" step="0.1" value="2"><span id="g-v" class="mono"></span></label>
+          <label>value v <input id="v" type="range" min="-3" max="3" step="0.1" value="1.5"><span id="v-v" class="mono"></span></label>
+        </div>
+        <div class="kv" id="glu"></div>
+        <div class="callout" id="glu-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. params -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">参数都去哪了？</span><span lang="en">Where do the parameters go?</span></h2>
+    <p class="hint">
+      <span lang="zh">选择一个真实模型或自己调结构。计算公式与 <code>code/transformer.py</code> 中的 <code>count_params</code> 相同，几个预设的总数与官方公布的参数量完全一致。</span>
+      <span lang="en">Pick a real model or design your own. The formula is the same as <code>count_params</code> in <code>code/transformer.py</code>, and the presets match the published parameter counts exactly.</span>
+    </p>
+    <div class="controls" id="p-presets"></div>
+    <div class="controls">
+      <label>d_model <input id="p-d" type="number" min="8" step="8"></label>
+      <label><span lang="zh">层数</span><span lang="en">layers</span> <input id="p-L" type="number" min="1"></label>
+      <label><span lang="zh">头数</span><span lang="en">heads</span> <input id="p-h" type="number" min="1"></label>
+      <label><span lang="zh">KV 头数</span><span lang="en">KV heads</span> <input id="p-kv" type="number" min="1"></label>
+      <label>d_ff <input id="p-ff" type="number" min="1"></label>
+      <label><span lang="zh">词表</span><span lang="en">vocab</span> <input id="p-V" type="number" min="1"></label>
+      <label>FFN <select id="p-ffn"><option value="swiglu">SwiGLU</option><option value="gelu">GELU</option></select></label>
+      <label><input id="p-tied" type="checkbox"> <span lang="zh">共享嵌入/输出</span><span lang="en">tied embeddings</span></label>
+      <label><input id="p-bias" type="checkbox"> <span lang="zh">偏置 + LayerNorm</span><span lang="en">biases + LayerNorm</span></label>
+      <label><span lang="zh">可学习位置</span><span lang="en">learned positions</span> <input id="p-pos" type="number" min="0"></label>
+    </div>
+    <div class="stack" id="p-stack"></div>
+    <div class="legend" id="p-legend"></div>
+    <div class="callout" id="p-note"></div>
+  </section>
+
+  <!-- 6. tiny GPT -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">训练一个迷你 GPT</span><span lang="en">Training a tiny GPT</span></h2>
+    <p class="hint">
+      <span lang="zh">本章代码中的 TinyGPT（2 层、d = 64、约 10 万参数）在一小段英文上做字符级训练。拖动滑块，看不同训练步数时模型从 “the ” 开始续写的结果。这段文本很短，模型最后其实是在“背诵”它。</span>
+      <span lang="en">This chapter's TinyGPT (2 layers, d = 64, about 100k parameters) trained at character level on a short English text. Drag the slider to see what it writes after “the ” at different training steps. The text is short, so in the end the model is really memorising it.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">训练步数</span><span lang="en">step</span> <input id="t-step" type="range" min="0" max="9" step="1" value="0"><span id="t-step-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="t-chart" viewBox="0 0 640 200"></svg>
+    <pre class="sample" id="t-sample"></pre>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">05 · Transformer</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Training curve and samples of the tiny GPT, generated by figures/transformer_figures.py -->
+<script src="transformer_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const fmt = n => n.toLocaleString("en-US");
+  const human = n => n >= 1e9 ? (n / 1e9).toFixed(2) + "B" : n >= 1e6 ? (n / 1e6).toFixed(1) + "M" : n >= 1e3 ? (n / 1e3).toFixed(1) + "K" : String(n);
+
+  // ---------- presets & parameter formula (mirrors count_params) ----------
+  const PRESETS = {
+    "TinyGPT": { d: 64, L: 2, h: 4, kv: 4, ff: 172, V: 30, ffn: "swiglu", tied: true, bias: false, pos: 0 },
+    "GPT-2 small": { d: 768, L: 12, h: 12, kv: 12, ff: 3072, V: 50257, ffn: "gelu", tied: true, bias: true, pos: 1024 },
+    "Llama 2 7B": { d: 4096, L: 32, h: 32, kv: 32, ff: 11008, V: 32000, ffn: "swiglu", tied: false, bias: false, pos: 0 },
+    "Llama 3 8B": { d: 4096, L: 32, h: 32, kv: 8, ff: 14336, V: 128256, ffn: "swiglu", tied: false, bias: false, pos: 0 },
+  };
+  function countParams(c) {
+    const kv = c.d / c.h * c.kv;
+    const attn = c.d * c.d + 2 * c.d * kv + c.d * c.d + (c.bias ? c.d + 2 * kv + c.d : 0);
+    const mlp = c.ffn === "swiglu" ? 3 * c.d * c.ff : 2 * c.d * c.ff + (c.bias ? c.ff + c.d : 0);
+    const norms = 2 * c.d * (c.bias ? 2 : 1);
+    return {
+      embedding: c.V * c.d + c.pos * c.d,
+      attention: c.L * attn,
+      ffn: c.L * mlp,
+      norm: c.L * norms + c.d * (c.bias ? 2 : 1),
+      output: c.tied ? 0 : c.V * c.d,
+    };
+  }
+  const PARTS = { embedding: ["嵌入", "embedding"], attention: ["注意力", "attention"], ffn: ["前馈 FFN", "FFN"], norm: ["归一化", "norm"], output: ["输出层", "output"] };
+
+  // ================= 1. block diagram =================
+  const NODES = [
+    { id: "in", y: 20, label: ["输入 x（残差流）", "input x (residual stream)"], kind: "io" },
+    { id: "norm1", y: 100, label: ["RMSNorm", "RMSNorm"], kind: "norm" },
+    { id: "attn", y: 170, label: ["多头注意力 + RoPE", "Multi-head attention + RoPE"], kind: "attention" },
+    { id: "add1", y: 245, label: ["+", "+"], kind: "add" },
+    { id: "norm2", y: 310, label: ["RMSNorm", "RMSNorm"], kind: "norm" },
+    { id: "ffn", y: 380, label: ["前馈网络 SwiGLU", "Feed-forward SwiGLU"], kind: "ffn" },
+    { id: "add2", y: 455, label: ["+", "+"], kind: "add" },
+    { id: "out", y: 515, label: ["输出（送入下一个块）", "output (to the next block)"], kind: "io" },
+  ];
+  let bSel = "attn", playTimer = null;
+  function blockCfg() { return { ...PRESETS[$("b-preset").value], T: Math.max(1, +$("b-T").value || 1) }; }
+  function renderDiagram() {
+    const color = k => ({ norm: css("--c-norm"), attention: css("--c-attention"), ffn: css("--c-ffn") }[k] || css("--muted"));
+    let s = `<defs><marker id="arr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="${css("--muted")}"/></marker></defs>`;
+    const cx = 130;
+    // main wires / 主干
+    for (let i = 0; i < NODES.length - 1; i++) {
+      const a = NODES[i], b = NODES[i + 1];
+      s += `<line class="wire" x1="${cx}" y1="${a.y + (a.kind === "add" ? 14 : 18)}" x2="${cx}" y2="${b.y - (b.kind === "add" ? 14 : 18)}" marker-end="url(#arr)"/>`;
+    }
+    // residual bypasses / 残差旁路
+    [["in", "add1"], ["add1", "add2"]].forEach(([from, to]) => {
+      const a = NODES.find(n => n.id === from), b = NODES.find(n => n.id === to);
+      // branch off just below `from`, run down the right side, rejoin at the `+` of `to`
+      // 从 from 下方分出，沿右侧向下，在 to 的加号处汇合
+      s += `<path class="wire res" d="M ${cx} ${from === "in" ? a.y + 40 : a.y + 18} H 268 V ${b.y} H ${cx + 16}" marker-end="url(#arr)"/>`;
+    });
+    s += `<text x="276" y="150" fill="${css("--muted")}" font-size="11" transform="rotate(90 276 150)">${tr("残差", "residual")}</text>`;
+    s += `<text x="276" y="360" fill="${css("--muted")}" font-size="11" transform="rotate(90 276 360)">${tr("残差", "residual")}</text>`;
+    NODES.forEach(n => {
+      const c = color(n.kind), sel = n.id === bSel ? "sel" : "";
+      if (n.kind === "add") {
+        s += `<g class="box ${sel}" data-id="${n.id}"><rect x="${cx - 14}" y="${n.y - 14}" width="28" height="28" rx="14" fill="${css("--bg")}" stroke="${n.id === bSel ? css("--accent") : c}"/><text x="${cx}" y="${n.y + 5}" text-anchor="middle" fill="${css("--ink")}">+</text></g>`;
+      } else {
+        const w = 220;
+        s += `<g class="box ${sel}" data-id="${n.id}"><rect x="${cx - w / 2}" y="${n.y - 18}" width="${w}" height="36" rx="8" fill="${n.kind === "io" ? css("--bg") : c}" fill-opacity="${n.kind === "io" ? 1 : 0.18}" stroke="${n.id === bSel ? css("--accent") : c}"/><text x="${cx}" y="${n.y + 5}" text-anchor="middle" fill="${css("--ink")}">${tr(...n.label)}</text></g>`;
+      }
+    });
+    $("diagram").innerHTML = s;
+    $("diagram").querySelectorAll(".box").forEach(g => g.addEventListener("click", () => { stopPlay(); bSel = g.dataset.id; renderBlock(); }));
+  }
+  function renderDetail() {
+    const c = blockCfg(), dh = c.d / c.h, kvd = dh * c.kv, sh = (...a) => `(${a.join(", ")})`;
+    const P = countParams(c);
+    const per = { attn: P.attention / c.L, ffn: P.ffn / c.L, norm: c.d * (c.bias ? 2 : 1) };
+    const info = {
+      in: [tr("残差流", "Residual stream"),
+        tr("每个词元在这里都是一个 d 维向量。整个模型可以看成一条“残差流”：每个块读取它、计算一些东西、再把结果加回去。", "Each token is a d-dimensional vector here. The whole model can be seen as a “residual stream”: every block reads it, computes something and adds the result back."),
+        [["x", sh("B", c.T, c.d)]], null],
+      norm1: [tr("归一化（注意力之前）", "Normalization (before attention)"),
+        tr("把每个词元的向量缩放到稳定的大小再送进注意力。这种“先归一化再计算”的写法叫 Pre-Norm，比原始 Transformer 的 Post-Norm 更容易训练深层模型。", "Rescales each token's vector to a stable size before attention. Normalizing first (“Pre-Norm”) trains deep models more easily than the original Transformer's Post-Norm."),
+        [[tr("输入/输出", "in/out"), sh("B", c.T, c.d)]], per.norm],
+      attn: [tr("多头自注意力", "Multi-head self-attention"),
+        tr(`词元之间唯一交换信息的地方（见 04 章）。q、k、v 由线性层得到，q 和 k 经过 RoPE 旋转（见 03 章），因果掩码保证只看过去。${c.kv < c.h ? `这里用了分组查询注意力（GQA）：${c.h} 个 query 头共享 ${c.kv} 组 K/V，K、V 的参数和缓存都更小。` : ""}`,
+           `The only place where tokens exchange information (chapter 04). q, k, v come from linear layers, q and k are rotated by RoPE (chapter 03), and a causal mask keeps it looking backwards.${c.kv < c.h ? ` This model uses grouped-query attention (GQA): ${c.h} query heads share ${c.kv} K/V groups, so K and V weights and caches are smaller.` : ""}`),
+        [["q", sh("B", c.h, c.T, dh)], ["k, v", sh("B", c.kv, c.T, dh)], [tr("分数", "scores"), sh("B", c.h, c.T, c.T) + `  ← ${fmt(c.h * c.T * c.T)} ${tr("个数/样本", "per sample")}`], [tr("输出", "out"), sh("B", c.T, c.d)]],
+        per.attn],
+      add1: [tr("残差相加", "Residual add"),
+        tr("x = x + Attention(Norm(x))。注意力的结果是“增量”，加到原来的向量上。这条直通路径让梯度可以毫无阻碍地传回前面的层（见第 2 节）。", "x = x + Attention(Norm(x)). Attention's output is an update added to the original vector. This direct path lets gradients flow back to earlier layers unhindered (part 2)."),
+        [["x", sh("B", c.T, c.d)]], 0],
+      norm2: [tr("归一化（前馈网络之前）", "Normalization (before the FFN)"),
+        tr("和第一个归一化一样，但有自己独立的缩放参数 γ。", "Same as the first one, with its own scale parameters γ."),
+        [[tr("输入/输出", "in/out"), sh("B", c.T, c.d)]], per.norm],
+      ffn: [tr("前馈网络", "Feed-forward network"),
+        tr(`对每个词元单独计算，词元之间不交流。先升维到 d_ff = ${fmt(c.ff)}（${(c.ff / c.d).toFixed(2)} 倍），经过非线性再降回 d。大模型中大部分参数都在这里，它常被认为是存放“知识”的地方。`,
+           `Computed for each token separately, with no communication between tokens. It widens to d_ff = ${fmt(c.ff)} (${(c.ff / c.d).toFixed(2)}×), applies a non-linearity, and projects back to d. Most parameters of large models live here; it is often thought of as where “knowledge” is stored.`),
+        [[tr("输入", "in"), sh("B", c.T, c.d)], [tr("中间", "hidden"), sh("B", c.T, c.ff)], [tr("输出", "out"), sh("B", c.T, c.d)]], per.ffn],
+      add2: [tr("残差相加", "Residual add"),
+        tr("x = x + FFN(Norm(x))。输出形状和输入完全相同，所以同样的块可以一层层叠下去。", "x = x + FFN(Norm(x)). The output has exactly the input's shape, so identical blocks can be stacked."),
+        [["x", sh("B", c.T, c.d)]], 0],
+      out: [tr("送入下一个块", "To the next block"),
+        tr(`这个模型共有 ${c.L} 个这样的块。最后一个块之后再做一次归一化，然后用输出层（${c.tied ? "与嵌入矩阵共享权重" : "独立的权重"}）把每个向量变成 ${fmt(c.V)} 个词元的分数。`,
+           `This model stacks ${c.L} such blocks. After the last one comes a final normalization, then the output layer (${c.tied ? "sharing weights with the embedding" : "with its own weights"}) turns each vector into scores for ${fmt(c.V)} tokens.`),
+        [["x", sh("B", c.T, c.d)], ["logits", sh("B", c.T, c.V)]], null],
+    }[bSel];
+    $("b-detail").innerHTML = `<h3 style="margin-top:0">${info[0]}</h3><p style="margin:4px 0 10px">${info[1]}</p>
+      <div class="kv">${info[2].map(([k, v]) => `<span>${k}</span><b class="shape">${v}</b>`).join("")}
+      ${info[3] !== null ? `<span>${tr("参数（每块）", "params (per block)")}</span><b>${fmt(info[3])}</b>` : ""}
+      <span>${tr("整个块的参数", "params per block")}</span><b>${fmt(per.attn + per.ffn + 2 * per.norm)}</b></div>`;
+  }
+  function renderBlock() { renderDiagram(); renderDetail(); }
+  function stopPlay() { if (playTimer) { clearInterval(playTimer); playTimer = null; } $("b-play").classList.remove("on"); }
+
+  // ================= 2. residual =================
+  const RD = 32;
+  let seed = 5;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const randn = () => { let u = 0, v = 0; while (!u) u = rand(); while (!v) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const BASE_W = Array.from({ length: 64 }, () => Array.from({ length: RD }, () => Array.from({ length: RD }, () => randn() / Math.sqrt(RD))));
+  const X0 = Array.from({ length: RD }, randn);
+  let residual = true;
+  function residualGrads(depth, gain) {
+    const hs = [X0], ts = [];
+    for (let l = 0; l < depth; l++) {
+      const h = hs[l], W = BASE_W[l];
+      const t = W.map(row => Math.tanh(gain * row.reduce((s, w, j) => s + w * h[j], 0)));
+      ts.push(t);
+      hs.push(residual ? h.map((x, i) => x + t[i]) : t);
+    }
+    let g = hs[depth].map(x => x);  // d(sum h^2 / 2)/dh = h
+    const norms = new Array(depth);
+    for (let l = depth - 1; l >= 0; l--) {
+      const t = ts[l], W = BASE_W[l];
+      const a = g.map((gi, i) => gi * (1 - t[i] * t[i]) * gain);  // through tanh
+      const back = new Array(RD).fill(0);
+      for (let i = 0; i < RD; i++) for (let j = 0; j < RD; j++) back[j] += W[i][j] * a[i];
+      g = residual ? back.map((x, j) => x + g[j]) : back;
+      norms[l] = Math.hypot(...g);
+    }
+    const top = norms[depth - 1];
+    return norms.map(n => n / top);
+  }
+  function renderResidual() {
+    const depth = +$("r-depth").value, gain = +$("r-gain").value;
+    $("r-depth-v").textContent = depth; $("r-gain-v").textContent = gain.toFixed(2);
+    $("r-res").classList.toggle("on", residual);
+    const ratios = residualGrads(depth, gain);
+    const W = 640, H = 220, L = 46, R = 10, T = 10, B = 28;
+    const lo = -12, hi = 4, y = v => T + (H - T - B) * (hi - Math.max(lo, Math.min(hi, Math.log10(v)))) / (hi - lo);
+    const bw = (W - L - R) / depth;
+    let s = "";
+    for (let e = lo; e <= hi; e += 4) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(10 ** e)}" y2="${y(10 ** e)}"/><text x="${L - 6}" y="${y(10 ** e) + 4}" text-anchor="end">${e === 0 ? "1" : "1e" + e}</text>`;
+    ratios.forEach((r, l) => {
+      const top = y(r), base = y(1);
+      s += `<rect x="${L + l * bw + 1}" y="${Math.min(top, base)}" width="${Math.max(1, bw - 2)}" height="${Math.max(1, Math.abs(base - top))}" fill="${residual ? css("--primary") : css("--accent")}"/>`;
+    });
+    s += `<text x="${L}" y="${H - 8}">${tr("第 1 层（底部）", "layer 1 (bottom)")}</text><text x="${W - R}" y="${H - 8}" text-anchor="end">${tr(`第 ${depth} 层（顶部）`, `layer ${depth} (top)`)}</text>`;
+    $("r-chart").innerHTML = s;
+    const bottom = ratios[0];
+    const ratio = v => v >= 0.01 && v < 1000 ? v.toFixed(2) : v.toExponential(1);
+    $("r-note").innerHTML = residual
+      ? tr(`有残差时，最底层收到的梯度是最顶层的 <b>${ratio(bottom)}</b> 倍：每一层都能有效地学习。残差的雅可比矩阵是 I + ∂f/∂h，里面的单位矩阵 I 保证了梯度至少能原样传回去。`,
+           `With residuals the bottom layer gets <b>${ratio(bottom)}</b>× the top layer's gradient, so every layer can learn. The residual Jacobian is I + ∂f/∂h, and the identity I guarantees the gradient can at least pass straight through.`)
+      : tr(`没有残差时，最底层的梯度只有最顶层的 <b>${ratio(bottom)}</b> 倍。${bottom < 1e-3 ? "底层几乎学不到东西，这就是“梯度消失”。" : "把层数调大或权重调小，看看会发生什么。"}${bottom > 1e3 ? "反过来，权重太大时梯度会“爆炸”。" : ""}`,
+           `Without residuals the bottom layer gets only <b>${ratio(bottom)}</b>× the top layer's gradient. ${bottom < 1e-3 ? "The bottom layers can barely learn: this is the vanishing-gradient problem." : "Increase the depth or lower the weights and see what happens."}${bottom > 1e3 ? " Conversely, weights that are too large make gradients explode." : ""}`);
+  }
+
+  // ================= 3. norm =================
+  const N0 = [2.1, 3.4, 1.2, 4.0, 2.8, 0.6, 3.1, 2.5];
+  let nv = N0.slice();
+  const stats = v => { const m = v.reduce((a, b) => a + b, 0) / v.length; const sd = Math.sqrt(v.reduce((a, b) => a + (b - m) ** 2, 0) / v.length); const rms = Math.sqrt(v.reduce((a, b) => a + b * b, 0) / v.length); return { m, sd, rms }; };
+  const layerNorm = v => { const { m, sd } = stats(v); return v.map(x => (x - m) / Math.sqrt(sd * sd + 1e-5)); };
+  const rmsNorm = v => { const { rms } = stats(v); return v.map(x => x / Math.sqrt(rms * rms + 1e-6)); };
+  let lastLN = null, lastRMS = null;
+  function renderNorm(action) {
+    const ln = layerNorm(nv), rn = rmsNorm(nv), s = stats(nv);
+    const mx = Math.max(3, ...nv.map(Math.abs));
+    const bar = (v, max, color) => { const w = Math.abs(v) / max * 50; return `<div class="bar-wrap" style="border-left:none"><span class="bar" style="left:${v >= 0 ? 50 : 50 - w}%;width:${w}%;background:${color}"></span><span style="position:absolute;left:50%;top:0;bottom:0;border-left:1px solid ${css("--muted")}"></span></div>`; };
+    $("n-bars").innerHTML = `<b></b><b>x</b><b>LayerNorm / RMSNorm</b>` + nv.map((x, i) =>
+      `<span class="mono hint">${i}</span>${bar(x, mx, css("--muted"))}<div>${bar(ln[i], 2.5, css("--c-attention"))}${bar(rn[i], 2.5, css("--c-norm"))}</div>`).join("");
+    const sl = stats(ln), sr = stats(rn);
+    $("n-stats").innerHTML = `<span></span><b>mean / RMS</b>
+      <span>x</span><b>${s.m.toFixed(2)} / ${s.rms.toFixed(2)}</b>
+      <span><span class="dot" style="background:${css("--c-attention")}"></span>LayerNorm</span><b>${sl.m.toFixed(2)} / ${sl.rms.toFixed(2)}</b>
+      <span><span class="dot" style="background:${css("--c-norm")}"></span>RMSNorm</span><b>${sr.m.toFixed(2)} / ${sr.rms.toFixed(2)}</b>`;
+    const same = (a, b) => a && a.every((x, i) => Math.abs(x - b[i]) < 1e-3);
+    let note;
+    if (action === "scale") note = tr(`把所有输入乘以 5：<span class="ok">两种归一化的输出都不变</span>。它们都只关心向量的“形状”，不关心整体大小。`, `Multiplying every input by 5: <span class="ok">neither output changes</span>. Both only care about the vector's shape, not its overall size.`);
+    else if (action === "shift") note = same(lastLN, ln) && !same(lastRMS, rn)
+      ? tr(`给所有输入加 3：<span class="ok">LayerNorm 的输出不变</span>（均值被减掉了），<span class="diff">RMSNorm 的输出变了</span>（它不减均值）。实践中这点差别影响不大，而 RMSNorm 少算一个均值、少一组偏置参数。`,
+           `Adding 3 to every input: <span class="ok">LayerNorm's output is unchanged</span> (the mean is subtracted) while <span class="diff">RMSNorm's output changes</span> (it keeps the mean). In practice this matters little, and RMSNorm saves computing the mean and a set of bias parameters.`)
+      : tr("给所有输入加 3。", "Added 3 to every input.");
+    else note = tr("归一化之后，LayerNorm 的输出均值为 0、均方根为 1；RMSNorm 的输出均方根为 1，但均值不一定为 0。真实模型还会再乘以可学习的缩放 γ（LayerNorm 还要加上偏置 β）。", "After normalization, LayerNorm's output has mean 0 and RMS 1; RMSNorm's has RMS 1 but not necessarily mean 0. Real models then multiply by a learnable scale γ (and LayerNorm adds a bias β).");
+    $("n-note").innerHTML = note;
+    lastLN = ln; lastRMS = rn;
+  }
+
+  // ================= 4. activations & SwiGLU =================
+  const silu = x => x / (1 + Math.exp(-x));
+  const gelu = x => 0.5 * x * (1 + Math.tanh(Math.sqrt(2 / Math.PI) * (x + 0.044715 * x ** 3)));
+  function renderAct() {
+    const W = 400, H = 240, L = 30, R = 10, T = 10, B = 24, x = v => L + (W - L - R) * (v + 4) / 8, y = v => T + (H - T - B) * (4 - v) / 5;
+    let s = "";
+    for (let k = -4; k <= 4; k += 2) s += `<line class="grid" x1="${x(k)}" x2="${x(k)}" y1="${T}" y2="${H - B}"/><text x="${x(k)}" y="${H - 8}" text-anchor="middle">${k}</text>`;
+    for (let k = -1; k <= 4; k++) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(k)}" y2="${y(k)}"/><text x="${L - 4}" y="${y(k) + 4}" text-anchor="end">${k}</text>`;
+    const curve = (f, color, label, ly) => {
+      const pts = []; for (let i = 0; i <= 160; i++) { const v = -4 + i / 20; pts.push(`${x(v).toFixed(1)},${y(f(v)).toFixed(1)}`); }
+      return `<polyline fill="none" stroke="${color}" stroke-width="2" points="${pts.join(" ")}"/><text x="${L + 8}" y="${ly}" fill="${color}" style="fill:${color}" font-weight="700">${label}</text>`;
+    };
+    s += curve(x => Math.max(0, x), css("--muted"), "ReLU", 24) + curve(gelu, css("--c-attention"), "GELU (GPT-2)", 40) + curve(silu, css("--c-ffn"), "SiLU (Llama)", 56);
+    const g = +$("g").value;
+    s += `<circle cx="${x(g)}" cy="${y(silu(g))}" r="5" fill="${css("--accent")}"/>`;
+    $("act-chart").innerHTML = s;
+  }
+  function renderGLU() {
+    const g = +$("g").value, v = +$("v").value, gate = silu(g), out = gate * v;
+    $("g-v").textContent = g.toFixed(1); $("v-v").textContent = v.toFixed(1);
+    $("glu").innerHTML = `<span>SiLU(g)</span><b>${gate.toFixed(3)}</b><span>v</span><b>${v.toFixed(2)}</b><span>SiLU(g) × v</span><b style="color:var(--accent)">${out.toFixed(3)}</b>`;
+    $("glu-note").innerHTML = tr(
+      gate < 0.05 ? "门几乎关闭：无论 value 多大，这一维几乎都不会通过。" : gate > 1.5 ? "门大开：value 被放大后通过。" : "门半开：value 被部分保留。",
+      gate < 0.05 ? "The gate is almost closed: whatever the value, little of this dimension passes." : gate > 1.5 ? "The gate is wide open: the value passes, amplified." : "The gate is half open: part of the value passes.")
+      + tr(" FFN 里有 d_ff 个这样的门并行工作，各自由输入决定开合。SwiGLU 多了一个矩阵，所以通常把 d_ff 设为约 8/3·d（而不是 4·d），让参数量与普通 FFN 接近。",
+           " An FFN runs d_ff such gates in parallel, each opened or closed by the input. SwiGLU adds a third matrix, so d_ff is usually about 8/3·d (instead of 4·d) to keep the parameter count similar to a plain FFN.");
+    renderAct();
+  }
+
+  // ================= 5. params =================
+  const FIELDS = { d: "p-d", L: "p-L", h: "p-h", kv: "p-kv", ff: "p-ff", V: "p-V", pos: "p-pos" };
+  let preset = "Llama 3 8B";
+  function loadPreset(name) {
+    preset = name;
+    const c = PRESETS[name];
+    Object.entries(FIELDS).forEach(([k, id]) => { $(id).value = c[k]; });
+    $("p-ffn").value = c.ffn; $("p-tied").checked = c.tied; $("p-bias").checked = c.bias;
+    renderParams();
+  }
+  function readCfg() {
+    const c = {};
+    Object.entries(FIELDS).forEach(([k, id]) => { c[k] = Math.max(k === "pos" ? 0 : 1, Math.round(+$(id).value || 0)); });
+    c.ffn = $("p-ffn").value; c.tied = $("p-tied").checked; c.bias = $("p-bias").checked;
+    return c;
+  }
+  function renderParams() {
+    $("p-presets").innerHTML = Object.keys(PRESETS).map(n => `<button class="${n === preset ? "on" : ""}" data-n="${n}">${n}</button>`).join("");
+    $("p-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => loadPreset(b.dataset.n)));
+    const c = readCfg(), P = countParams(c), total = Object.values(P).reduce((a, b) => a + b, 0);
+    $("p-stack").innerHTML = Object.entries(P).map(([k, n]) => n ? `<span style="width:${n / total * 100}%;background:${css("--c-" + k)}" title="${k}: ${fmt(n)}"></span>` : "").join("");
+    $("p-legend").innerHTML = Object.entries(P).map(([k, n]) =>
+      `<span><span class="dot" style="background:${css("--c-" + k)}"></span>${tr(...PARTS[k])} ${(n / total * 100).toFixed(1)}% <span class="hint">(${human(n)})</span></span>`).join("");
+    const bad = c.d % c.h !== 0 || c.h % c.kv !== 0;
+    $("p-note").innerHTML = (bad ? `<span class="diff">${tr("d_model 需要能被头数整除，头数需要能被 KV 头数整除。", "d_model must be divisible by heads, and heads by KV heads.")}</span><br>` : "") + tr(
+      `总参数量 <b>${fmt(total)}</b>（${human(total)}）。用 bf16 存储（每个参数 2 字节）需要约 <b>${(total * 2 / 2 ** 30).toFixed(2)} GiB</b> 显存；每生成一个词元大约要做 2 × 参数量 ≈ <b>${human(2 * total)}</b> 次浮点运算。`,
+      `Total <b>${fmt(total)}</b> parameters (${human(total)}). Stored in bf16 (2 bytes each) that is about <b>${(total * 2 / 2 ** 30).toFixed(2)} GiB</b> of memory, and generating one token takes roughly 2 × parameters ≈ <b>${human(2 * total)}</b> floating-point operations.`);
+  }
+
+  // ================= 6. tiny GPT =================
+  const TD = window.TRANSFORMER_DATA;
+  const SAMPLE_STEPS = TD ? Object.keys(TD.samples).map(Number).sort((a, b) => a - b) : [];
+  function renderTiny() {
+    if (!TD) { $("t-sample").textContent = "transformer_data.js missing"; return; }
+    $("t-step").max = SAMPLE_STEPS.length - 1;
+    const step = SAMPLE_STEPS[+$("t-step").value];
+    $("t-step-v").textContent = step;
+    const losses = TD.losses, n = losses.length;
+    const W = 640, H = 200, L = 40, R = 10, T = 10, B = 26;
+    const lo = Math.log(0.05), hi = Math.log(4);
+    const x = i => L + (W - L - R) * i / n, y = v => T + (H - T - B) * (hi - Math.log(Math.max(0.05, v))) / (hi - lo);
+    let s = "";
+    [0.1, 0.3, 1, 3].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`; });
+    [0, 100, 200, 300, 400, 500, 600].forEach(v => { s += `<text x="${x(v)}" y="${H - 8}" text-anchor="middle">${v}</text>`; });
+    const uni = Math.log(TD.vocab_size);
+    s += `<line x1="${L}" x2="${W - R}" y1="${y(uni)}" y2="${y(uni)}" stroke="${css("--muted")}" stroke-dasharray="3 3"/><text x="${W - R}" y="${y(uni) - 4}" text-anchor="end">${tr("均匀猜测", "uniform guess")} ln(${TD.vocab_size})</text>`;
+    s += `<polyline fill="none" stroke="${css("--primary")}" stroke-width="1.5" points="${losses.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`).join(" ")}"/>`;
+    const cur = step === 0 ? uni : losses[step - 1];
+    s += `<line x1="${x(step)}" x2="${x(step)}" y1="${T}" y2="${H - B}" stroke="${css("--accent")}"/><circle cx="${x(step)}" cy="${y(cur)}" r="5" fill="${css("--accent")}"/>`;
+    $("t-chart").innerHTML = s;
+    $("t-sample").textContent = TD.samples[String(step)];
+  }
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["在一个 Transformer 块里，词元之间交换信息发生在哪里？", "Inside a Transformer block, where do tokens exchange information?"],
+      opts: [["前馈网络", "The feed-forward network"], ["注意力层", "The attention layer"], ["归一化层", "The normalization layer"]],
+      a: 1, ex: ["只有注意力会混合不同位置的信息；FFN 和归一化都是对每个词元单独计算的。", "Only attention mixes information across positions; the FFN and normalization act on each token separately."] },
+    { q: ["残差连接 x = x + f(x) 最主要的好处是？", "What is the main benefit of the residual connection x = x + f(x)?"],
+      opts: [["减少参数量", "Fewer parameters"], ["给梯度一条直通的路径，让深层网络可以训练", "It gives gradients a direct path, so deep networks can train"], ["让注意力看得更远", "It lets attention see farther"]],
+      a: 1, ex: ["残差的雅可比矩阵含有单位矩阵 I，梯度至少能原样传回（第 2 节）。残差本身不增加参数。", "The residual Jacobian contains the identity I, so the gradient can at least pass straight back (part 2). Residuals add no parameters."] },
+    { q: ["在 Llama 3 8B 中，大约多少比例的参数在前馈网络里？", "Roughly what share of Llama 3 8B's parameters are in the feed-forward networks?"],
+      opts: [["约 10%", "About 10%"], ["约 30%", "About 30%"], ["约 70%", "About 70%"]],
+      a: 2, ex: ["32 层 × 3 × 4096 × 14,336 ≈ 56.4 亿，约占 80.3 亿的 70%（第 5 节）。", "32 layers × 3 × 4096 × 14,336 ≈ 5.64B, about 70% of 8.03B (part 5)."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  $("b-preset").innerHTML = Object.keys(PRESETS).map(n => `<option ${n === "Llama 3 8B" ? "selected" : ""}>${n}</option>`).join("");
+  function renderAll() { renderBlock(); renderResidual(); renderNorm(); renderGLU(); renderParams(); renderTiny(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("b-preset").addEventListener("change", renderBlock);
+  $("b-T").addEventListener("input", renderDetail);
+  $("b-play").addEventListener("click", () => {
+    if (playTimer) return stopPlay();
+    let i = 0;
+    $("b-play").classList.add("on");
+    const tick = () => { bSel = NODES[i].id; renderBlock(); i++; if (i >= NODES.length) stopPlay(); };
+    tick();
+    playTimer = setInterval(tick, 1600);
+  });
+  $("r-res").addEventListener("click", () => { residual = !residual; renderResidual(); });
+  $("r-depth").addEventListener("input", renderResidual);
+  $("r-gain").addEventListener("input", renderResidual);
+  $("n-shift").addEventListener("click", () => { nv = nv.map(x => x + 3); renderNorm("shift"); });
+  $("n-scale").addEventListener("click", () => { nv = nv.map(x => x * 5); renderNorm("scale"); });
+  $("n-rand").addEventListener("click", () => { nv = nv.map(() => randn() * 1.5 + 1); renderNorm(); });
+  $("n-reset").addEventListener("click", () => { nv = N0.slice(); renderNorm(); });
+  $("g").addEventListener("input", renderGLU);
+  $("v").addEventListener("input", renderGLU);
+  Object.values(FIELDS).concat(["p-ffn", "p-tied", "p-bias"]).forEach(id => $(id).addEventListener("input", () => { preset = null; renderParams(); }));
+  $("t-step").addEventListener("input", renderTiny);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  loadPreset("Llama 3 8B");
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
