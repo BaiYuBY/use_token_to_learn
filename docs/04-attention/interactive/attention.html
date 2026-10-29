@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>注意力机制交互演示 · Attention Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --primary-soft: rgba(63, 81, 181, 0.12);
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --heat: 63, 81, 181;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --primary-soft: rgba(140, 158, 255, 0.16);
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --heat: 140, 158, 255;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+    border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  code, .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .scroll { overflow-x: auto; }
+
+  /* heatmap */
+  table.heat { border-collapse: separate; border-spacing: 2px; font-size: .78rem; }
+  table.heat th { font-weight: 500; color: var(--muted); padding: 0 4px; white-space: nowrap; }
+  table.heat th.col-h { writing-mode: vertical-rl; transform: rotate(180deg); height: 64px; vertical-align: bottom; }
+  table.heat td { width: 44px; height: 32px; text-align: center; border-radius: 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  table.heat td.masked { background: repeating-linear-gradient(45deg, transparent 0 4px, var(--line) 4px 6px); color: var(--muted); }
+  table.heat tr.sel th { color: var(--accent); font-weight: 700; }
+  table.heat tr.sel td { outline: 2px solid var(--accent); }
+  .mini table.heat td { width: 14px; height: 14px; font-size: 0; }
+  .mini table.heat { border-spacing: 1px; }
+  .mini table.heat th { font-size: .7rem; padding: 0 2px; }
+  .mini table.heat th.col-h { height: 46px; }
+
+  /* bars */
+  .bars { display: grid; grid-template-columns: 70px 1fr 54px; gap: 4px 8px; align-items: center; font-size: .85rem; }
+  .bar { height: 14px; background: var(--primary); border-radius: 3px; transition: width .25s; min-width: 1px; }
+  .bar.alt { background: var(--accent); }
+  .bar.off { background: var(--line); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .pipeline { width: 100%; border-collapse: collapse; font-size: .85rem; }
+  .pipeline th, .pipeline td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .pipeline th:first-child, .pipeline td:first-child { text-align: left; }
+  .pipeline td.w { width: 40%; text-align: left; }
+  .pipeline td.w .bar { display: inline-block; vertical-align: middle; }
+  .feat { display: grid; grid-template-columns: 120px 1fr 44px; gap: 6px 8px; align-items: center; font-size: .88rem; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .heads { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .head-card { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+  .head-card h3 { margin: 0 0 4px; font-size: .95rem; }
+  .shape { font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .82rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; overflow-x: auto; white-space: pre; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">注意力机制 · 交互演示</span><span lang="en">Attention · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">动手改参数，亲眼看 Q、K、V 如何变成注意力权重。</span>
+        <span lang="en">Change the numbers and watch Q, K and V turn into attention weights.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. heatmap + pipeline -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">一句话里，每个词在看谁？</span><span lang="en">Who is each word looking at?</span></h2>
+    <p class="hint">
+      <span lang="zh">点击任一行，选中该词作为 <b>Query</b>。右侧逐步展示它的计算过程。每个词用 4 维向量表示，每一维有直观含义（名词 / 代词 / 动词 / 功能词），这里令 V = K 以便阅读输出。</span>
+      <span lang="en">Click a row to pick that word as the <b>query</b>; the right panel walks through its computation. Each word is a 4-d vector whose dimensions mean noun / pronoun / verb / function word. Here V = K so the output is easy to read.</span>
+    </p>
+    <div class="controls">
+      <button id="causal" class="on"><span lang="zh">因果掩码</span><span lang="en">Causal mask</span></button>
+      <button id="scale" class="on"><span lang="zh">除以 √d</span><span lang="en">Divide by √d</span></button>
+      <label><span lang="zh">放大 ‖q‖</span><span lang="en">Scale ‖q‖</span>
+        <input id="gain" type="range" min="0" max="4" step="0.1" value="1"><span id="gain-v" class="mono">1.0×</span></label>
+    </div>
+    <div class="row">
+      <div class="col scroll"><table class="heat" id="heat"></table></div>
+      <div class="col">
+        <div class="scroll"><table class="pipeline" id="pipe"></table></div>
+        <div class="callout" id="pipe-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. edit the query -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">改写 Query：让词去“找”别的东西</span><span lang="en">Rewrite the query: make a word look for something else</span></h2>
+    <p class="hint">
+      <span lang="zh">拖动滑块修改当前选中词的 q 向量。试试把 “it” 的“名词”维调到 0、“动词”维调高，它就会改去关注 “sat”。</span>
+      <span lang="en">Drag the sliders to edit the selected word's q vector. Try setting the “noun” dimension of “it” to 0 and raising “verb”: it starts attending to “sat”.</span>
+    </p>
+    <div class="row">
+      <div class="col">
+        <div class="feat" id="qedit"></div>
+        <div class="controls"><button id="reset-q"><span lang="zh">重置</span><span lang="en">Reset</span></button></div>
+      </div>
+      <div class="col">
+        <b><span lang="zh">输出向量 = Σ 权重 × V</span><span lang="en">Output = Σ weight × V</span></b>
+        <div class="feat" id="out" style="margin-top:6px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. why sqrt(d) -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">为什么要除以 √d？</span><span lang="en">Why divide by √d?</span></h2>
+    <p class="hint">
+      <span lang="zh">随机生成 1 个 query 和 16 个 key（每个分量 ~ N(0,1)）。维度 d 越大，点积的方差越大（≈ d），softmax 会变成近似 one-hot，梯度几乎为 0。</span>
+      <span lang="en">One random query and 16 random keys (entries ~ N(0,1)). The larger d is, the larger the dot products' variance (≈ d), and softmax collapses towards one-hot with near-zero gradients.</span>
+    </p>
+    <div class="controls">
+      <label>d = <input id="dim" type="range" min="0" max="8" step="1" value="4"><span id="dim-v" class="mono"></span></label>
+      <button id="resample"><span lang="zh">重新采样</span><span lang="en">Resample</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><b><span lang="zh">不缩放</span><span lang="en">Unscaled</span> softmax(q·k)</b><div class="bars" id="bars-raw" style="margin-top:6px"></div></div>
+      <div class="col"><b><span lang="zh">缩放</span><span lang="en">Scaled</span> softmax(q·k / √d)</b><div class="bars" id="bars-scaled" style="margin-top:6px"></div></div>
+    </div>
+    <div class="callout" id="scale-note"></div>
+  </section>
+
+  <!-- 4. multi-head -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">多头注意力：每个头学一种“看法”</span><span lang="en">Multi-head attention: each head learns its own pattern</span></h2>
+    <p class="hint">
+      <span lang="zh">真实模型里常能找到下面这些典型的头（这里是人工构造的示意）。各头的输出拼接后再经过 W<sub>O</sub> 混合。</span>
+      <span lang="en">Heads like these are commonly found in trained models (hand-built here for illustration). Their outputs are concatenated and mixed by W<sub>O</sub>.</span>
+    </p>
+    <div class="heads" id="heads"></div>
+    <div class="controls" style="margin-top:14px">
+      <label>d_model <select id="dmodel"><option>512</option><option selected>768</option><option>4096</option></select></label>
+      <label><span lang="zh">头数</span><span lang="en">heads</span> <select id="nheads"><option>8</option><option selected>12</option><option>32</option></select></label>
+      <label>T <select id="tlen"><option>7</option><option selected>1024</option><option>8192</option></select></label>
+    </div>
+    <div class="shape" id="shape"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">04 · Attention</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script>
+(() => {
+  // ---------- data ----------
+  const TOKENS = ["The", "cat", "sat", "because", "it", "was", "tired"];
+  const FEATS = [["名词", "noun"], ["代词", "pronoun"], ["动词", "verb"], ["功能词", "function"]];
+  const K = [[0,0,0,1],[3,0,0,0],[0,0,2,0],[0,0,0,1],[1,1,0,0],[0,0,1.5,.5],[.5,0,1.5,0]];
+  const Q0 = [[0,0,0,1],[1,0,1,0],[2,0,.5,0],[0,0,1.5,0],[2,0,0,0],[1.5,.5,0,0],[1.5,.5,.5,0]];
+  const V = K;
+  const D = 4;
+
+  let Q = Q0.map(r => r.slice());
+  let sel = TOKENS.indexOf("it");
+  let causal = true, scaled = true, gain = 1;
+  let lang = "zh";
+
+  const $ = id => document.getElementById(id);
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const fmt = (x, n = 2) => Number.isFinite(x) ? x.toFixed(n) : "−∞";
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  const softmax = xs => {
+    const m = Math.max(...xs.filter(Number.isFinite));
+    const e = xs.map(x => Number.isFinite(x) ? Math.exp(x - m) : 0);
+    const s = e.reduce((a, b) => a + b, 0);
+    return e.map(x => x / s);
+  };
+  const heatBg = w => `rgba(var(--heat), ${0.08 + 0.92 * w})`;
+
+  function rowScores(i) {
+    const q = Q[i].map(x => x * gain);
+    return TOKENS.map((_, j) => {
+      const raw = dot(q, K[j]);
+      const s = scaled ? raw / Math.sqrt(D) : raw;
+      return { raw, s, masked: causal && j > i };
+    });
+  }
+  function rowWeights(i) {
+    const sc = rowScores(i);
+    return softmax(sc.map(c => c.masked ? -Infinity : c.s));
+  }
+
+  // ---------- 1. heatmap ----------
+  function heatTable(el, weightsFn, maskFn, opts = {}) {
+    let h = "<tr><th></th>" + TOKENS.map(t => `<th class="col-h">${t}</th>`).join("") + "</tr>";
+    TOKENS.forEach((t, i) => {
+      const w = weightsFn(i);
+      h += `<tr data-i="${i}" class="${opts.sel === i ? "sel" : ""}"><th>${t}</th>`;
+      w.forEach((x, j) => {
+        if (maskFn(i, j)) h += `<td class="masked" title="masked">·</td>`;
+        else h += `<td style="background:${heatBg(x)};color:${x > .55 ? "var(--bg)" : "var(--ink)"}" title="${TOKENS[i]} → ${TOKENS[j]}: ${x.toFixed(3)}">${x.toFixed(2)}</td>`;
+      });
+      h += "</tr>";
+    });
+    el.innerHTML = h;
+  }
+
+  function renderHeat() {
+    heatTable($("heat"), rowWeights, (i, j) => causal && j > i, { sel });
+    $("heat").querySelectorAll("tr[data-i]").forEach(r =>
+      r.addEventListener("click", () => { sel = +r.dataset.i; renderAll(); }));
+  }
+
+  function renderPipe() {
+    const sc = rowScores(sel), w = rowWeights(sel);
+    let h = `<tr><th>Key</th><th>q·k</th><th>${scaled ? "÷√d" : tr("不缩放", "no scale")}</th><th>${tr("权重", "weight")}</th></tr>`;
+    sc.forEach((c, j) => {
+      h += `<tr><td>${TOKENS[j]}</td><td>${fmt(c.raw)}</td><td>${c.masked ? "−∞ 🔒" : fmt(c.s)}</td>
+        <td class="w"><span class="bar ${c.masked ? "off" : ""}" style="width:${Math.max(1, w[j] * 100)}%"></span> ${w[j].toFixed(2)}</td></tr>`;
+    });
+    $("pipe").innerHTML = h;
+    const top = w.indexOf(Math.max(...w));
+    const visible = sc.filter(c => !c.masked).length;
+    $("pipe-note").innerHTML = tr(
+      `Query <b>“${TOKENS[sel]}”</b> 能看见 ${visible} 个词，最关注 <b>“${TOKENS[top]}”</b>（${(w[top] * 100).toFixed(0)}%）。` +
+        (causal ? " 被🔒的词在它之后，生成时还不存在，所以分数被设为 −∞，softmax 后权重为 0。" : " 关闭因果掩码后，每个词都能看见整句话（类似 BERT 这样的编码器）。"),
+      `Query <b>“${TOKENS[sel]}”</b> sees ${visible} words and attends most to <b>“${TOKENS[top]}”</b> (${(w[top] * 100).toFixed(0)}%).` +
+        (causal ? " 🔒 words come later and don't exist yet during generation, so their scores are −∞ and their weights become 0." : " Without the causal mask every word sees the whole sentence (like an encoder such as BERT).")
+    );
+  }
+
+  // ---------- 2. edit q ----------
+  function renderQEdit() {
+    let h = "";
+    FEATS.forEach((f, d) => {
+      h += `<span>q<sub>${d}</sub> ${tr(f[0], f[1])}</span>
+        <input type="range" min="-1" max="3" step="0.25" value="${Q[sel][d]}" data-d="${d}">
+        <span class="num mono">${Q[sel][d].toFixed(2)}</span>`;
+    });
+    $("qedit").innerHTML = `<b style="grid-column:1/-1">${tr("当前 Query", "Current query")}: “${TOKENS[sel]}”</b>` + h;
+    $("qedit").querySelectorAll("input").forEach(inp =>
+      inp.addEventListener("input", () => {
+        Q[sel][+inp.dataset.d] = +inp.value;
+        inp.nextElementSibling.textContent = (+inp.value).toFixed(2);
+        renderHeat(); renderPipe(); renderOut();
+      }));
+  }
+  function renderOut() {
+    const w = rowWeights(sel);
+    const out = FEATS.map((_, d) => w.reduce((s, x, j) => s + x * V[j][d], 0));
+    const mx = Math.max(3, ...out);
+    $("out").innerHTML = FEATS.map((f, d) =>
+      `<span>${tr(f[0], f[1])}</span><span class="bar alt" style="width:${Math.max(1, out[d] / mx * 100)}%"></span><span class="num mono">${out[d].toFixed(2)}</span>`).join("");
+  }
+
+  // ---------- 3. why sqrt(d) ----------
+  const DIMS = [2, 4, 8, 16, 32, 64, 128, 256, 1024];
+  const NK = 16;
+  let seed = 1;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const randn = () => { let u = 0, v = 0; while (!u) u = rand(); while (!v) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  let base = null;
+  function sample() {
+    const dmax = DIMS[DIMS.length - 1];
+    base = { q: Array.from({ length: dmax }, randn), k: Array.from({ length: NK }, () => Array.from({ length: dmax }, randn)) };
+  }
+  function bars(el, p, alt) {
+    el.innerHTML = p.map((x, j) =>
+      `<span class="mono">k${j + 1}</span><span class="bar ${alt ? "alt" : ""}" style="width:${Math.max(.5, x * 100)}%"></span><span class="num mono">${x.toFixed(2)}</span>`).join("");
+  }
+  function renderScale() {
+    const d = DIMS[+$("dim").value];
+    $("dim-v").textContent = d;
+    const s = base.k.map(k => dot(base.q.slice(0, d), k.slice(0, d)));
+    const raw = softmax(s), sc = softmax(s.map(x => x / Math.sqrt(d)));
+    bars($("bars-raw"), raw, true);
+    bars($("bars-scaled"), sc, false);
+    const std = Math.sqrt(s.reduce((a, x) => a + x * x, 0) / s.length);
+    const ent = p => -p.reduce((a, x) => a + (x > 0 ? x * Math.log2(x) : 0), 0);
+    $("scale-note").innerHTML = tr(
+      `d = ${d}：点积标准差 ≈ <b>${std.toFixed(1)}</b>（理论值 √d = ${Math.sqrt(d).toFixed(1)}）。不缩放时最大权重 <b>${Math.max(...raw).toFixed(2)}</b>、熵 ${ent(raw).toFixed(2)} bit；缩放后最大权重 <b>${Math.max(...sc).toFixed(2)}</b>、熵 ${ent(sc).toFixed(2)} bit（均匀分布为 4 bit）。`,
+      `d = ${d}: dot-product std ≈ <b>${std.toFixed(1)}</b> (theory √d = ${Math.sqrt(d).toFixed(1)}). Unscaled max weight <b>${Math.max(...raw).toFixed(2)}</b>, entropy ${ent(raw).toFixed(2)} bits; scaled max weight <b>${Math.max(...sc).toFixed(2)}</b>, entropy ${ent(sc).toFixed(2)} bits (uniform = 4 bits).`
+    );
+  }
+
+  // ---------- 4. multi-head ----------
+  const HEADS = [
+    { zh: "前一个词头", en: "Previous-token head", dzh: "总是看紧挨着的前一个词，帮助拼出短语。", den: "Always looks at the word right before; helps build phrases.",
+      score: (i, j) => j === i - 1 ? 4 : 0 },
+    { zh: "注意力汇聚头", en: "Attention-sink head", dzh: "没什么可看时就把注意力“停”在第一个词上。", den: "Parks attention on the first token when nothing else is relevant.",
+      score: (i, j) => j === 0 ? 3 : 0 },
+    { zh: "指代头", en: "Coreference head", dzh: "代词和形容词去找它们指代的名词（本页第 1 部分）。", den: "Pronouns and adjectives find the noun they refer to (part 1 above).",
+      score: (i, j) => dot(Q0[i], K[j]) / Math.sqrt(D) },
+    { zh: "自身头", en: "Self head", dzh: "主要看自己，相当于保留自身信息。", den: "Mostly looks at itself, preserving its own information.",
+      score: (i, j) => j === i ? 3 : 0 },
+  ];
+  function renderHeads() {
+    $("heads").innerHTML = HEADS.map((h, n) =>
+      `<div class="head-card mini"><h3>Head ${n + 1} · ${tr(h.zh, h.en)}</h3><div class="hint">${tr(h.dzh, h.den)}</div><div class="scroll"><table class="heat" id="head-${n}"></table></div></div>`).join("");
+    HEADS.forEach((h, n) => heatTable($(`head-${n}`),
+      i => softmax(TOKENS.map((_, j) => j > i ? -Infinity : h.score(i, j))),
+      (i, j) => j > i));
+  }
+  function renderShape() {
+    const dm = +$("dmodel").value, H = +$("nheads").value, T = +$("tlen").value, dh = dm / H;
+    const params = 4 * dm * dm;
+    const scoreMem = H * T * T;
+    $("shape").textContent = lang === "zh" ?
+`x                      (B, T, d_model)       = (B, ${T}, ${dm})
+Q, K, V = x·W_Q, W_K, W_V                     → 3 × (B, ${T}, ${dm})
+拆成多头 view+transpose (B, H, T, d_head)    = (B, ${H}, ${T}, ${dh})
+打分 Q·Kᵀ/√d_head       (B, H, T, T)          = (B, ${H}, ${T}, ${T})   ← 每个样本 ${scoreMem.toLocaleString()} 个数，随 T² 增长
+softmax · V            (B, H, T, d_head)     = (B, ${H}, ${T}, ${dh})
+拼接 concat            (B, T, d_model)       = (B, ${T}, ${dm})
+输出 ·W_O              (B, T, d_model)       = (B, ${T}, ${dm})
+
+参数量 W_Q+W_K+W_V+W_O = 4 × d_model² = ${params.toLocaleString()}（不含偏置）`
+:
+`x                      (B, T, d_model)       = (B, ${T}, ${dm})
+Q, K, V = x·W_Q, W_K, W_V                     → 3 × (B, ${T}, ${dm})
+split heads            (B, H, T, d_head)     = (B, ${H}, ${T}, ${dh})
+scores Q·Kᵀ/√d_head    (B, H, T, T)          = (B, ${H}, ${T}, ${T})   ← ${scoreMem.toLocaleString()} numbers per sample, grows as T²
+softmax · V            (B, H, T, d_head)     = (B, ${H}, ${T}, ${dh})
+concat heads           (B, T, d_model)       = (B, ${T}, ${dm})
+output ·W_O            (B, T, d_model)       = (B, ${T}, ${dm})
+
+params W_Q+W_K+W_V+W_O = 4 × d_model² = ${params.toLocaleString()} (without bias)`;
+  }
+
+  // ---------- 5. quiz ----------
+  const QUIZ = [
+    { q: ["因果掩码的作用是？", "What does the causal mask do?"],
+      opts: [["让模型训练更快", "Makes training faster"], ["防止一个词看到它后面的词", "Stops a token from seeing later tokens"], ["让每行权重之和为 1", "Makes each row sum to 1"]],
+      a: 1, ex: ["生成时后面的词还不存在；训练时若能“偷看”答案，模型就学不会预测。每行和为 1 是 softmax 的作用。", "Later tokens don't exist yet at generation time; peeking during training would leak the answer. Rows summing to 1 is softmax's job."] },
+    { q: ["d_k 从 64 变为 256，不缩放的点积标准差大约变为原来的几倍？", "If d_k goes from 64 to 256, roughly how much larger is the std of the unscaled dot product?"],
+      opts: [["2 倍", "2×"], ["4 倍", "4×"], ["16 倍", "16×"]],
+      a: 0, ex: ["标准差 ∝ √d，√(256/64) = 2。可以在第 3 部分验证。", "std ∝ √d and √(256/64) = 2. Check it in part 3."] },
+    { q: ["d_model = 768、12 个头时，每个头的维度 d_head 是？", "With d_model = 768 and 12 heads, what is d_head?"],
+      opts: [["768", "768"], ["64", "64"], ["12", "12"]],
+      a: 1, ex: ["768 / 12 = 64。多头不会增加计算总维度，只是把空间切开分别计算。", "768 / 12 = 64. Multi-head splits the space; it doesn't add dimensions."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ---------- wiring ----------
+  function renderAll() {
+    renderHeat(); renderPipe(); renderQEdit(); renderOut();
+    renderScale(); renderHeads(); renderShape(); renderQuiz();
+  }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  const toggle = (id, get, set) => $(id).addEventListener("click", () => {
+    set(!get()); $(id).classList.toggle("on", get()); renderHeat(); renderPipe(); renderOut();
+  });
+  toggle("causal", () => causal, v => causal = v);
+  toggle("scale", () => scaled, v => scaled = v);
+  $("gain").addEventListener("input", e => { gain = +e.target.value; $("gain-v").textContent = gain.toFixed(1) + "×"; renderHeat(); renderPipe(); renderOut(); });
+  $("reset-q").addEventListener("click", () => { Q = Q0.map(r => r.slice()); renderAll(); });
+  $("dim").addEventListener("input", renderScale);
+  $("resample").addEventListener("click", () => { sample(); renderScale(); });
+  ["dmodel", "nheads", "tlen"].forEach(id => $(id).addEventListener("change", renderShape));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+
+  sample();
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

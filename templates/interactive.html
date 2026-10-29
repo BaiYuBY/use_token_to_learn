@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>主题交互演示 · Topic Playground</title>
+<!-- Template for interactive pages. Full example: docs/04-attention/interactive/attention.html
+     交互页模板，完整示例见 docs/04-attention/interactive/attention.html -->
+<style>
+  :root {
+    --bg: #ffffff; --panel: #f6f7fb; --ink: #1f2328; --muted: #5f6672; --line: #dfe2ea;
+    --primary: #3f51b5; --accent: #e8710a; --good: #188038; --bad: #c5221f;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b; --panel: #1d2027; --ink: #e6e8ee; --muted: #9aa1ad; --line: #2f333d;
+      --primary: #8c9eff; --accent: #ffa149; --good: #6dd58c; --bad: #f28b82;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif; }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  button { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer; }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  input[type=range] { accent-color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1><span lang="zh">主题 · 交互演示</span><span lang="en">Topic · Interactive Playground</span></h1>
+    <div class="controls">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="step">1</span><span lang="zh">第一个问题</span><span lang="en">First question</span></h2>
+    <p class="hint"><span lang="zh">一句话说明要观察什么。</span><span lang="en">One sentence on what to look for.</span></p>
+    <div class="controls">
+      <label>x <input id="x" type="range" min="0" max="10" step="0.1" value="1"></label>
+    </div>
+    <div id="out"></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+
+  function render() {
+    const x = +$("x").value;
+    $("out").textContent = tr(`x 的平方是 ${(x * x).toFixed(2)}`, `x squared is ${(x * x).toFixed(2)}`);
+  }
+
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    render();
+  }
+
+  $("x").addEventListener("input", render);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

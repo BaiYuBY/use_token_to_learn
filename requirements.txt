@@ -1,0 +1,10 @@
+# Site / 网站
+mkdocs==1.6.1
+mkdocs-material==9.8.0
+mkdocs-static-i18n==1.3.1
+
+# Figures and code examples / 图片与代码示例
+# For a CPU-only torch: pip install torch --index-url https://download.pytorch.org/whl/cpu
+torch>=2.2
+matplotlib>=3.8
+numpy>=1.26

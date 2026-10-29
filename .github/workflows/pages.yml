@@ -1,0 +1,57 @@
+name: Build site
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: site-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - name: Install dependencies
+        run: |
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements.txt
+      - name: Run code examples
+        run: make code
+      - name: Build site
+        run: make site
+      # Downloadable from the run's summary page; unzip and open index.html
+      # 可在本次运行的 Summary 页面下载，解压后双击 index.html 即可浏览
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site
+      - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
+        with:
+          path: site
+
+  # Runs only after Pages is enabled and the repository variable ENABLE_PAGES is set to "true"
+  # 只有在开启 Pages 并把仓库变量 ENABLE_PAGES 设为 "true" 之后才会发布
+  deploy:
+    if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
