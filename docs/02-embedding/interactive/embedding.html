@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>词嵌入交互演示 · Embedding Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --heat-pos: 197, 34, 31;
+    --heat-neg: 63, 81, 181;
+    --c-people: #3f51b5;
+    --c-animals: #188038;
+    --c-food: #e8710a;
+    --c-colors: #c5221f;
+    --c-places: #8e24aa;
+    --c-other: #9aa0a6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --heat-pos: 242, 139, 130;
+      --heat-neg: 140, 158, 255;
+      --c-people: #8c9eff;
+      --c-animals: #6dd58c;
+      --c-food: #ffa149;
+      --c-colors: #f28b82;
+      --c-places: #d39ef0;
+      --c-other: #6b7280;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .scroll { overflow-x: auto; }
+
+  /* lookup table */
+  table.mat { border-collapse: separate; border-spacing: 2px; font-size: .72rem; }
+  table.mat th { font-weight: 500; color: var(--muted); padding: 0 6px 0 0; text-align: right; white-space: nowrap; }
+  table.mat td { width: 27px; height: 22px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  table.mat tr.sel th { color: var(--accent); font-weight: 700; }
+  table.mat tr.sel td { outline: 2px solid var(--accent); }
+  table.mat td.oh { width: 24px; border: 1px solid var(--line); }
+  table.mat td.oh.one { background: var(--accent); color: var(--bg); font-weight: 700; border-color: var(--accent); }
+  .eq { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .eq .op { font-size: 1.4rem; color: var(--muted); }
+  .words { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  /* 3D view */
+  .stage { position: relative; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; touch-action: none; }
+  .stage canvas { display: block; width: 100%; cursor: grab; }
+  .stage canvas.dragging { cursor: grabbing; }
+  .legend { display: flex; flex-wrap: wrap; gap: 6px; }
+  .legend button { display: inline-flex; align-items: center; gap: 6px; }
+  .legend button.off { opacity: .45; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .stat { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .9rem; }
+  .stat b { font-variant-numeric: tabular-nums; }
+
+  /* bars */
+  .bars { display: grid; grid-template-columns: 76px 1fr 44px; gap: 4px 8px; align-items: center; font-size: .88rem; }
+  .bar { height: 14px; border-radius: 3px; transition: width .25s; min-width: 1px; background: var(--primary); }
+  .bar.neg { background: var(--bad); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+  /* cosine widget */
+  svg.cos { width: 100%; max-width: 360px; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; touch-action: none; }
+  svg.cos .grid { stroke: var(--line); }
+  svg.cos .handle { cursor: grab; }
+
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">词嵌入 · 交互演示</span><span lang="en">Embeddings · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">词元编号是怎样变成有“意义”的向量的？本页所有向量都是用 PyTorch 在小语料上真实训练出来的。</span>
+        <span lang="en">How does a token id become a vector with “meaning”? Every vector on this page was really trained with PyTorch on a small corpus.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. lookup -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">嵌入层就是一张查找表</span><span lang="en">An embedding layer is a lookup table</span></h2>
+    <p class="hint">
+      <span lang="zh">嵌入矩阵 W 每一行对应一个词元。“查表”取出第 i 行，和“one-hot 向量乘以 W”的结果完全相同，但查表不需要做乘法。点一个词试试（这里只显示 8 个词，每个词的 16 维都画出来了）。</span>
+      <span lang="en">Each row of the embedding matrix W belongs to one token. Looking up row i gives exactly the same result as multiplying a one-hot vector by W, without doing any multiplication. Click a word (only 8 words are shown, each with all 16 dimensions).</span>
+    </p>
+    <div class="words" id="lookup-words"></div>
+    <div class="scroll" style="margin-top:12px"><div class="eq" id="lookup-eq"></div></div>
+    <div class="callout" id="lookup-note"></div>
+  </section>
+
+  <!-- 2. 3D space + training -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">语义空间：拖动旋转，回放训练</span><span lang="en">The semantic space: drag to rotate, replay training</span></h2>
+    <p class="hint">
+      <span lang="zh">16 维向量用 PCA 降到 3 维显示。拖动可以旋转，点一个点会连出它最相似的 5 个词。拖动“训练轮数”或点播放，看词向量如何从随机位置出发，按类别逐渐聚在一起。</span>
+      <span lang="en">The 16-d vectors are shown in 3-D using PCA. Drag to rotate; click a point to connect it to its 5 most similar words. Drag the epoch slider or press play to watch the vectors start from random positions and gather by category.</span>
+    </p>
+    <div class="controls">
+      <button id="play" class="on"><span lang="zh">▶ 播放训练</span><span lang="en">▶ Play training</span></button>
+      <label><span lang="zh">训练轮数</span><span lang="en">epoch</span>
+        <input id="epoch" type="range" min="0" max="30" step="0.05" value="30"><span id="epoch-v" class="mono"></span></label>
+      <button id="spin"><span lang="zh">自动旋转</span><span lang="en">Auto-rotate</span></button>
+      <button id="others"><span lang="zh">显示其他词</span><span lang="en">Show other words</span></button>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="row" style="margin-top:10px">
+      <div class="col" style="flex:2 1 420px"><div class="stage"><canvas id="cv" aria-label="3D embedding space"></canvas></div></div>
+      <div class="col" style="flex:1 1 240px">
+        <div class="stat" id="train-stats"></div>
+        <h3 id="nn-title"></h3>
+        <div class="bars" id="nn"></div>
+      </div>
+    </div>
+    <div class="callout" id="space-note"></div>
+  </section>
+
+  <!-- 3. cosine -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">怎样衡量“相似”：余弦相似度</span><span lang="en">Measuring “similar”: cosine similarity</span></h2>
+    <p class="hint">
+      <span lang="zh">拖动两个箭头的端点。余弦相似度只看<b>方向</b>（夹角），不看长度：同向为 1，垂直为 0，反向为 −1。点积则同时受长度影响。</span>
+      <span lang="en">Drag the tips of the two arrows. Cosine similarity only looks at <b>direction</b> (the angle), not length: 1 when aligned, 0 when perpendicular, −1 when opposite. The dot product also depends on length.</span>
+    </p>
+    <div class="row">
+      <div class="col"><svg class="cos" id="cos" viewBox="-110 -110 220 220"></svg></div>
+      <div class="col">
+        <div class="stat" id="cos-stats" style="font-size:1rem"></div>
+        <div class="callout">
+          <div class="mono" style="text-align:center;font-size:1.05rem;margin:4px 0 8px">cos(a, b) = a·b / (‖a‖ ‖b‖)</div>
+          <span lang="zh">词向量的长度常常和词频有关，而我们关心的是“含义的方向”，所以比较词向量时通常用余弦相似度。</span>
+          <span lang="en">A word vector's length often tracks word frequency, while what we care about is the direction of its meaning, so word vectors are usually compared by cosine.</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. analogies -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">向量算术：king − man + woman ≈ ?</span><span lang="en">Vector arithmetic: king − man + woman ≈ ?</span></h2>
+    <p class="hint">
+      <span lang="zh">如果“男 → 女”在空间里是一个固定的方向，那么从 king 出发，减去 man、加上 woman，就应该落在 queen 附近。结果按与 A − B + C 的余弦相似度排序，并排除了 A、B、C 本身。</span>
+      <span lang="en">If “male → female” is a fixed direction in the space, then starting at king, subtracting man and adding woman should land near queen. Results are ranked by cosine similarity to A − B + C, excluding A, B and C themselves.</span>
+    </p>
+    <div class="controls" id="ana-presets"></div>
+    <div class="controls">
+      <select id="ana-a"></select><b>−</b><select id="ana-b"></select><b>+</b><select id="ana-c"></select><b>≈</b>
+    </div>
+    <div class="bars" id="ana-out"></div>
+    <div class="callout" id="ana-note"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">02 · Embedding</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Trained vectors and training snapshots, generated by figures/embedding_figures.py -->
+<!-- 训练好的向量与训练过程快照，由 figures/embedding_figures.py 生成 -->
+<script src="embedding_data.js"></script>
+<script>
+(() => {
+  const D = window.EMBEDDING_DATA;
+  const $ = id => document.getElementById(id);
+  if (!D) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>embedding_data.js missing</p>"); return; }
+
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const CATS = ["people", "animals", "food", "colors", "places"];
+  const CAT_NAMES = { people: ["人物", "people"], animals: ["动物", "animals"], food: ["食物", "food"], colors: ["颜色", "colors"], places: ["地点", "places"], other: ["其他", "other"] };
+  const catOf = w => D.category[w] || "other";
+  const idx = w => D.vocab.indexOf(w);
+
+  // ---------- vector math on the real 16-d vectors ----------
+  const norm = v => Math.hypot(...v);
+  const unit = v => { const n = norm(v); return v.map(x => x / n); };
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  const U = D.vectors.map(unit);
+  function nearest(vec, k, exclude = []) {
+    const q = unit(vec);
+    return D.vocab.map((w, i) => [w, dot(U[i], q)])
+      .filter(([w]) => !exclude.includes(w)).sort((a, b) => b[1] - a[1]).slice(0, k);
+  }
+  function bars(el, rows) {
+    el.innerHTML = rows.map(([w, s]) =>
+      `<span class="mono">${w}</span><span class="bar ${s < 0 ? "neg" : ""}" style="width:${Math.max(1, Math.abs(s) * 100)}%;background:${s < 0 ? "" : css("--c-" + catOf(w))}"></span><span class="num mono">${s.toFixed(2)}</span>`).join("");
+  }
+
+  // ================= 1. lookup =================
+  const LOOKUP = ["king", "queen", "cat", "dog", "apple", "red", "palace", "the"];
+  let lookSel = 0;
+  const heat = v => {
+    const a = Math.min(1, Math.abs(v) / 1.5);
+    return `background:rgba(var(${v >= 0 ? "--heat-pos" : "--heat-neg"}), ${0.08 + 0.8 * a});color:${a > 0.6 ? "var(--bg)" : "var(--ink)"}`;
+  };
+  function renderLookup() {
+    $("lookup-words").innerHTML = LOOKUP.map((w, i) => `<button class="mono ${i === lookSel ? "on" : ""}" data-i="${i}">${w}</button>`).join("");
+    $("lookup-words").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { lookSel = +b.dataset.i; renderLookup(); }));
+    const W = LOOKUP.map(w => D.vectors[idx(w)]);
+    const oneHot = `<table class="mat"><tr>${LOOKUP.map((_, i) => `<td class="oh ${i === lookSel ? "one" : ""}">${i === lookSel ? 1 : 0}</td>`).join("")}</tr></table>`;
+    const mat = `<table class="mat">${W.map((row, i) => `<tr class="${i === lookSel ? "sel" : ""}"><th class="mono">${LOOKUP[i]}</th>${row.map(v => `<td style="${heat(v)}" title="${v.toFixed(3)}">${v.toFixed(1)}</td>`).join("")}</tr>`).join("")}</table>`;
+    const out = `<table class="mat"><tr>${W[lookSel].map(v => `<td style="${heat(v)}">${v.toFixed(1)}</td>`).join("")}</tr></table>`;
+    $("lookup-eq").innerHTML = `<div><div class="hint">one-hot (1×${LOOKUP.length})</div>${oneHot}</div><span class="op">×</span>
+      <div><div class="hint">W (${LOOKUP.length}×16)</div>${mat}</div><span class="op">=</span>
+      <div><div class="hint">${tr("向量", "vector")} “${LOOKUP[lookSel]}” (1×16)</div>${out}</div>`;
+    const V = D.vocab.length;
+    $("lookup-note").innerHTML = tr(
+      `one-hot 向量只有第 ${lookSel + 1} 位是 1，乘以 W 时其他行都被乘以 0，结果正好是 W 的第 ${lookSel + 1} 行。所以 PyTorch 的 <code>nn.Embedding</code> 直接按编号取行。完整的嵌入矩阵是 ${V} 个词 × 16 维 = <b>${(V * 16).toLocaleString()}</b> 个参数，它们和模型其他参数一起通过反向传播学习。`,
+      `The one-hot vector is 1 only at position ${lookSel + 1}, so every other row of W is multiplied by 0 and the result is exactly row ${lookSel + 1}. That is why PyTorch's <code>nn.Embedding</code> simply fetches the row. The full matrix is ${V} words × 16 dims = <b>${(V * 16).toLocaleString()}</b> parameters, learned by backpropagation together with the rest of the model.`);
+  }
+
+  // ================= 2. 3D space =================
+  const cv = $("cv"), ctx = cv.getContext("2d");
+  let yaw = 0.6, pitch = -0.35, t = D.frames.length - 1, playing = false, spinning = false;
+  let showOthers = false, hidden = new Set(), selected = "king", screen = [];
+  const maxEpoch = D.frames[D.frames.length - 1].epoch;
+  $("epoch").max = maxEpoch;
+
+  function posAt(i) {  // interpolate between snapshots / 在快照之间插值
+    const lo = Math.floor(t), hi = Math.min(D.frames.length - 1, lo + 1), f = t - lo;
+    const a = D.frames[lo].xyz[i], b = D.frames[hi].xyz[i];
+    return [0, 1, 2].map(k => a[k] + (b[k] - a[k]) * f);
+  }
+  let radius = 2;  // radius of the visible cloud, so it fills the canvas / 可见点云的半径，用于缩放
+  function project([x, y, z], W, H) {
+    const cy = Math.cos(yaw), sy = Math.sin(yaw), cp = Math.cos(pitch), sp = Math.sin(pitch);
+    const x1 = cy * x + sy * z, z1 = -sy * x + cy * z;
+    const y2 = cp * y - sp * z1, z2 = (sp * y + cp * z1) / radius;
+    const s = Math.min(W, H) * 0.42 / radius * (3 / (3 + z2));
+    return { x: W / 2 + x1 * s, y: H / 2 - y2 * s, z: z2, s };
+  }
+  function resize() {
+    const w = cv.parentElement.clientWidth, h = Math.round(Math.min(520, Math.max(300, w * 0.75)));
+    const r = window.devicePixelRatio || 1;
+    cv.width = w * r; cv.height = h * r; cv.style.height = h + "px";
+    ctx.setTransform(r, 0, 0, r, 0, 0);
+    draw();
+  }
+  function visible(w) { const c = catOf(w); return c === "other" ? showOthers : !hidden.has(c); }
+  function draw() {
+    const W = cv.clientWidth, H = parseFloat(cv.style.height);
+    ctx.clearRect(0, 0, W, H);
+    const shown = D.vocab.map((w, i) => i).filter(i => visible(D.vocab[i]));
+    radius = Math.max(0.5, ...shown.map(i => Math.hypot(...posAt(i))));
+    // axes / 坐标轴
+    ctx.lineWidth = 1;
+    [[radius, 0, 0], [0, radius, 0], [0, 0, radius]].forEach((a, k) => {
+      const o = project([0, 0, 0], W, H), p = project(a, W, H);
+      ctx.strokeStyle = css("--line"); ctx.beginPath(); ctx.moveTo(o.x, o.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      ctx.fillStyle = css("--muted"); ctx.font = "11px sans-serif"; ctx.fillText("PC" + (k + 1), p.x + 3, p.y);
+    });
+    screen = D.vocab.map((w, i) => ({ w, i, ...project(posAt(i), W, H) })).filter(p => visible(p.w));
+    // neighbour lines / 近邻连线
+    const sel = screen.find(p => p.w === selected);
+    const nbrs = sel ? nearest(D.vectors[idx(selected)], 5, [selected]).map(([w]) => w) : [];
+    if (sel) {
+      ctx.strokeStyle = css("--accent"); ctx.lineWidth = 1.5;
+      nbrs.forEach(w => {
+        const p = screen.find(q => q.w === w) || { w, ...project(posAt(idx(w)), W, H) };
+        ctx.beginPath(); ctx.moveTo(sel.x, sel.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      });
+    }
+    // points, far to near / 由远及近画点
+    screen.forEach(p => { p.r = (catOf(p.w) === "other" ? 3 : 5) * (3 / (3 + p.z)); });
+    [...screen].sort((a, b) => b.z - a.z).forEach(p => {
+      const c = catOf(p.w);
+      ctx.globalAlpha = c === "other" ? 0.7 : 1;
+      ctx.fillStyle = css("--c-" + c); ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, 7); ctx.fill();
+      if (p.w === selected) { ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(p.x, p.y, p.r + 4, 0, 7); ctx.stroke(); }
+      ctx.globalAlpha = 1;
+    });
+    // labels: hovered, selected and its neighbours first, then near to far; skip a label that would
+    // overlap one already drawn (hover a point to see its label)
+    // 标签：悬停词、选中词及其近邻优先，其余由近及远；会与已画标签重叠的就跳过（悬停可查看）
+    const rank = p => p.w === hovered ? 0 : p.w === selected ? 1 : nbrs.includes(p.w) ? 2 : catOf(p.w) === "other" ? 4 : 3;
+    const boxes = [];
+    [...screen].sort((a, b) => rank(a) - rank(b) || a.z - b.z).forEach(p => {
+      const c = catOf(p.w);
+      ctx.font = `${p.w === hovered || p.w === selected ? "bold " : ""}${c === "other" ? 10 : 12}px sans-serif`;
+      const w = ctx.measureText(p.w).width, box = [p.x + p.r + 3, p.y - 7, w, 13];
+      const hit = boxes.some(b => box[0] < b[0] + b[2] && b[0] < box[0] + box[2] && box[1] < b[1] + b[3] && b[1] < box[1] + box[3]);
+      if (hit && rank(p) > 1) return;
+      boxes.push(box);
+      ctx.fillStyle = c === "other" ? css("--muted") : css("--c-" + c);
+      ctx.fillText(p.w, box[0], p.y + 4);
+    });
+  }
+  let hovered = null;
+  function pick(e, maxDist) {
+    const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+    let best = null, bd = maxDist;
+    screen.forEach(p => { const d = Math.hypot(p.x - x, p.y - y); if (d < bd) { bd = d; best = p; } });
+    return best;
+  }
+  function renderSpaceSide() {
+    const lo = Math.floor(t), f = D.frames[Math.round(t)];
+    const epoch = D.frames[lo].epoch + (t - lo) * ((D.frames[Math.min(lo + 1, D.frames.length - 1)].epoch) - D.frames[lo].epoch);
+    $("epoch-v").textContent = epoch.toFixed(1);
+    const loss = f.epoch === 0 ? "–" : D.losses[f.epoch - 1].toFixed(3);
+    $("train-stats").innerHTML = `
+      <span>${tr("训练轮数", "epoch")}</span><b>${f.epoch} / ${maxEpoch}</b>
+      <span>${tr("损失", "loss")}</span><b>${loss}</b>
+      <span>${tr("同类词平均余弦", "same-category cosine")}</span><b style="color:var(--accent)">${f.within.toFixed(2)}</b>
+      <span>${tr("不同类平均余弦", "cross-category cosine")}</span><b>${f.between.toFixed(2)}</b>`;
+    $("nn-title").textContent = tr(`与 “${selected}” 最相似（训练完成后）`, `Most similar to “${selected}” (after training)`);
+    bars($("nn"), nearest(D.vectors[idx(selected)], 6, [selected]));
+    $("space-note").innerHTML = tr(
+      "模型从来没有被告诉“cat 是动物”。它只是在做一件事：<b>用一个词去预测它周围的词</b>（skip-gram）。出现在相似上下文中的词，梯度会把它们推向相似的方向，类别就自然出现了。注意：每一帧都是对当时向量单独做的 PCA，再旋转对齐到最后一帧，所以坐标轴本身没有固定含义。",
+      "The model was never told that “cat is an animal”. It only does one thing: <b>use a word to predict the words around it</b> (skip-gram). Words that appear in similar contexts get pushed in similar directions by the gradients, and categories emerge on their own. Note: each frame is a separate PCA of the vectors at that time, rotated to line up with the last frame, so the axes themselves have no fixed meaning.");
+  }
+  function renderLegend() {
+    $("legend").innerHTML = CATS.map(c => `<button data-c="${c}" class="${hidden.has(c) ? "off" : ""}"><span class="dot" style="background:${css("--c-" + c)}"></span>${tr(...CAT_NAMES[c])}</button>`).join("");
+    $("legend").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      const c = b.dataset.c; hidden.has(c) ? hidden.delete(c) : hidden.add(c); renderLegend(); draw();
+    }));
+  }
+  function setT(v) { t = Math.max(0, Math.min(D.frames.length - 1, v)); $("epoch").value = D.frames[0].epoch + t * (maxEpoch / (D.frames.length - 1)); renderSpaceSide(); draw(); }
+
+  let drag = null;
+  cv.addEventListener("pointerdown", e => { drag = { x: e.clientX, y: e.clientY, moved: false }; cv.setPointerCapture(e.pointerId); cv.classList.add("dragging"); });
+  cv.addEventListener("pointermove", e => {
+    if (!drag) {
+      const h = pick(e, 12), w = h ? h.w : null;
+      if (w !== hovered) { hovered = w; draw(); }
+      return;
+    }
+    const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if (Math.abs(dx) + Math.abs(dy) > 3) drag.moved = true;
+    yaw += dx * 0.01; pitch = Math.max(-1.5, Math.min(1.5, pitch + dy * 0.01));
+    drag.x = e.clientX; drag.y = e.clientY; draw();
+  });
+  cv.addEventListener("pointerup", e => {
+    cv.classList.remove("dragging");
+    if (drag && !drag.moved) {
+      const best = pick(e, 18);
+      if (best) { selected = best.w; renderSpaceSide(); draw(); }
+    }
+    drag = null;
+  });
+  cv.addEventListener("pointerleave", () => { if (hovered) { hovered = null; draw(); } });
+
+  let last = 0;
+  function loop(ts) {
+    const dt = Math.min(50, ts - (last || ts)); last = ts;
+    if (playing) {
+      setT(t + dt / 350);
+      if (t >= D.frames.length - 1) { playing = false; $("play").classList.remove("on"); }
+    }
+    if (spinning && !drag) { yaw += dt * 0.0004; draw(); }
+    requestAnimationFrame(loop);
+  }
+
+  // ================= 3. cosine widget =================
+  let va = [70, 25], vb = [30, 75];
+  function renderCos() {
+    const svg = $("cos");
+    const arrow = (v, color, id) => {
+      const ang = Math.atan2(v[1], v[0]);
+      const hx = v[0] - 9 * Math.cos(ang - 0.4), hy = v[1] - 9 * Math.sin(ang - 0.4);
+      const kx = v[0] - 9 * Math.cos(ang + 0.4), ky = v[1] - 9 * Math.sin(ang + 0.4);
+      return `<line x1="0" y1="0" x2="${v[0]}" y2="${-v[1]}" stroke="${color}" stroke-width="3"/>
+        <polygon points="${v[0]},${-v[1]} ${hx},${-hy} ${kx},${-ky}" fill="${color}"/>
+        <circle class="handle" data-id="${id}" cx="${v[0]}" cy="${-v[1]}" r="11" fill="${color}" fill-opacity=".25" stroke="${color}"/>
+        <text x="${v[0] * 1.12 + 2}" y="${-v[1] * 1.12 + 4}" fill="${color}" font-size="12" font-weight="700">${id}</text>`;
+    };
+    let g = "";
+    for (let k = -100; k <= 100; k += 25) g += `<line class="grid" x1="${k}" y1="-100" x2="${k}" y2="100"/><line class="grid" x1="-100" y1="${k}" x2="100" y2="${k}"/>`;
+    const a1 = Math.atan2(va[1], va[0]), a2 = Math.atan2(vb[1], vb[0]);
+    let d = a2 - a1; while (d > Math.PI) d -= 2 * Math.PI; while (d < -Math.PI) d += 2 * Math.PI;
+    const r = 26, ex = r * Math.cos(a1 + d), ey = r * Math.sin(a1 + d);
+    const arc = `<path d="M ${r * Math.cos(a1)} ${-r * Math.sin(a1)} A ${r} ${r} 0 0 ${d > 0 ? 0 : 1} ${ex} ${-ey}" fill="none" stroke="${css("--muted")}" stroke-width="1.5"/>`;
+    svg.innerHTML = g + arc + arrow(va, css("--c-people"), "a") + arrow(vb, css("--c-food"), "b");
+    const cos = dot(va, vb) / (norm(va) * norm(vb));
+    const deg = Math.abs(d) * 180 / Math.PI;
+    $("cos-stats").innerHTML = `
+      <span>${tr("夹角", "angle")}</span><b>${deg.toFixed(0)}°</b>
+      <span>${tr("余弦相似度", "cosine")}</span><b style="color:var(--accent)">${cos.toFixed(2)}</b>
+      <span>${tr("点积", "dot product")} a·b</span><b>${(dot(va, vb) / 100).toFixed(1)}</b>
+      <span>‖a‖, ‖b‖</span><b>${(norm(va) / 10).toFixed(1)}, ${(norm(vb) / 10).toFixed(1)}</b>`;
+  }
+  let cosDrag = null;
+  function svgPoint(e) {
+    const svg = $("cos"), pt = svg.createSVGPoint();
+    pt.x = e.clientX; pt.y = e.clientY;
+    const p = pt.matrixTransform(svg.getScreenCTM().inverse());
+    return [p.x, -p.y];
+  }
+  // grab whichever arrow tip is closer to the pointer / 抓取离指针更近的箭头端点
+  $("cos").addEventListener("pointerdown", e => {
+    const p = svgPoint(e), da = Math.hypot(p[0] - va[0], p[1] - va[1]), db = Math.hypot(p[0] - vb[0], p[1] - vb[1]);
+    if (Math.min(da, db) > 30) return;
+    cosDrag = da <= db ? "a" : "b";
+    $("cos").setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+  $("cos").addEventListener("pointermove", e => {
+    if (!cosDrag) return;
+    const p = svgPoint(e);
+    let v = [Math.max(-100, Math.min(100, p[0])), Math.max(-100, Math.min(100, p[1]))];
+    if (Math.hypot(...v) < 8) return;
+    if (cosDrag === "a") va = v; else vb = v;
+    renderCos();
+  });
+  $("cos").addEventListener("pointerup", () => { cosDrag = null; });
+
+  // ================= 4. analogies =================
+  const PRESETS = [["king", "man", "woman"], ["prince", "boy", "girl"], ["king", "queen", "princess"], ["woman", "man", "king"], ["queen", "palace", "village"]];
+  const choices = [...Object.keys(D.category)].sort((a, b) => CATS.indexOf(catOf(a)) - CATS.indexOf(catOf(b)) || a.localeCompare(b));
+  ["ana-a", "ana-b", "ana-c"].forEach(id => {
+    $(id).innerHTML = choices.map(w => `<option>${w}</option>`).join("");
+    $(id).addEventListener("change", renderAnalogy);
+  });
+  function setAnalogy([a, b, c]) { $("ana-a").value = a; $("ana-b").value = b; $("ana-c").value = c; renderAnalogy(); }
+  function renderAnalogyPresets() {
+    $("ana-presets").innerHTML = PRESETS.map((p, i) => `<button class="mono" data-i="${i}">${p[0]} − ${p[1]} + ${p[2]}</button>`).join("");
+    $("ana-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => setAnalogy(PRESETS[+b.dataset.i])));
+  }
+  function renderAnalogy() {
+    const a = $("ana-a").value, b = $("ana-b").value, c = $("ana-c").value;
+    const v = U[idx(a)].map((x, k) => x - U[idx(b)][k] + U[idx(c)][k]);
+    const res = nearest(v, 5, [a, b, c]);
+    bars($("ana-out"), res);
+    $("ana-note").innerHTML = tr(
+      `<b>${a} − ${b} + ${c}</b> 最接近 <b>${res[0][0]}</b>（余弦 ${res[0][1].toFixed(2)}）。在这个语料里，人物词由“王室/平民、男/女、成人/孩子”三种属性组合而成，所以这些属性差异会变成空间中大致平行的方向。换成不相关的组合（例如 cat − red + apple）结果就没有意义了：类比只在数据里真的存在这种结构时才成立。`,
+      `<b>${a} − ${b} + ${c}</b> is closest to <b>${res[0][0]}</b> (cosine ${res[0][1].toFixed(2)}). In this corpus every person word combines three attributes (royal/common, male/female, adult/child), so those differences become roughly parallel directions in the space. Try an unrelated combination such as cat − red + apple and the result is meaningless: analogies only work when the data really has that structure.`);
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["nn.Embedding(50000, 768) 有多少个参数？", "How many parameters does nn.Embedding(50000, 768) have?"],
+      opts: [["50,768", "50,768"], ["3,840 万", "38.4 million"], ["768", "768"]],
+      a: 1, ex: ["词表大小 × 维度 = 50,000 × 768 = 38,400,000。每个词元一行。", "vocab size × dim = 50,000 × 768 = 38,400,000: one row per token."] },
+    { q: ["在 skip-gram 训练中，是什么决定了一个词的向量最终落在哪里？", "In skip-gram training, what decides where a word's vector ends up?"],
+      opts: [["词的拼写", "Its spelling"], ["它周围经常出现的词（上下文）", "The words that tend to appear around it (its contexts)"], ["它在词表中的编号", "Its id in the vocabulary"]],
+      a: 1, ex: ["这就是“分布假说”：出现在相似上下文中的词含义相近。编号只是表格的行号，本身没有含义。", "This is the distributional hypothesis: words in similar contexts have similar meanings. The id is just a row number with no meaning of its own."] },
+    { q: ["向量 a = (1, 0) 和 b = (5, 0) 的余弦相似度是？", "What is the cosine similarity of a = (1, 0) and b = (5, 0)?"],
+      opts: [["0.2", "0.2"], ["1", "1"], ["5", "5"]],
+      a: 1, ex: ["方向完全相同，夹角为 0，余弦为 1，与长度无关。点积则是 5。", "Same direction, angle 0, cosine 1, whatever the lengths. The dot product is 5."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() {
+    renderLookup(); renderLegend(); renderSpaceSide(); draw(); renderCos();
+    renderAnalogyPresets(); renderAnalogy(); renderQuiz();
+  }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("epoch").addEventListener("input", e => { playing = false; $("play").classList.remove("on"); setT(+e.target.value / maxEpoch * (D.frames.length - 1)); });
+  $("play").addEventListener("click", () => {
+    if (playing) { playing = false; $("play").classList.remove("on"); return; }
+    if (t >= D.frames.length - 1) setT(0);
+    playing = true; $("play").classList.add("on");
+  });
+  $("spin").addEventListener("click", () => { spinning = !spinning; $("spin").classList.toggle("on", spinning); });
+  $("others").addEventListener("click", () => { showOthers = !showOthers; $("others").classList.toggle("on", showOthers); draw(); });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  window.addEventListener("resize", resize);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  $("play").classList.remove("on");
+  setAnalogy(PRESETS[0]);
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+  resize();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>
