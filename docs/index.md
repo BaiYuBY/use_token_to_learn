@@ -20,7 +20,7 @@
 | 02 | [词嵌入 Embedding](02-embedding/README.md) | [词嵌入演示](02-embedding/interactive/embedding.html) | ✅ 已完成 |
 | 03 | [位置编码 Positional Encoding](03-positional-encoding/README.md) | [位置编码演示](03-positional-encoding/interactive/positional.html) | ✅ 已完成 |
 | 04 | [注意力机制 Attention](04-attention/README.md) | [注意力演示](04-attention/interactive/attention.html) | ✅ 已完成 |
-| 05 | Transformer 结构 | 张量形状流转 | 🚧 计划中 |
+| 05 | [Transformer 结构](05-transformer/README.md) | [Transformer 演示](05-transformer/interactive/transformer.html) | ✅ 已完成 |
 | 06+ | 预训练、Scaling Laws、微调、对齐、解码、推理优化、MoE、RAG、Agent…… | | 🚧 计划中 |
 
 完整路线图见仓库中的 [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md)。

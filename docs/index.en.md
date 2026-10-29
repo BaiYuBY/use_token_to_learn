@@ -20,7 +20,7 @@ Each chapter follows the same rhythm:
 | 02 | [Embedding](02-embedding/README.md) | [Embedding playground](02-embedding/interactive/embedding.html?lang=en) | ✅ done |
 | 03 | [Positional encoding](03-positional-encoding/README.md) | [Positional encoding playground](03-positional-encoding/interactive/positional.html?lang=en) | ✅ done |
 | 04 | [Attention](04-attention/README.md) | [Attention playground](04-attention/interactive/attention.html?lang=en) | ✅ done |
-| 05 | Transformer block | Tensor shape flow | 🚧 planned |
+| 05 | [Transformer block](05-transformer/README.md) | [Transformer playground](05-transformer/interactive/transformer.html?lang=en) | ✅ done |
 | 06+ | Pre-training, scaling laws, fine-tuning, alignment, decoding, inference, MoE, RAG, agents… | | 🚧 planned |
 
 See [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md) in the repository for the full roadmap.

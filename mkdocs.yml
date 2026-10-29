@@ -56,6 +56,7 @@ plugins:
             词嵌入: Embedding
             位置编码: Positional Encoding
             注意力机制: Attention
+            Transformer 结构: Transformer Block
 
 markdown_extensions:
   - admonition
@@ -89,3 +90,4 @@ nav:
       - 词嵌入: 02-embedding/README.md
       - 位置编码: 03-positional-encoding/README.md
       - 注意力机制: 04-attention/README.md
+      - Transformer 结构: 05-transformer/README.md
