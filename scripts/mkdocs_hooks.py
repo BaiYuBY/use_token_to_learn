@@ -9,7 +9,7 @@ between language variants. Drop them from the site build only.
 
 import re
 
-LANG_LINK = re.compile(r"🌐 \[[^\]]*\]\((?:README|index)(?:\.en)?\.md\)(?: · )?")
+LANG_LINK = re.compile(r"🌐 \[[^\]]*\]\([^)]*\.md\)(?: · )?")
 
 
 def on_page_markdown(markdown, **kwargs):

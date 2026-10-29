@@ -21,6 +21,16 @@
 | 03 | [位置编码 Positional Encoding](03-positional-encoding/README.md) | [位置编码演示](03-positional-encoding/interactive/positional.html) | ✅ 已完成 |
 | 04 | [注意力机制 Attention](04-attention/README.md) | [注意力演示](04-attention/interactive/attention.html) | ✅ 已完成 |
 | 05 | [Transformer 结构](05-transformer/README.md) | [Transformer 演示](05-transformer/interactive/transformer.html) | ✅ 已完成 |
-| 06+ | 预训练、Scaling Laws、微调、对齐、解码、推理优化、MoE、RAG、Agent…… | | 🚧 计划中 |
+| 06–10 | 训练：预训练、Scaling Laws、微调、对齐、推理模型与测试时计算 | | 🚧 计划中 |
+| 11–15 | 推理与部署：解码采样、推理优化、推理服务系统、长上下文、MoE | | 🚧 计划中 |
+| 16–20 | 应用与前沿：多模态、RAG、Agent、评测、安全与可解释性 | | 🚧 计划中 |
+
+## 前沿问答
+
+一些具体又新鲜的问题，一问一页，注明来源和核实日期：
+
+- [推理强度（low / medium / high / xhigh）是怎么设置的？](qa/reasoning-effort.md)
+- [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](qa/deepinfer.md)
+- [全部问答](qa/index.md) · [术语表](glossary.md)（含“推理 inference / reasoning”的区分）
 
 完整路线图见仓库中的 [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md)。

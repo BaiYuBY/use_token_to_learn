@@ -57,6 +57,11 @@ plugins:
             位置编码: Positional Encoding
             注意力机制: Attention
             Transformer 结构: Transformer Block
+            前沿问答: Frontier Q&A
+            问答首页: Q&A index
+            推理强度是怎么设置的: How reasoning effort is set
+            DeepInfer 是什么: What is DeepInfer
+            术语表: Glossary
 
 markdown_extensions:
   - admonition
@@ -91,3 +96,8 @@ nav:
       - 位置编码: 03-positional-encoding/README.md
       - 注意力机制: 04-attention/README.md
       - Transformer 结构: 05-transformer/README.md
+  - 前沿问答:
+      - 问答首页: qa/index.md
+      - 推理强度是怎么设置的: qa/reasoning-effort.md
+      - DeepInfer 是什么: qa/deepinfer.md
+  - 术语表: glossary.md

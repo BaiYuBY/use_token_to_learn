@@ -65,15 +65,19 @@ use_token_to_learn/
 | 07 | Scaling Laws | 参数量/数据量/算力关系、Chinchilla 最优 | 对数坐标拟合曲线，交互滑块调参数 |
 | 08 | 微调 | SFT、指令微调、LoRA/QLoRA、全参 vs 参数高效 | LoRA 低秩分解示意图、参数量对比柱状图 |
 | 09 | 对齐 | RLHF（奖励模型 + PPO）、DPO、Constitutional AI | 三阶段流程图、偏好对比示意 |
-| 10 | 解码与采样 | greedy、beam search、temperature、top-k、top-p | **交互**：调节温度看概率分布变化 |
-| 11 | 推理优化 | KV Cache、量化（INT8/INT4）、投机解码、FlashAttention、批处理 | KV Cache 动画；显存占用计算器（交互） |
-| 12 | 长上下文 | 上下文窗口扩展、位置插值、稀疏注意力 | 注意力模式对比图 |
-| 13 | 混合专家 MoE | 路由、负载均衡、稀疏激活 | token 路由动画 |
-| 14 | 多模态 | 视觉编码器、图文对齐（CLIP）、视觉语言模型 | 架构框图 |
-| 15 | 提示工程与 RAG | few-shot、思维链、检索增强、向量检索 | RAG 流程图、向量相似度示意 |
-| 16 | Agent 与工具调用 | function calling、ReAct、多智能体 | 时序图（Mermaid sequenceDiagram） |
-| 17 | 评测 | 困惑度、基准测试、LLM-as-judge、污染问题 | 雷达图、排行榜表格 |
-| 18 | 安全与可解释性 | 幻觉、越狱、探针、稀疏自编码器特征 | 激活可视化 |
+| 10 | **推理模型与测试时计算** 🆕 | 思维链、可验证奖励的强化学习（DeepSeek-R1）、思考预算、推理强度（low/medium/high/xhigh）、测试时扩展曲线 | **交互**：拖动“推理强度”看思考词元、准确率、延迟、成本的权衡；budget forcing 演示 |
+| 11 | 解码与采样 | greedy、beam search、temperature、top-k、top-p、结构化输出 | **交互**：调节温度看概率分布变化 |
+| 12 | 推理优化（单模型层面） | KV Cache、量化（INT8/INT4/FP8）、投机解码、FlashAttention / MLA | KV Cache 动画；投机解码“草稿-验证”演示；显存计算器 |
+| 13 | **推理服务系统** 🆕 | 连续批处理、Prefill/Decode 分离、并行策略（DP/TP/EP）、MoE 专家并行与负载均衡、KV 缓存存储；案例：vLLM、SGLang、DeepInfer | **交互**：P/D 分离流水线；批处理调度模拟器 |
+| 14 | 长上下文 | 上下文窗口扩展、位置插值、稀疏注意力、滑动窗口 | 注意力模式对比图 |
+| 15 | 混合专家 MoE | 路由、负载均衡、稀疏激活 | token 路由动画 |
+| 16 | 多模态 | 视觉编码器、图文对齐（CLIP）、视觉语言模型 | 架构框图 |
+| 17 | 提示工程与 RAG | few-shot、思维链提示、检索增强、向量检索 | RAG 流程图、向量相似度示意 |
+| 18 | Agent 与工具调用 | function calling、ReAct、多智能体 | 时序图（Mermaid sequenceDiagram） |
+| 19 | 评测 | 困惑度、基准测试、LLM-as-judge、污染问题 | 雷达图、排行榜表格 |
+| 20 | 安全与可解释性 | 幻觉、越狱、探针、稀疏自编码器特征 | 激活可视化 |
+
+> 🆕 为 2026-10 根据讨论新增的章节。另有一个随时扩充的 **[前沿问答](#12-前沿问答单元)** 单元，用来回答具体的新鲜问题，见第 12 节。
 
 ---
 
@@ -140,10 +144,10 @@ use_token_to_learn/
 ## 7. 分阶段路线图
 
 ### 阶段 0：搭骨架（第 1 周）
-- [ ] 建立目录结构、`README.md`、`CONTRIBUTING.md`、模板
-- [ ] 配置 `mkdocs.yml`、`requirements.txt`、`Makefile`
-- [ ] 配置 GitHub Actions：lint + Pages 部署
-- [ ] 写 `scripts/style.py`（统一配色与中文字体）
+- [x] 建立目录结构、`README.md`、`CONTRIBUTING.md`、模板
+- [x] 配置 `mkdocs.yml`、`requirements.txt`、`Makefile`
+- [x] 配置 GitHub Actions：构建 + Pages 部署
+- [x] 写 `scripts/style.py`（统一配色与中文字体）
 
 ### 阶段 1：核心原理（第 2–4 周）——先做“最有代表性”的样板
 - [x] 01 分词（含交互 BPE 演示）
@@ -152,18 +156,25 @@ use_token_to_learn/
 - [x] 03 位置编码
 - [x] 05 Transformer 结构
 
-### 阶段 2：训练（第 5–7 周）
-- [ ] 06 预训练、07 Scaling Laws、08 微调、09 对齐
+### 阶段 2：训练
+- [ ] 06 预训练、07 Scaling Laws、08 微调、09 对齐、10 推理模型与测试时计算
 
-### 阶段 3：推理（第 8–9 周）
-- [ ] 10 解码采样（交互）、11 推理优化（显存计算器）、12 长上下文、13 MoE
+### 阶段 3：推理与部署
+- [ ] 11 解码采样（交互）、12 推理优化（显存计算器）、13 推理服务系统、14 长上下文、15 MoE
 
-### 阶段 4：应用与前沿（第 10–12 周）
-- [ ] 14 多模态、15 提示工程与 RAG、16 Agent、17 评测、18 安全与可解释性
+### 阶段 4：应用与前沿
+- [ ] 16 多模态、17 提示工程与 RAG、18 Agent、19 评测、20 安全与可解释性
+
+### 持续进行：前沿问答
+- [x] 建立 `docs/qa/` 单元与模板
+- [x] 推理强度（low / medium / high / xhigh）是怎么设置的？
+- [x] DeepSeek 开源的 DeepInfer 是什么？
+- [ ] ……之后的新问题随时加入
 
 ### 阶段 5：打磨
 - [ ] 00 总览与学习路线图（所有模块完成后回头写最合适）
-- [ ] 术语表 `glossary.md`、论文清单 `papers.md`
+- [x] 术语表 `glossary.md`（已建立，随章节持续补充）
+- [ ] 论文清单 `papers.md`
 - [ ] 每章自测题与答案
 
 ---
@@ -218,3 +229,14 @@ use_token_to_learn/
 - **交互页**：直接双击 `docs/NN-topic/interactive/*.html`，离线可用
 - **完整网站**：在 Actions → Build and deploy site 中下载 `site` 压缩包，或运行 `make site` 后双击 `site/index.html`
 - 讲解中的所有链接都是相对路径，在 GitHub、本地文件和网站三种方式下都有效
+
+## 12. 前沿问答单元
+
+很多新鲜问题（某个新参数、某个刚开源的项目）不值得、也来不及写成完整章节，但值得一个准确的回答。它们放在 `docs/qa/`：
+
+- **一问一页**：`docs/qa/<slug>.md` + `docs/qa/<slug>.en.md`，用 [`templates/qa/`](templates/qa/) 的模板
+- **固定结构**：一句话回答 → 详细解释（配 Mermaid 图）→ 为什么重要 → 与知识库章节的关系 → 来源与核实日期
+- **注明时效**：每页写“核实日期”，区分“一手资料确认的事实”和“媒体报道/推测”
+- **和章节互相链接**：问答页指向相关章节；章节写成后，在“延伸阅读”里链接回问答页
+- **可以“毕业”**：某个话题积累得足够多时，可以扩写成完整章节（例如“推理服务系统”就来自 DeepInfer 这个问题）
+- 新增问答时，同时更新 `docs/qa/index.md`、`docs/qa/index.en.md` 和 `mkdocs.yml` 的导航
