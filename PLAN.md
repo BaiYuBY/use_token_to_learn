@@ -11,9 +11,9 @@
 | **一个知识点一个目录** | 讲解、图片、交互页、生成脚本放在一起，方便维护 |
 | **图可复现** | PNG/SVG 一律由 `scripts/` 或主题目录下的 Python 脚本生成，不提交手工截图（概念示意图例外） |
 | **GitHub 上直接能看** | 正文用 Markdown，流程/结构图优先用 Mermaid（GitHub 原生渲染），静态图用 PNG/SVG |
-| **交互放 HTML** | GitHub 不渲染 HTML，交互页通过 GitHub Pages 访问，Markdown 里放链接和截图预览 |
+| **交互优先** | 每个知识点尽量配交互页；GitHub 不渲染 HTML，交互页通过 GitHub Pages 访问，Markdown 里放链接和截图预览 |
 | **由浅入深** | 每篇分「直觉 → 图解 → 公式 → 代码 → 延伸阅读」五段 |
-| **中文为主** | 术语首次出现时附英文，如“注意力（Attention）” |
+| **中英双语** | 每篇讲解提供中文与英文两个版本，交互页内置语言切换 |
 
 ---
 
@@ -178,9 +178,30 @@ use_token_to_learn/
 
 ---
 
-## 9. 待确认的问题
+## 9. 已确定的决策
 
-1. **语言**：纯中文，还是中英双语？
-2. **站点**：是否启用 GitHub Pages（推荐，否则 HTML 交互页无法在线直接打开）？
-3. **代码框架**：示例代码以 NumPy（更直观）还是 PyTorch（更贴近实际）为主？
-4. **从哪个知识点开始**：建议先做「04 注意力机制」作为完整样板。
+| 问题 | 决定 | 落地方式 |
+| --- | --- | --- |
+| 语言 | **中英双语** | 每章 `README.md`（中文）+ `README.en.md`（英文），网站用 `mkdocs-static-i18n` 生成 `/` 与 `/en/` 两套；交互页内置中英切换，支持 `?lang=` |
+| 站点 | **启用 GitHub Pages** | `.github/workflows/pages.yml` 在 push 到 main 时构建并发布 |
+| 交互 | **每个知识点都尽量做交互页** | 交互页是每章的核心，讲解围绕它组织（见 [CONTRIBUTING.md](CONTRIBUTING.md)） |
+| 代码 | **以 PyTorch 为主** | 每章 `code/*.py` 用 PyTorch 实现，并与官方实现对比；图表脚本也用 PyTorch 计算 |
+| 样板 | **04 注意力机制** | ✅ 已完成：[`docs/04-attention/`](docs/04-attention/) |
+
+## 10. 样板章节包含的内容（后续章节照此执行）
+
+`docs/04-attention/`：
+
+- `README.md` / `README.en.md`：双语讲解（直觉 → 图解 → 公式 → 代码 → 误区 → 自测 → 延伸阅读）
+- `interactive/attention.html`：5 个交互小节
+  1. 点击热力图逐行查看打分、掩码、softmax 的计算过程，开关因果掩码与 √d 缩放
+  2. 拖动滑块改写 Query 向量，实时看到注意力转移和输出变化
+  3. 调整维度 d，对比缩放与不缩放时的 softmax 分布
+  4. 4 种典型注意力头，以及多头注意力的张量形状和参数量计算
+  5. 小测验
+- `figures/attention_figures.py` → `assets/*.png`：热力图、三步计算图、√d 缩放实验
+- `code/attention.py`：PyTorch 实现，与 `F.scaled_dot_product_attention` 和 `nn.MultiheadAttention` 对比
+
+## 11. 启用 GitHub Pages 的一次性设置
+
+合并到 `main` 后，在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。之后每次 push 到 `main` 都会自动发布到 <https://baiyuby.github.io/use_token_to_learn/>。
