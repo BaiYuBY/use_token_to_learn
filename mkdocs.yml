@@ -54,6 +54,7 @@ plugins:
             核心原理: Core Concepts
             分词: Tokenization
             词嵌入: Embedding
+            位置编码: Positional Encoding
             注意力机制: Attention
 
 markdown_extensions:
@@ -86,4 +87,5 @@ nav:
   - 核心原理:
       - 分词: 01-tokenization/README.md
       - 词嵌入: 02-embedding/README.md
+      - 位置编码: 03-positional-encoding/README.md
       - 注意力机制: 04-attention/README.md
