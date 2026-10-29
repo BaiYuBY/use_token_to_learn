@@ -1,4 +1,4 @@
-name: Build site
+name: Build and deploy site
 
 on:
   push:
@@ -39,14 +39,14 @@ jobs:
           name: site
           path: site
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
+        if: github.event_name != 'pull_request'
         with:
           path: site
 
-  # Runs only after Pages is enabled and the repository variable ENABLE_PAGES is set to "true"
-  # 只有在开启 Pages 并把仓库变量 ENABLE_PAGES 设为 "true" 之后才会发布
+  # Publish on every push to main (Settings → Pages → Source must be "GitHub Actions")
+  # 每次 push 到 main 时发布（Settings → Pages → Source 需选择 “GitHub Actions”）
   deploy:
-    if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
+    if: github.event_name != 'pull_request'
     needs: build
     runs-on: ubuntu-latest
     environment:
