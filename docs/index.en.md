@@ -21,7 +21,8 @@ Each chapter follows the same rhythm:
 | 03 | [Positional encoding](03-positional-encoding/README.md) | [Positional encoding playground](03-positional-encoding/interactive/positional.html?lang=en) | ✅ done |
 | 04 | [Attention](04-attention/README.md) | [Attention playground](04-attention/interactive/attention.html?lang=en) | ✅ done |
 | 05 | [Transformer block](05-transformer/README.md) | [Transformer playground](05-transformer/interactive/transformer.html?lang=en) | ✅ done |
-| 06–10 | Training: pre-training, scaling laws, fine-tuning, alignment, reasoning models and test-time compute | | 🚧 planned |
+| 06 | [Pre-training](06-pretraining/README.md) | [Pre-training playground](06-pretraining/interactive/pretraining.html?lang=en) | ✅ done |
+| 07–10 | Training: scaling laws, fine-tuning, alignment, reasoning models and test-time compute | | 🚧 planned |
 | 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
 | 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
 

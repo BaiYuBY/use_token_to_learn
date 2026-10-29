@@ -35,6 +35,13 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 层归一化 / RMS 归一化 | LayerNorm / RMSNorm | Rescales each token's vector into a stable range | [05](05-transformer/README.en.md) |
 | 前馈网络 | FFN (feed-forward network) | A per-token non-linear transformation; the largest share of parameters in big models | [05](05-transformer/README.en.md) |
 | 交叉熵 | cross-entropy | The loss used for next-token prediction | [05](05-transformer/README.en.md) |
+| 困惑度 | perplexity | The exponential of cross-entropy; roughly how many words the model hesitates between | [06](06-pretraining/README.en.md) |
+| 过拟合 / 背诵 | overfitting / memorization | Training loss falls while validation loss rises: the model only memorized its data | [06](06-pretraining/README.en.md) |
+| 去重 | deduplication | Removing identical or near-identical training documents | [06](06-pretraining/README.en.md) |
+| 轮数 | epoch | One full pass over a dataset | [06](06-pretraining/README.en.md) |
+| 学习率预热 / 余弦衰减 / WSD | warmup / cosine decay / WSD | Schedules that raise then lower the learning rate | [06](06-pretraining/README.en.md) |
+| 梯度裁剪 | gradient clipping | Capping the gradient norm so huge gradients cannot wreck training | [06](06-pretraining/README.en.md) |
+| 算力利用率 | MFU (model FLOPs utilization) | Achieved compute as a fraction of the hardware's peak | [06](06-pretraining/README.en.md) |
 | 推理强度 | reasoning effort | How long a reasoning model thinks before answering | [Q&A](qa/reasoning-effort.en.md) |
 | 测试时计算 | test-time compute | Spending more compute at use time (e.g. longer thinking) to improve results | [Q&A](qa/reasoning-effort.en.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | Software that serves a model efficiently, e.g. vLLM, SGLang, DeepInfer | [Q&A](qa/deepinfer.en.md) |

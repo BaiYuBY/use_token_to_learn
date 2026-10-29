@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>预训练交互演示 · Pre-training Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --c3: #188038;
+    --c4: #8e24aa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --c3: #6dd58c;
+      --c4: #d39ef0;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select, input[type=number] {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px;
+  }
+  button, select { cursor: pointer; }
+  input[type=number] { width: 90px; padding: 3px 6px; }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .ok { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  .scroll { overflow-x: auto; }
+
+  /* next-word */
+  .words { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .w { padding: 2px 8px; border-radius: 6px; border: 2px solid transparent; cursor: pointer; font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .w.sel { border-color: var(--accent); }
+  .w.first { cursor: default; opacity: .7; }
+  .bars { display: grid; grid-template-columns: 90px 1fr 52px; gap: 4px 8px; align-items: center; font-size: .88rem; }
+  .bar { height: 14px; border-radius: 3px; background: var(--primary); min-width: 1px; transition: width .2s; }
+  .bar.hit { background: var(--good); }
+
+  /* pipeline */
+  .docs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .doc { background: var(--bg); border: 1px solid var(--line); border-left: 4px solid var(--good); border-radius: 8px; padding: 8px 10px; font-size: .84rem; }
+  .doc.drop { border-left-color: var(--bad); opacity: .6; }
+  .doc .head { display: flex; justify-content: space-between; gap: 6px; flex-wrap: wrap; margin-bottom: 4px; }
+  .doc .txt { white-space: pre-wrap; word-break: break-word; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: .78rem; max-height: 7.5em; overflow: hidden; }
+  .tag { display: inline-block; font-size: .72rem; padding: 0 6px; border-radius: 999px; border: 1px solid var(--bad); color: var(--bad); margin-left: 4px; }
+  .tag.keep { border-color: var(--good); color: var(--good); }
+  .filters { display: flex; flex-wrap: wrap; gap: 6px 12px; }
+
+  /* tables */
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  table.t td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  table.t input[type=range] { width: 110px; }
+
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; font-size: .85rem; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">预训练 · 交互演示</span><span lang="en">Pre-training · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">预训练只有一个目标：预测下一个词。本页的模型、曲线和预测结果都来自本章代码的真实训练。</span>
+        <span lang="en">Pre-training has a single goal: predict the next token. The models, curves and predictions on this page all come from real training runs in this chapter's code.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. next word -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">预测下一个词</span><span lang="en">Predicting the next word</span></h2>
+    <p class="hint">
+      <span lang="zh">两个模型结构相同，只是训练数据不同：一个只见过 100 个句子，另一个见过 20,000 个。点一个词，看模型在它之前的上下文下预测的概率。词的颜色表示模型给正确答案的概率（绿＝高，红＝低）。</span>
+      <span lang="en">Both models have the same architecture but different training data: one saw only 100 sentences, the other 20,000. Click a word to see what the model predicted from the context before it. Word colours show the probability given to the correct word (green = high, red = low).</span>
+    </p>
+    <div class="controls">
+      <span id="p-sentences"></span>
+      <button id="p-large" class="on"><span lang="zh">2 万句训练</span><span lang="en">20k sentences</span></button>
+      <button id="p-small"><span lang="zh">100 句训练</span><span lang="en">100 sentences</span></button>
+    </div>
+    <div class="words" id="p-words"></div>
+    <div class="row">
+      <div class="col"><div class="bars" id="p-bars"></div></div>
+      <div class="col"><div class="kv" id="p-stats"></div><div class="callout" id="p-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. cross-entropy -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">交叉熵与困惑度</span><span lang="en">Cross-entropy and perplexity</span></h2>
+    <p class="hint">
+      <span lang="zh">每个位置的损失是 −ln p(正确的词)。把所有位置平均就是交叉熵；困惑度 = e<sup>交叉熵</sup>，可以理解为“模型平均在几个词之间犹豫”。拖动滑块改变模型给正确答案的概率。</span>
+      <span lang="en">The loss at each position is −ln p(correct word). Averaged over positions it is the cross-entropy; perplexity = e<sup>cross-entropy</sup>, roughly “how many words the model is hesitating between”. Drag the slider to change the probability given to the correct word.</span>
+    </p>
+    <div class="row">
+      <div class="col"><svg class="chart" id="ce-chart" viewBox="0 0 420 230"></svg></div>
+      <div class="col">
+        <div class="controls"><label>p <input id="ce-p" type="range" min="0.005" max="1" step="0.005" value="0.25"><span id="ce-p-v" class="mono"></span></label></div>
+        <div class="kv" id="ce-stats"></div>
+        <div class="callout" id="ce-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. data pipeline -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">数据清洗流水线</span><span lang="en">The data-cleaning pipeline</span></h2>
+    <p class="hint">
+      <span lang="zh">网页抓取来的原始文本质量参差不齐。勾选或取消各个过滤规则，看哪些文档被保留、哪些被丢弃以及原因。规则与 <code>code/data_filters.py</code> 完全相同（简化版，真实流水线用的规则和模型要复杂得多）。</span>
+      <span lang="en">Raw web text varies wildly in quality. Toggle each filter and see which documents are kept, which are dropped, and why. The rules are exactly those in <code>code/data_filters.py</code> (a simplified version; real pipelines use far more elaborate rules and models).</span>
+    </p>
+    <div class="filters" id="f-toggles"></div>
+    <div class="callout" id="f-summary"></div>
+    <div class="docs" id="f-docs" style="margin-top:10px"></div>
+  </section>
+
+  <!-- 4. mixture -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">数据配比与重复轮数</span><span lang="en">Data mixture and repetition</span></h2>
+    <p class="hint">
+      <span lang="zh">高质量数据（书籍、维基百科、数学）往往很少，配比给高了就要重复很多轮（epoch）。研究发现，重复大约 4 轮以内几乎和新数据一样有用，之后收益迅速下降。调整训练总量和各来源的权重，观察每个来源要被重复几轮。</span>
+      <span lang="en">High-quality data (books, Wikipedia, maths) is scarce, so giving it a large weight means repeating it for many epochs. Research found that up to about 4 epochs of repetition is almost as useful as fresh data, with quickly diminishing returns after that. Change the token budget and the weights and see how many epochs each source needs.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">训练总量</span><span lang="en">token budget</span> <input id="m-total" type="range" min="100" max="20000" step="100" value="1400"><span id="m-total-v" class="mono"></span></label>
+      <button id="m-llama"><span lang="zh">LLaMA (2023) 配比</span><span lang="en">LLaMA (2023) mixture</span></button>
+      <button id="m-demo"><span lang="zh">示例配比</span><span lang="en">Example mixture</span></button>
+    </div>
+    <div class="scroll"><table class="t" id="m-table"></table></div>
+    <div class="callout" id="m-note"></div>
+  </section>
+
+  <!-- 5. LR schedule -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">学习率调度</span><span lang="en">Learning-rate schedules</span></h2>
+    <p class="hint">
+      <span lang="zh">上图：自己调一条学习率曲线。下图：本章用 4 种调度在同一份数据上训练 600 步的真实验证损失。预热（warmup）避免训练初期更新过猛；末尾把学习率降下来，损失往往还能再降一截。</span>
+      <span lang="en">Top: shape your own learning-rate curve. Bottom: real validation loss from this chapter's 600-step runs with 4 schedules on the same data. Warmup avoids overly large updates early on; lowering the rate at the end often buys a final drop in loss.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">类型</span><span lang="en">type</span> <select id="s-type"><option value="cosine">cosine</option><option value="wsd">WSD</option><option value="constant">constant</option></select></label>
+      <label><span lang="zh">峰值</span><span lang="en">peak</span> <input id="s-peak" type="range" min="1" max="50" value="30"><span id="s-peak-v" class="mono"></span></label>
+      <label><span lang="zh">预热步数</span><span lang="en">warmup</span> <input id="s-warm" type="range" min="0" max="300" step="10" value="50"><span id="s-warm-v" class="mono"></span></label>
+      <label><span lang="zh">最低比例</span><span lang="en">min ratio</span> <input id="s-min" type="range" min="0" max="1" step="0.05" value="0.1"><span id="s-min-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="s-lr" viewBox="0 0 640 170"></svg>
+    <div class="legend" id="s-legend"></div>
+    <svg class="chart" id="s-loss" viewBox="0 0 640 210" style="margin-top:8px"></svg>
+  </section>
+
+  <!-- 6. memorize vs generalize -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">背诵还是泛化？</span><span lang="en">Memorizing or generalizing?</span></h2>
+    <p class="hint">
+      <span lang="zh">训练损失低不代表学会了。要看模型没见过的验证数据，以及它是否掌握了规则：在 “the cat that chases the dogs ___” 中，最近的名词是复数，但动词必须跟主语 cat 一致用单数。</span>
+      <span lang="en">A low training loss does not mean the model has learned. Look at unseen validation data, and at whether the model has learned the rules: in “the cat that chases the dogs ___” the nearest noun is plural, but the verb must agree with the subject “cat” and be singular.</span>
+    </p>
+    <div class="controls">
+      <button id="g-large" class="on"><span lang="zh">2 万句</span><span lang="en">20k sentences</span></button>
+      <button id="g-small"><span lang="zh">100 句</span><span lang="en">100 sentences</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="g-loss" viewBox="0 0 420 230"></svg></div>
+      <div class="col"><svg class="chart" id="g-agree" viewBox="0 0 420 230"></svg></div>
+    </div>
+    <div class="callout" id="g-note"></div>
+  </section>
+
+  <!-- 7. compute -->
+  <section>
+    <h2><span class="step">7</span><span lang="zh">训练要花多少算力？</span><span lang="en">How much compute does training take?</span></h2>
+    <p class="hint">
+      <span lang="zh">训练一个参数量为 N 的模型、看 D 个词元，大约需要 6·N·D 次浮点运算（前向 2ND，反向约 4ND）。MFU 是实际用到的算力占硬件峰值的比例，大规模训练通常在 30%–50%。</span>
+      <span lang="en">Training a model with N parameters on D tokens takes about 6·N·D floating-point operations (forward 2ND, backward about 4ND). MFU is the fraction of the hardware's peak actually achieved, typically 30%–50% at scale.</span>
+    </p>
+    <div class="controls">
+      <label>N (<span lang="zh">十亿参数</span><span lang="en">billion params</span>) <input id="c-n" type="number" min="0.001" step="0.1" value="8"></label>
+      <label>D (<span lang="zh">万亿词元</span><span lang="en">trillion tokens</span>) <input id="c-d" type="number" min="0.001" step="0.1" value="15"></label>
+      <label>GPU <select id="c-gpu"><option value="312">A100 (312 TFLOPS bf16)</option><option value="989" selected>H100 (989 TFLOPS bf16)</option></select></label>
+      <label>MFU % <input id="c-mfu" type="number" min="1" max="100" value="40"></label>
+      <label><span lang="zh">GPU 数量</span><span lang="en">GPUs</span> <input id="c-g" type="number" min="1" value="1024"></label>
+    </div>
+    <div class="kv" id="c-out"></div>
+    <div class="callout" id="c-note"></div>
+  </section>
+
+  <!-- 8. quiz -->
+  <section class="quiz">
+    <h2><span class="step">8</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">06 · Pre-training</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Training results and sample documents, generated by figures/pretraining_figures.py -->
+<script src="pretrain_data.js"></script>
+<script>
+(() => {
+  const D = window.PRETRAIN_DATA;
+  const $ = id => document.getElementById(id);
+  if (!D) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>pretrain_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const V = D.vocab_size;
+
+  // generic line chart / 通用折线图
+  function lineChart(svg, series, opts) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 44, R = 10, T = 10, B = opts.xlabel ? 40 : 26;
+    const xs = series.flatMap(s => s.x), ys = series.flatMap(s => s.y);
+    const x0 = opts.xmin ?? Math.min(...xs), x1 = opts.xmax ?? Math.max(...xs);
+    const y0 = opts.ymin ?? Math.min(...ys), y1 = opts.ymax ?? Math.max(...ys);
+    const fx = v => L + (W - L - R) * (v - x0) / (x1 - x0 || 1);
+    const fy = v => T + (H - T - B) * (1 - (Math.max(y0, Math.min(y1, v)) - y0) / (y1 - y0 || 1));
+    let s = "";
+    (opts.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${opts.yfmt ? opts.yfmt(v) : v}</text>`; });
+    (opts.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    (opts.hlines || []).forEach(h => { s += `<line x1="${L}" x2="${W - R}" y1="${fy(h.y)}" y2="${fy(h.y)}" stroke="${css("--muted")}" stroke-dasharray="3 3"/><text x="${W - R}" y="${fy(h.y) - 4}" text-anchor="end">${h.label}</text>`; });
+    series.forEach(se => {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" ${se.dash ? 'stroke-dasharray="5 4"' : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+    });
+    (opts.points || []).forEach(p => { s += `<circle cx="${fx(p.x)}" cy="${fy(p.y)}" r="5" fill="${p.color}"/>`; });
+    if (opts.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${opts.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 1. next word =================
+  let pSent = 0, pModel = "large", pPos = 3;
+  const probColor = p => { const h = Math.round(120 * Math.min(1, p / 0.6)); return `hsla(${h}, 70%, 50%, .28)`; };
+  function renderPredict() {
+    $("p-sentences").innerHTML = D.samples.map((s, i) => `<button class="mono ${i === pSent ? "on" : ""}" data-i="${i}">${tr("句子", "sentence")} ${i + 1}</button>`).join(" ");
+    $("p-sentences").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { pSent = +b.dataset.i; pPos = Math.min(pPos, D.predictions.large[pSent].length); renderPredict(); }));
+    $("p-large").classList.toggle("on", pModel === "large"); $("p-small").classList.toggle("on", pModel === "small");
+    const words = D.samples[pSent].split(" "), preds = D.predictions[pModel][pSent];
+    pPos = Math.max(1, Math.min(pPos, words.length - 1));
+    $("p-words").innerHTML = words.map((w, i) => i === 0
+      ? `<span class="w first">${esc(w)}</span>`
+      : `<span class="w ${i === pPos ? "sel" : ""}" data-i="${i}" style="background:${probColor(preds[i - 1].p_target)}" title="p = ${preds[i - 1].p_target.toFixed(3)}">${esc(w)}</span>`).join("");
+    $("p-words").querySelectorAll(".w[data-i]").forEach(el => el.addEventListener("click", () => { pPos = +el.dataset.i; renderPredict(); }));
+    const pr = preds[pPos - 1];
+    const top = pr.top.slice();
+    if (!top.some(([w]) => w === pr.target)) top.push([pr.target, pr.p_target]);
+    $("p-bars").innerHTML = `<b style="grid-column:1/-1">${tr("看到", "After")} “${esc(words.slice(0, pPos).join(" "))}” ${tr("之后，下一个词：", ", the next word is:")}</b>` +
+      top.map(([w, p]) => `<span class="mono">${esc(w)}</span><span class="bar ${w === pr.target ? "hit" : ""}" style="width:${Math.max(0.5, p * 100)}%"></span><span class="mono" style="text-align:right">${(p * 100).toFixed(1)}%</span>`).join("");
+    const losses = preds.map(q => -Math.log(q.p_target)), avg = losses.reduce((a, b) => a + b, 0) / losses.length;
+    $("p-stats").innerHTML = `
+      <span>${tr("正确答案", "correct word")}</span><b class="mono">${esc(pr.target)}</b>
+      <span>p(${tr("正确", "correct")})</span><b>${pr.p_target.toFixed(3)}</b>
+      <span>${tr("这个位置的损失", "loss here")} −ln p</span><b>${(-Math.log(pr.p_target)).toFixed(3)}</b>
+      <span>${tr("整句平均损失", "sentence loss")}</span><b>${avg.toFixed(3)}</b>
+      <span>${tr("整句困惑度", "sentence perplexity")}</span><b>${Math.exp(avg).toFixed(2)}</b>`;
+    $("p-note").innerHTML = pModel === "large"
+      ? tr(`见过 2 万个句子的模型学会了规则：限定词后面接名词或形容词，主语 cat 后面的动词用单数。有些位置本身就有很多合理选择（比如该选哪个名词），所以概率不可能接近 100%，这也是验证损失降不到 0 的原因。`,
+           `The model trained on 20k sentences has learned the rules: determiners are followed by nouns or adjectives, and the verb after the subject “cat” is singular. Some positions genuinely allow many choices (which noun?), so probabilities cannot approach 100%, which is why validation loss cannot reach 0.`)
+      : tr(`只见过 100 个句子的模型把训练句子背了下来，遇到没见过的句子就会非常自信地猜错（红色的词）。它的整句困惑度甚至可能超过 ${V}，比在 ${V} 个词里随机乱猜还差。`,
+           `The model trained on only 100 sentences memorized them and confidently guesses wrong on unseen sentences (red words). Its sentence perplexity can even exceed ${V}, worse than guessing at random among ${V} words.`);
+  }
+
+  // ================= 2. cross-entropy =================
+  function renderCE() {
+    const p = +$("ce-p").value, loss = -Math.log(p);
+    $("ce-p-v").textContent = p.toFixed(3);
+    const xs = [], ys = [];
+    for (let i = 1; i <= 200; i++) { xs.push(i / 200); ys.push(-Math.log(i / 200)); }
+    lineChart($("ce-chart"), [{ x: xs, y: ys, color: css("--primary") }], {
+      xmin: 0, xmax: 1, ymin: 0, ymax: 5.5, yticks: [0, 1, 2, 3, 4, 5], xticks: [0, 0.25, 0.5, 0.75, 1],
+      hlines: [{ y: Math.log(V), label: `ln ${V} = ${Math.log(V).toFixed(2)} (${tr("均匀猜", "uniform")})` }],
+      points: [{ x: p, y: Math.min(5.5, loss), color: css("--accent") }], xlabel: tr("给正确答案的概率 p", "probability p of the correct word"),
+    });
+    $("ce-stats").innerHTML = `<span>−ln p</span><b>${loss.toFixed(3)}</b><span>${tr("困惑度", "perplexity")} = 1/p</span><b>${(1 / p).toFixed(2)}</b>`;
+    $("ce-note").innerHTML = tr(
+      `如果每个位置都给正确答案 ${(p * 100).toFixed(1)}% 的概率，交叉熵就是 ${loss.toFixed(2)}，困惑度 ${(1 / p).toFixed(1)}：相当于每次在约 ${(1 / p).toFixed(1)} 个词之间等概率地挑选。在 ${V} 个词里完全乱猜时，困惑度就是 ${V}。p 越接近 0，损失增长得越快，所以模型对错误答案“过度自信”会被重罚。`,
+      `If every position gives the correct word ${(p * 100).toFixed(1)}%, cross-entropy is ${loss.toFixed(2)} and perplexity ${(1 / p).toFixed(1)}: like choosing uniformly among about ${(1 / p).toFixed(1)} words each time. Guessing blindly among ${V} words gives perplexity ${V}. As p approaches 0 the loss grows very fast, so being confidently wrong is punished hard.`);
+  }
+
+  // ================= 3. pipeline (mirrors code/data_filters.py) =================
+  const TH = D.thresholds, STOP = new Set(D.stopwords);
+  const FILTERS = [
+    ["length", "长度", "length"], ["language", "语言识别", "language ID"], ["caps", "全大写", "all caps"],
+    ["symbols", "符号比例", "symbol ratio"], ["repetition", "重复刷屏", "repetition"],
+    ["exact_dedup", "精确去重", "exact dedup"], ["near_dedup", "近似去重", "near dedup"], ["pii", "隐私脱敏", "PII masking"],
+  ];
+  const enabled = new Set(FILTERS.map(f => f[0]));
+  const WORD = /[A-Za-zÀ-ÿ0-9']+|[一-鿿]/g, CODE_LINE = /^\s*(def|class|import|from|return|for|if|print)\b/gm;
+  const EMAIL = /[\w.+-]+@[\w-]+\.[\w.]+/g, PHONE = /\b\d{3}[-.\s]\d{3}[-.\s]\d{4}\b/g;
+  const words = t => t.match(WORD) || [];
+  const isCJK = t => t >= "一" && t <= "鿿";
+  function language(text) {
+    const toks = words(text);
+    if ((text.match(CODE_LINE) || []).length >= 2) return "code";
+    if (toks.length && toks.filter(isCJK).length / toks.length >= TH.min_cjk_ratio) return "zh";
+    if (toks.length && toks.filter(t => STOP.has(t.toLowerCase())).length / toks.length >= TH.min_stopword_ratio) return "en";
+    return "other";
+  }
+  function shingles(text, n = 3) {
+    const t = words(text).map(x => x.toLowerCase()), out = new Set();
+    for (let i = 0; i < Math.max(1, t.length - n + 1); i++) out.add(t.slice(i, i + n).join("\u0001"));
+    return out;
+  }
+  const jaccard = (a, b) => { let inter = 0; a.forEach(x => { if (b.has(x)) inter++; }); const uni = a.size + b.size - inter; return uni ? inter / uni : 0; };
+  function qualityReasons(text) {
+    const toks = words(text), chars = [...text];
+    const letters = chars.filter(c => /\p{L}/u.test(c)), nonSpace = chars.filter(c => !/\s/.test(c));
+    const checks = {
+      length: toks.length < TH.min_words,
+      language: language(text) === "other",
+      caps: letters.length > 0 && letters.filter(c => /\p{Lu}/u.test(c)).length / letters.length > TH.max_caps_ratio,
+      symbols: nonSpace.length > 0 && nonSpace.filter(c => !/[\p{L}\p{N}]/u.test(c)).length / nonSpace.length > TH.max_symbol_ratio,
+      repetition: toks.length > 0 && new Set(toks.map(t => t.toLowerCase())).size / toks.length < TH.min_unique_ratio,
+    };
+    return Object.keys(checks).filter(k => checks[k] && enabled.has(k));
+  }
+  function runPipeline() {
+    const seen = new Set(), kept = [], out = [];
+    D.docs.forEach(({ id, text }) => {
+      let reasons = qualityReasons(text), t = text;
+      const norm = text.toLowerCase().split(/\s+/).filter(Boolean).join(" ");
+      if (!reasons.length && enabled.has("exact_dedup") && seen.has(norm)) reasons = ["exact_dedup"];
+      if (!reasons.length && enabled.has("near_dedup") && kept.some(s => jaccard(shingles(text), s) >= TH.near_dup_jaccard)) reasons = ["near_dedup"];
+      if (!reasons.length) {
+        seen.add(norm); kept.push(shingles(text));
+        if (enabled.has("pii")) t = t.replace(EMAIL, "<EMAIL>").replace(PHONE, "<PHONE>");
+      }
+      out.push({ id, kept: !reasons.length, reasons, text: t });
+    });
+    return out;
+  }
+  window.runPipeline = runPipeline;  // for checking against Python / 用于与 Python 结果对比
+  const reasonName = r => { const f = FILTERS.find(x => x[0] === r); return f ? tr(f[1], f[2]) : r; };
+  function renderPipeline() {
+    $("f-toggles").innerHTML = FILTERS.map(([k, zh, en]) => `<label><input type="checkbox" data-k="${k}" ${enabled.has(k) ? "checked" : ""}> ${tr(zh, en)}</label>`).join("");
+    $("f-toggles").querySelectorAll("input").forEach(cb => cb.addEventListener("change", () => { cb.checked ? enabled.add(cb.dataset.k) : enabled.delete(cb.dataset.k); renderPipeline(); }));
+    const res = runPipeline(), keptN = res.filter(r => r.kept).length;
+    $("f-docs").innerHTML = res.map(r => `<div class="doc ${r.kept ? "" : "drop"}"><div class="head"><b class="mono">${r.id}</b><span>${r.kept ? `<span class="tag keep">${tr("保留", "kept")}</span>` : r.reasons.map(x => `<span class="tag">${reasonName(x)}</span>`).join("")}</span></div><div class="txt">${esc(r.text).replace(/&lt;(EMAIL|PHONE)&gt;/g, '<b style="color:var(--accent)">&lt;$1&gt;</b>')}</div></div>`).join("");
+    $("f-summary").innerHTML = tr(
+      `保留 <b>${keptN}</b> / ${res.length} 篇。真实的网页数据中，经过这类过滤后往往只剩一小部分；例如 RefinedWeb、FineWeb 等数据集在去重和质量过滤后都丢弃了大部分原始文本。规则也有副作用：简单的语言识别会把西班牙语这类“非目标语言”整篇删掉，代码也容易被误判（本页专门为代码加了识别规则）；阈值设得太严，好数据也会被误伤。`,
+      `Kept <b>${keptN}</b> of ${res.length}. On real web data, filters like these keep only a small fraction; datasets such as RefinedWeb and FineWeb discard most of the raw text through deduplication and quality filtering. Rules have side effects: simple language ID drops whole documents in non-target languages such as Spanish, and code is easily misjudged (this page adds a dedicated rule for code); overly strict thresholds throw away good documents too.`);
+  }
+
+  // ================= 4. mixture =================
+  const DEMO = [  // illustrative numbers / 示例数字（十亿词元）
+    { name: ["网页", "Web"], size: 3000, w: 60 }, { name: ["代码", "Code"], size: 400, w: 15 },
+    { name: ["书籍", "Books"], size: 60, w: 8 }, { name: ["维基百科", "Wikipedia"], size: 25, w: 5 },
+    { name: ["数学", "Maths"], size: 30, w: 5 }, { name: ["中文", "Chinese"], size: 500, w: 7 },
+  ];
+  let mix = [];
+  function loadDemo() { mix = DEMO.map(s => ({ ...s })); $("m-total").value = 1400; renderMix(); }
+  function loadLlama() {
+    // size implied by LLaMA's table: share × 1.4T tokens / epochs / 由论文中的比例和轮数反推每个来源的大小
+    mix = D.llama_mix.map(s => ({ name: [s.name, s.name], size: s.share / 100 * 1400 / s.epochs, w: s.share }));
+    $("m-total").value = 1400; renderMix();
+  }
+  function renderMix() {
+    const total = +$("m-total").value, wsum = mix.reduce((a, s) => a + s.w, 0);
+    $("m-total-v").textContent = `${(total / 1000).toFixed(1)}T ${tr("词元", "tokens")}`;
+    let rows = `<tr><th>${tr("来源", "source")}</th><th>${tr("大小（十亿词元）", "size (B tokens)")}</th><th>${tr("权重", "weight")}</th><th>${tr("占比", "share")}</th><th>${tr("训练用量", "tokens used")}</th><th>${tr("重复轮数", "epochs")}</th></tr>`;
+    let worst = null;
+    mix.forEach((s, i) => {
+      const share = s.w / wsum, used = share * total, ep = used / s.size;
+      if (!worst || ep > worst.ep) worst = { name: tr(...s.name), ep };
+      const cls = ep > 4 ? "bad" : ep > 2 ? "" : "ok";
+      rows += `<tr><td>${tr(...s.name)}</td><td class="n">${s.size >= 100 ? Math.round(s.size).toLocaleString() : s.size.toFixed(1)}</td>
+        <td><input type="range" min="0" max="80" step="0.5" value="${s.w}" data-i="${i}"> ${s.w}</td>
+        <td class="n">${(share * 100).toFixed(1)}%</td><td class="n">${used.toFixed(0)}B</td><td class="n ${cls}">${ep.toFixed(2)}</td></tr>`;
+    });
+    $("m-table").innerHTML = rows;
+    $("m-table").querySelectorAll("input").forEach(inp => inp.addEventListener("input", () => { mix[+inp.dataset.i].w = +inp.value; renderMix(); }));
+    $("m-note").innerHTML = worst.ep > 4
+      ? tr(`<span class="bad">${worst.name} 要被重复 ${worst.ep.toFixed(1)} 轮</span>，超过约 4 轮后，继续重复的收益会迅速下降，还可能让模型背诵原文。可以降低它的权重、减少训练总量，或者找更多同类数据。`,
+           `<span class="bad">${worst.name} would be repeated ${worst.ep.toFixed(1)} times.</span> Beyond about 4 epochs, further repetition quickly stops helping and may lead to memorization. Lower its weight, reduce the budget, or find more data like it.`)
+      : tr(`重复最多的来源是 ${worst.name}（${worst.ep.toFixed(2)} 轮），在 4 轮以内。LLaMA 就是这样做的：维基百科和书籍质量高但量少，被重复了 2 轮多，而网页数据只用了约 1 轮。`,
+           `The most repeated source is ${worst.name} (${worst.ep.toFixed(2)} epochs), within about 4. LLaMA did exactly this: Wikipedia and books are high quality but small, so they were repeated a little over twice, while web data was used about once.`);
+  }
+
+  // ================= 5. LR schedules =================
+  const SCHED_COLORS = () => [css("--muted"), css("--primary"), css("--c3"), css("--accent")];
+  const hiddenSched = new Set();
+  function lrAt(type, step, total, peak, warmup, minRatio) {
+    if (type !== "constant" && step < warmup) return peak * (step + 1) / Math.max(1, warmup);
+    if (type === "constant") return peak;
+    if (type === "cosine") { const p = (step - warmup) / Math.max(1, total - warmup); return peak * (minRatio + (1 - minRatio) * 0.5 * (1 + Math.cos(Math.PI * p))); }
+    const ds = Math.floor(total * 0.8);
+    return step < ds ? peak : peak * (minRatio + (1 - minRatio) * (total - step) / Math.max(1, total - ds));
+  }
+  function renderSched() {
+    const type = $("s-type").value, peak = +$("s-peak").value / 10000 * 1, warm = +$("s-warm").value, minR = +$("s-min").value;
+    $("s-peak-v").textContent = (peak).toExponential(1); $("s-warm-v").textContent = warm; $("s-min-v").textContent = minR.toFixed(2);
+    const xs = [], ys = [];
+    for (let s = 0; s < 1000; s += 5) { xs.push(s); ys.push(lrAt(type, s, 1000, peak, warm, minR)); }
+    lineChart($("s-lr"), [{ x: xs, y: ys, color: css("--primary") }], { xmin: 0, xmax: 1000, ymin: 0, ymax: 0.0055, yticks: [0, 0.002, 0.004], yfmt: v => v ? v.toExponential(0) : "0", xticks: [0, 250, 500, 750, 1000], xlabel: tr("训练步数", "step") });
+    const names = Object.keys(D.schedules), cols = SCHED_COLORS();
+    $("s-legend").innerHTML = names.map((n, i) => `<button data-n="${n}" class="${hiddenSched.has(n) ? "off" : ""}"><span class="dot" style="background:${cols[i]}"></span>${n} → ${D.schedules[n].val.at(-1).toFixed(3)}</button>`).join("");
+    $("s-legend").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const n = b.dataset.n; hiddenSched.has(n) ? hiddenSched.delete(n) : hiddenSched.add(n); renderSched(); }));
+    lineChart($("s-loss"), names.filter(n => !hiddenSched.has(n)).map(n => ({ x: D.schedules[n].step, y: D.schedules[n].val, color: cols[names.indexOf(n)] })),
+      { ymin: 1.95, ymax: 3, yticks: [2, 2.25, 2.5, 2.75, 3], xticks: [0, 100, 200, 300, 400, 500, 600], xlabel: tr("训练步数（验证损失）", "step (validation loss)") });
+  }
+
+  // ================= 6. memorize vs generalize =================
+  let gRun = "large";
+  function renderGen() {
+    $("g-large").classList.toggle("on", gRun === "large"); $("g-small").classList.toggle("on", gRun === "small");
+    const c = D.curves[gRun];
+    lineChart($("g-loss"), [{ x: c.step, y: c.train, color: css("--primary") }, { x: c.step, y: c.val, color: css("--accent") }],
+      { ymin: 0, ymax: 6.5, yticks: [0, 2, 4, 6], xticks: [0, 200, 400, 600], hlines: [{ y: Math.log(V), label: `ln ${V}` }], xlabel: tr("步数：蓝＝训练，橙＝验证", "step: blue = train, orange = val") });
+    lineChart($("g-agree"), [{ x: c.step, y: c.probe.map(p => p * 100), color: gRun === "large" ? css("--primary") : css("--accent") }],
+      { ymin: 0, ymax: 100, yticks: [0, 25, 50, 75, 100], xticks: [0, 200, 400, 600], hlines: [{ y: 50, label: tr("随机猜", "chance") }], xlabel: tr("步数：主谓一致正确率 %", "step: agreement accuracy %") });
+    const last = i => c[i].at(-1), minAgree = Math.min(...c.probe);
+    $("g-note").innerHTML = gRun === "large"
+      ? tr(`训练和验证损失始终贴在一起（最终 ${last("train").toFixed(2)} / ${last("val").toFixed(2)}），主谓一致正确率达到 ${(last("probe") * 100).toFixed(0)}%。有意思的是，训练初期正确率先跌到 ${(minAgree * 100).toFixed(0)}%，远低于随机：模型先学会了“动词跟最近的名词一致”这个捷径，后来才学会真正的句子结构。`,
+           `Train and validation loss stay together (final ${last("train").toFixed(2)} / ${last("val").toFixed(2)}) and agreement accuracy reaches ${(last("probe") * 100).toFixed(0)}%. Interestingly, early on accuracy first drops to ${(minAgree * 100).toFixed(0)}%, far below chance: the model first picks up the shortcut “agree with the nearest noun” and only later learns the real sentence structure.`)
+      : tr(`训练损失降到 ${last("train").toFixed(2)}，验证损失却升到 ${last("val").toFixed(2)}（比均匀乱猜的 ${Math.log(V).toFixed(2)} 还高），主谓一致正确率在 50% 附近徘徊：模型只是背下了 100 个句子，没有学到规则。这就是过拟合。`,
+           `Training loss falls to ${last("train").toFixed(2)} while validation loss climbs to ${last("val").toFixed(2)} (worse than uniform guessing at ${Math.log(V).toFixed(2)}), and agreement hovers around 50%: the model memorized 100 sentences without learning the rules. That is overfitting.`);
+  }
+
+  // ================= 7. compute =================
+  function renderCompute() {
+    const N = +$("c-n").value * 1e9, Dt = +$("c-d").value * 1e12, peak = +$("c-gpu").value * 1e12, mfu = +$("c-mfu").value / 100, G = Math.max(1, +$("c-g").value);
+    const flops = 6 * N * Dt, gpuHours = flops / (peak * mfu) / 3600, days = gpuHours / G / 24;
+    $("c-out").innerHTML = `
+      <span>${tr("总计算量", "total compute")} 6ND</span><b>${flops.toExponential(2)} FLOPs</b>
+      <span>${tr("GPU 小时", "GPU-hours")}</span><b>${Math.round(gpuHours).toLocaleString()}</b>
+      <span>${tr("墙钟时间", "wall-clock")}（${G.toLocaleString()} GPUs）</span><b>${days.toFixed(1)} ${tr("天", "days")}</b>
+      <span>${tr("每个参数的词元数", "tokens per parameter")} D/N</span><b>${(Dt / N).toFixed(0)}</b>`;
+    $("c-note").innerHTML = tr(
+      `默认值约为 Llama 3 8B 的规模：80 亿参数、超过 15 万亿词元，即每个参数约 ${(15e12 / 8e9).toFixed(0)} 个词元，远多于 Chinchilla 提出的“约 20 个词元/参数”的计算最优比例（见下一章 07 Scaling Laws）。这是有意为之：小模型多训练一些，推理时更便宜。这里的估算忽略了重算、通信和故障等开销。`,
+      `The defaults are roughly Llama 3 8B's scale: 8 billion parameters and over 15 trillion tokens, about ${(15e12 / 8e9).toFixed(0)} tokens per parameter, far more than Chinchilla's compute-optimal “about 20 tokens per parameter” (see 07 Scaling Laws). That is deliberate: over-training a small model makes it cheaper to serve. The estimate ignores recomputation, communication and failures.`);
+  }
+
+  // ================= 8. quiz =================
+  const QUIZ = [
+    { q: ["模型在词表大小为 50,000 时完全随机猜，初始损失约为？", "A model guessing uniformly over a 50,000-word vocabulary has an initial loss of about:"],
+      opts: [["0", "0"], ["10.8（ln 50000）", "10.8 (ln 50000)"], ["50,000", "50,000"]],
+      a: 1, ex: ["均匀分布时 p = 1/V，损失 = ln V ≈ 10.8，困惑度 = V。训练开始时的损失如果远高于 ln V，通常说明初始化有问题（见 05 章）。", "Uniform means p = 1/V, so the loss is ln V ≈ 10.8 and perplexity is V. A starting loss far above ln V usually means a bad initialization (chapter 05)."] },
+    { q: ["训练损失持续下降、验证损失却开始上升，说明什么？", "Training loss keeps falling while validation loss starts rising. What does that mean?"],
+      opts: [["学习率太低", "The learning rate is too low"], ["模型在背诵训练数据（过拟合）", "The model is memorizing the training data (overfitting)"], ["模型已经训练好了", "The model is done"]],
+      a: 1, ex: ["见第 6 节的 100 句实验。解决办法是更多（且不重复的）数据、更小的模型或正则化。", "See the 100-sentence run in part 6. Remedies are more (non-repeated) data, a smaller model or regularization."] },
+    { q: ["为什么训练开始时要做学习率预热（warmup）？", "Why use learning-rate warmup at the start of training?"],
+      opts: [["让训练更快结束", "To finish training sooner"], ["初始参数是随机的，梯度和 Adam 的统计量都不稳定，大步更新容易发散", "Parameters are random and gradients/Adam statistics are unstable, so big steps can diverge"], ["为了节省显存", "To save memory"]],
+      a: 1, ex: ["先用小学习率让参数和优化器状态进入稳定区域，再升到峰值。", "Small steps first let the parameters and optimizer state settle before ramping up to the peak."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderPredict(); renderCE(); renderPipeline(); renderMix(); renderSched(); renderGen(); renderCompute(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("p-large").addEventListener("click", () => { pModel = "large"; renderPredict(); });
+  $("p-small").addEventListener("click", () => { pModel = "small"; renderPredict(); });
+  $("ce-p").addEventListener("input", renderCE);
+  $("m-total").addEventListener("input", renderMix);
+  $("m-llama").addEventListener("click", loadLlama);
+  $("m-demo").addEventListener("click", loadDemo);
+  ["s-type", "s-peak", "s-warm", "s-min"].forEach(id => $(id).addEventListener("input", renderSched));
+  $("g-large").addEventListener("click", () => { gRun = "large"; renderGen(); });
+  $("g-small").addEventListener("click", () => { gRun = "small"; renderGen(); });
+  ["c-n", "c-d", "c-gpu", "c-mfu", "c-g"].forEach(id => $(id).addEventListener("input", renderCompute));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  mix = DEMO.map(s => ({ ...s }));
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
