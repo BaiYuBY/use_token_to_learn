@@ -183,7 +183,7 @@ use_token_to_learn/
 | 问题 | 决定 | 落地方式 |
 | --- | --- | --- |
 | 语言 | **中英双语** | 每章 `README.md`（中文）+ `README.en.md`（英文），网站用 `mkdocs-static-i18n` 生成 `/` 与 `/en/` 两套；交互页内置中英切换，支持 `?lang=` |
-| 站点 | **启用 GitHub Pages** | `.github/workflows/pages.yml` 在 push 到 main 时构建并发布 |
+| 站点 | **先本地浏览，以后可选 GitHub Pages** | `.github/workflows/pages.yml` 每次都会构建网站并上传为可下载的 `site` 压缩包；开启 Pages 后才自动发布 |
 | 交互 | **每个知识点都尽量做交互页** | 交互页是每章的核心，讲解围绕它组织（见 [CONTRIBUTING.md](CONTRIBUTING.md)） |
 | 代码 | **以 PyTorch 为主** | 每章 `code/*.py` 用 PyTorch 实现，并与官方实现对比；图表脚本也用 PyTorch 计算 |
 | 样板 | **04 注意力机制** | ✅ 已完成：[`docs/04-attention/`](docs/04-attention/) |
@@ -202,6 +202,16 @@ use_token_to_learn/
 - `figures/attention_figures.py` → `assets/*.png`：热力图、三步计算图、√d 缩放实验
 - `code/attention.py`：PyTorch 实现，与 `F.scaled_dot_product_attention` 和 `nn.MultiheadAttention` 对比
 
-## 11. 启用 GitHub Pages 的一次性设置
+## 11. 浏览方式与 GitHub Pages
 
-合并到 `main` 后，在仓库 **Settings → Pages → Build and deployment → Source** 中选择 **GitHub Actions**。之后每次 push 到 `main` 都会自动发布到 <https://baiyuby.github.io/use_token_to_learn/>。
+私有仓库使用 GitHub Pages 需要付费计划（Pro / Team），所以目前以本地浏览为主：
+
+- **交互页**：直接双击 `docs/NN-topic/interactive/*.html`，离线可用
+- **完整网站**：在 Actions → Build site 中下载 `site` 压缩包，或运行 `make site` 后双击 `site/index.html`
+- 讲解中的所有链接都是相对路径，在 GitHub、本地文件和网站三种方式下都有效
+
+以后如果想发布到网上（把仓库设为公开即可免费使用 Pages，或者升级计划）：
+
+1. **Settings → Pages → Source** 选择 **GitHub Actions**
+2. **Settings → Secrets and variables → Actions → Variables** 中新建变量 `ENABLE_PAGES`，值为 `true`
+3. 之后每次 push 到 `main` 都会自动发布到 <https://baiyuby.github.io/use_token_to_learn/>

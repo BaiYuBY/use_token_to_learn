@@ -1,4 +1,4 @@
-name: Deploy site to GitHub Pages
+name: Build site
 
 on:
   push:
@@ -12,7 +12,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-${{ github.ref }}
+  group: site-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -32,13 +32,21 @@ jobs:
         run: make code
       - name: Build site
         run: make site
+      # Downloadable from the run's summary page; unzip and open index.html
+      # 可在本次运行的 Summary 页面下载，解压后双击 index.html 即可浏览
+      - uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site
       - uses: actions/upload-pages-artifact@v3
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
         with:
           path: site
 
+  # Runs only after Pages is enabled and the repository variable ENABLE_PAGES is set to "true"
+  # 只有在开启 Pages 并把仓库变量 ENABLE_PAGES 设为 "true" 之后才会发布
   deploy:
-    if: github.event_name != 'pull_request'
+    if: github.event_name != 'pull_request' && vars.ENABLE_PAGES == 'true'
     needs: build
     runs-on: ubuntu-latest
     environment:

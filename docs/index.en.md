@@ -2,7 +2,7 @@
 
 > Learn large language models by playing with them: every topic comes with **a write-up, figures, an interactive playground and runnable PyTorch code**.
 >
-> 🌐 [中文](https://baiyuby.github.io/use_token_to_learn/)
+> 🌐 [中文](index.md)
 
 ## How to learn
 

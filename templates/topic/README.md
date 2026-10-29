@@ -2,9 +2,9 @@
 
 > **一句话总结：** ……
 >
-> 🌐 [English version](https://baiyuby.github.io/use_token_to_learn/en/NN-topic/) · 🎮 **[打开交互演示](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/topic.html?lang=zh)**
 
-[![交互演示预览](assets/interactive-preview.png)](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=zh)
+[![交互演示预览](assets/interactive-preview.png)](interactive/topic.html?lang=zh)
 
 **本章你将学会：**
 
@@ -25,7 +25,7 @@ flowchart LR
 
 > **🎮 动手试试**
 >
-> 在[交互演示](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=zh)中，你可以：
+> 在[交互演示](interactive/topic.html?lang=zh)中，你可以：
 >
 > 1. ……
 

@@ -6,6 +6,12 @@ repo_name: BaiYuBY/use_token_to_learn
 edit_uri: edit/main/docs/
 
 docs_dir: docs
+# Plain .html URLs so the built site also works when opened from disk
+# 使用 .html 地址，构建出的网站可直接双击打开
+use_directory_urls: false
+
+hooks:
+  - scripts/mkdocs_hooks.py
 
 theme:
   name: material

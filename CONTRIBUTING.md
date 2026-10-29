@@ -23,7 +23,8 @@ docs/NN-topic/
 - 公式用 `$...$` 与 `$$...$$`，GitHub 和网站都能渲染。Use `$...$` / `$$...$$` for math.
 - 提示框用引用块 `> **标题**`，不要用 `!!!`（GitHub 上不显示）。Use `> **Title**` blockquotes for callouts, not `!!!` admonitions.
 - 流程图、结构图优先用 Mermaid。Prefer Mermaid for diagrams.
-- 交互演示链接用 GitHub Pages 绝对地址，并带 `?lang=zh` 或 `?lang=en`。Link playgrounds by their absolute Pages URL with `?lang=`.
+- 所有链接用相对路径（如 `interactive/topic.html?lang=zh`），这样在 GitHub、本地文件和网站上都有效。Use relative links everywhere.
+- 开头的 `🌐` 语言切换链接只给 GitHub 读者用，构建网站时会被 `scripts/mkdocs_hooks.py` 自动去掉。The `🌐` language links are stripped from the site build.
 
 ## 图片 / Figures
 

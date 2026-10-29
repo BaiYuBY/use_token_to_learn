@@ -2,7 +2,7 @@
 
 > 在交互中学习大语言模型：每个知识点都配有**讲解、图解、可交互演示和可运行的 PyTorch 代码**。
 >
-> 🌐 [English](https://baiyuby.github.io/use_token_to_learn/en/)
+> 🌐 [English](index.en.md)
 
 ## 怎么学
 

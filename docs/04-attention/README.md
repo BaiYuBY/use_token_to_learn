@@ -2,9 +2,9 @@
 
 > **一句话总结：** 注意力让序列中的每个词，根据“相关程度”从其他词那里按比例收集信息。
 >
-> 🌐 [English version](https://baiyuby.github.io/use_token_to_learn/en/04-attention/) · 🎮 **[打开交互演示](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/attention.html?lang=zh)**
 
-[![交互演示预览](assets/interactive-preview.png)](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=zh)
+[![交互演示预览](assets/interactive-preview.png)](interactive/attention.html?lang=zh)
 
 **本章你将学会：**
 
@@ -62,7 +62,7 @@ flowchart LR
 
 > **🎮 动手试试**
 >
-> 在[交互演示](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=zh)中，你可以：
+> 在[交互演示](interactive/attention.html?lang=zh)中，你可以：
 >
 > 1. 点击任意一行，查看该词逐步的打分与权重
 > 2. 开关因果掩码和 $\sqrt{d}$ 缩放，观察热力图的变化

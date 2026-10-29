@@ -2,9 +2,9 @@
 
 > **In one sentence:** …
 >
-> 🌐 [中文版](https://baiyuby.github.io/use_token_to_learn/NN-topic/) · 🎮 **[Open the interactive playground](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/topic.html?lang=en)**
 
-[![Interactive playground preview](assets/interactive-preview.en.png)](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=en)
+[![Interactive playground preview](assets/interactive-preview.en.png)](interactive/topic.html?lang=en)
 
 **In this chapter you will learn:**
 
@@ -25,7 +25,7 @@ flowchart LR
 
 > **🎮 Try it yourself**
 >
-> In the [interactive playground](https://baiyuby.github.io/use_token_to_learn/NN-topic/interactive/topic.html?lang=en) you can:
+> In the [interactive playground](interactive/topic.html?lang=en) you can:
 >
 > 1. …
 

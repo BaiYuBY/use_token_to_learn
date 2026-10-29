@@ -2,9 +2,9 @@
 
 > **In one sentence:** attention lets every token gather information from other tokens, in proportion to how relevant they are.
 >
-> 🌐 [中文版](https://baiyuby.github.io/use_token_to_learn/04-attention/) · 🎮 **[Open the interactive playground](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/attention.html?lang=en)**
 
-[![Interactive playground preview](assets/interactive-preview.en.png)](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=en)
+[![Interactive playground preview](assets/interactive-preview.en.png)](interactive/attention.html?lang=en)
 
 **In this chapter you will learn:**
 
@@ -62,7 +62,7 @@ flowchart LR
 
 > **🎮 Try it yourself**
 >
-> In the [interactive playground](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html?lang=en) you can:
+> In the [interactive playground](interactive/attention.html?lang=en) you can:
 >
 > 1. Click any row to see that token's scores and weights step by step
 > 2. Toggle the causal mask and the $\sqrt{d}$ scaling and watch the heatmap change
