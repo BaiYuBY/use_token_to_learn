@@ -17,6 +17,7 @@
 | 章节 | 讲解 | 交互演示 | 代码 |
 | --- | --- | --- | --- |
 | 01 分词 Tokenization | [中文](docs/01-tokenization/README.md) · [EN](docs/01-tokenization/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/01-tokenization/interactive/tokenizer.html) | [bpe.py](docs/01-tokenization/code/bpe.py) |
+| 02 词嵌入 Embedding | [中文](docs/02-embedding/README.md) · [EN](docs/02-embedding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/02-embedding/interactive/embedding.html) | [embedding.py](docs/02-embedding/code/embedding.py) |
 | 04 注意力机制 Attention | [中文](docs/04-attention/README.md) · [EN](docs/04-attention/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html) | [attention.py](docs/04-attention/code/attention.py) |
 
 完整的大纲和路线图见 [PLAN.md](PLAN.md)，写作规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。

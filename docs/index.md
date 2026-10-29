@@ -17,7 +17,7 @@
 | 编号 | 主题 | 交互演示 | 状态 |
 | --- | --- | --- | --- |
 | 01 | [分词 Tokenization](01-tokenization/README.md) | [分词演示](01-tokenization/interactive/tokenizer.html) | ✅ 已完成 |
-| 02 | 词嵌入 Embedding | 3D 语义空间 | 🚧 计划中 |
+| 02 | [词嵌入 Embedding](02-embedding/README.md) | [词嵌入演示](02-embedding/interactive/embedding.html) | ✅ 已完成 |
 | 03 | 位置编码 Positional Encoding | RoPE 旋转 | 🚧 计划中 |
 | 04 | [注意力机制 Attention](04-attention/README.md) | [注意力演示](04-attention/interactive/attention.html) | ✅ 已完成 |
 | 05 | Transformer 结构 | 张量形状流转 | 🚧 计划中 |

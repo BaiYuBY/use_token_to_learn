@@ -17,7 +17,7 @@ Each chapter follows the same rhythm:
 | # | Topic | Playground | Status |
 | --- | --- | --- | --- |
 | 01 | [Tokenization](01-tokenization/README.md) | [Tokenizer playground](01-tokenization/interactive/tokenizer.html?lang=en) | ✅ done |
-| 02 | Embedding | 3-D semantic space | 🚧 planned |
+| 02 | [Embedding](02-embedding/README.md) | [Embedding playground](02-embedding/interactive/embedding.html?lang=en) | ✅ done |
 | 03 | Positional encoding | RoPE rotation | 🚧 planned |
 | 04 | [Attention](04-attention/README.md) | [Attention playground](04-attention/interactive/attention.html?lang=en) | ✅ done |
 | 05 | Transformer block | Tensor shape flow | 🚧 planned |

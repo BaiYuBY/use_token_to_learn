@@ -42,6 +42,7 @@ docs/NN-topic/
 - 双语：用 `<span lang="zh">` / `<span lang="en">` 包裹文字，支持 `?lang=` 参数。
 - 支持亮/暗色（`prefers-color-scheme`）和手机宽度（无横向滚动）。
 - 结构建议：几个编号小节，每节「一句说明 + 可操作的控件 + 实时反馈」，最后放小测验。
+- 需要大量数据时（如训练好的向量），可以由 `figures/*.py` 生成一个 `interactive/*_data.js`（`window.XXX_DATA = {...}`），交互页用 `<script src>` 引入；它在本地双击打开时也能加载。Large generated data may live in a sibling `*_data.js` written by the figure script.
 - 用 `make previews` 生成 `assets/interactive-preview.png`（中文）和 `assets/interactive-preview.en.png`（英文）。
 
 ## 代码 / Code
