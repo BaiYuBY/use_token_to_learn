@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>分词交互演示 · Tokenization Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --chip-l: 62%;
+    --chip-a: .22;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --chip-l: 58%;
+      --chip-a: .28;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select, textarea, input[type=text] {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+  }
+  button, select { padding: 4px 10px; cursor: pointer; }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  button:disabled { opacity: .5; cursor: default; }
+  textarea, input[type=text] { width: 100%; padding: 8px 10px; }
+  textarea { resize: vertical; }
+  .controls { display: flex; gap: 8px 12px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+
+  /* token chips */
+  .gran { display: grid; grid-template-columns: 130px 1fr; gap: 10px 12px; align-items: start; }
+  .gran .name { font-weight: 600; font-size: .9rem; padding-top: 3px; }
+  .gran .name small { display: block; font-weight: 400; color: var(--muted); }
+  .chips { display: flex; flex-wrap: wrap; gap: 3px; min-width: 0; }
+  .chip {
+    --h: 230;
+    display: inline-block; padding: 1px 5px; border-radius: 5px; white-space: pre;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem;
+    background: hsla(var(--h), 70%, var(--chip-l), var(--chip-a));
+    border: 1px solid hsla(var(--h), 70%, var(--chip-l), .65);
+  }
+  .chip.raw { border-style: dashed; color: var(--muted); }
+  .chip.new { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .chip sub { color: var(--muted); font-size: .7em; margin-left: 3px; }
+  .count { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; margin-left: 4px; }
+
+  /* tables */
+  table.t { border-collapse: collapse; width: 100%; font-size: .85rem; }
+  table.t th, table.t td { padding: 3px 6px; border-bottom: 1px solid var(--line); text-align: left; vertical-align: top; }
+  table.t td.n { text-align: right; font-variant-numeric: tabular-nums; }
+  table.t tr.win td { background: hsla(30, 90%, 55%, .15); font-weight: 600; }
+  .scroll { overflow-x: auto; }
+  .tall { max-height: 260px; overflow-y: auto; }
+
+  /* chart */
+  svg.chart { width: 100%; height: auto; display: block; }
+  svg.chart .axis { stroke: var(--muted); stroke-width: 1; }
+  svg.chart .grid { stroke: var(--line); stroke-width: 1; }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  svg.chart .line { fill: none; stroke: var(--primary); stroke-width: 2; }
+  svg.chart .dot { fill: var(--accent); }
+  .stat { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: .9rem; }
+  .stat b { font-variant-numeric: tabular-nums; }
+
+  .traps { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 8px 12px; align-items: start; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  @media (max-width: 560px) {
+    .gran, .traps { grid-template-columns: 1fr; gap: 2px 0; }
+    .gran .name { margin-top: 8px; }
+  }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">分词 · 交互演示</span><span lang="en">Tokenization · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">模型看不到文字，只看到一串整数。看看文字是怎样被切成词元（token）的。</span>
+        <span lang="en">Models never see text, only integers. Watch text get cut into tokens.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. granularity -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">同一句话，四种切法</span><span lang="en">One sentence, four ways to cut it</span></h2>
+    <p class="hint">
+      <span lang="zh">输入任意文本，对比按字节、按字符、按“词”（预分词）和按 BPE 切分的结果。BPE 是在本页内置的小语料上现场训练的（见第 2、4 节）。把鼠标悬停在词元上可以看到它的编号和字节。</span>
+      <span lang="en">Type anything and compare cutting by bytes, by characters, by “words” (pre-tokens) and by BPE. The BPE is trained live on this page's small built-in corpus (see parts 2 and 4). Hover a token to see its id and bytes.</span>
+    </p>
+    <div class="controls" id="presets"></div>
+    <textarea id="text" rows="2"></textarea>
+    <div class="controls">
+      <label><span lang="zh">BPE 合并次数</span><span lang="en">BPE merges</span>
+        <input id="merges" type="range" min="0" max="400" step="1" value="400"><span id="merges-v" class="mono"></span></label>
+      <span class="hint" id="vocab-v"></span>
+    </div>
+    <div class="gran" id="gran"></div>
+    <div class="callout" id="gran-note"></div>
+  </section>
+
+  <!-- 2. training -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">BPE 训练：一步一步合并</span><span lang="en">Training BPE, one merge at a time</span></h2>
+    <p class="hint">
+      <span lang="zh">规则只有一条：<b>数一数所有相邻词元对出现的次数，把最多的那一对合并成一个新词元</b>，然后重复。下面是经典的小例子（Sennrich 等，2016），你也可以改成自己的句子。“·”表示空格。</span>
+      <span lang="en">There is only one rule: <b>count every pair of neighbouring tokens and merge the most frequent pair into a new token</b>, then repeat. Below is the classic toy example (Sennrich et al., 2016); edit it if you like. “·” marks a space.</span>
+    </p>
+    <textarea id="toy" rows="2"></textarea>
+    <div class="controls">
+      <button id="toy-step" class="on"><span lang="zh">合并一次</span><span lang="en">Merge once</span></button>
+      <button id="toy-play"><span lang="zh">▶ 自动播放</span><span lang="en">▶ Play</span></button>
+      <button id="toy-reset"><span lang="zh">重置</span><span lang="en">Reset</span></button>
+      <span class="hint" id="toy-status"></span>
+    </div>
+    <div class="row">
+      <div class="col">
+        <h3><span lang="zh">当前每个词的切分</span><span lang="en">Current segmentation of each word</span></h3>
+        <div class="gran" id="toy-words"></div>
+      </div>
+      <div class="col">
+        <h3><span lang="zh">相邻对计数（前 8）</span><span lang="en">Pair counts (top 8)</span></h3>
+        <div class="scroll"><table class="t" id="toy-pairs"></table></div>
+        <h3><span lang="zh">已学到的合并规则</span><span lang="en">Merges learned so far</span></h3>
+        <div class="chips" id="toy-merges"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. encoding -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">编码新词：按学到的顺序合并</span><span lang="en">Encoding a new word: replay merges in order</span></h2>
+    <p class="hint">
+      <span lang="zh">编码时不再数频率，而是从字节出发，<b>每次应用最早学到的、能用上的那条合并规则</b>，直到无法再合并。训练时没见过的词也能编码，最坏情况就是退回到单个字节，所以字节级 BPE 永远不会出现“未知词”。</span>
+      <span lang="en">Encoding does not count anything. Starting from bytes, it <b>repeatedly applies the earliest-learned merge that fits</b>, until none does. Words never seen in training still work: at worst they fall back to single bytes, so byte-level BPE never needs an “unknown” token.</span>
+    </p>
+    <div class="controls" id="enc-presets"></div>
+    <input type="text" id="enc-word">
+    <div class="scroll" style="margin-top:10px"><table class="t" id="enc-steps"></table></div>
+  </section>
+
+  <!-- 4. vocab size trade-off -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">词表大小的权衡</span><span lang="en">The vocabulary-size trade-off</span></h2>
+    <p class="hint">
+      <span lang="zh">合并越多，词表越大，同样的文本需要的词元越少（序列更短、算得更快、上下文能装更多内容）；但嵌入矩阵和输出层都有“词表大小 × d_model”个参数，也会变大。拖动滑块观察内置语料的变化。</span>
+      <span lang="en">More merges mean a bigger vocabulary and fewer tokens for the same text (shorter sequences, faster compute, more text per context window). But the embedding table and the output layer each hold vocab size × d_model parameters, and those grow. Drag the slider and watch the built-in corpus.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">合并次数</span><span lang="en">merges</span>
+        <input id="merges2" type="range" min="0" max="400" step="1" value="400"><span id="merges2-v" class="mono"></span></label>
+      <label>d_model <select id="dmodel"><option>768</option><option selected>4096</option></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="chart" viewBox="0 0 460 240" role="img" aria-label="tokens vs merges"></svg></div>
+      <div class="col">
+        <div class="stat" id="stats"></div>
+        <div class="callout" id="trade-note"></div>
+      </div>
+    </div>
+    <details style="margin-top:10px">
+      <summary><span lang="zh">查看 / 编辑训练语料</span><span lang="en">View / edit the training corpus</span></summary>
+      <textarea id="corpus" rows="10" style="margin-top:8px"></textarea>
+      <div class="controls"><button id="retrain"><span lang="zh">用这段语料重新训练</span><span lang="en">Retrain on this corpus</span></button></div>
+    </details>
+  </section>
+
+  <!-- 5. traps -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">分词带来的“怪现象”</span><span lang="en">Tokenizer quirks</span></h2>
+    <p class="hint">
+      <span lang="zh">很多大模型的奇怪行为其实来自分词。下面用第 1 节同一个 BPE 演示（会跟着第 1 节的滑块变化），数字是词元编号。</span>
+      <span lang="en">Many odd behaviours of large models come from tokenization. These use the same BPE as part 1 (and follow its slider); the small numbers are token ids.</span>
+    </p>
+    <div id="traps"></div>
+  </section>
+
+  <!-- 6. quiz -->
+  <section class="quiz">
+    <h2><span class="step">6</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与代码：</span><span lang="en">Write-up and code: </span>
+    <a href="../">01 · Tokenization</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Same text as docs/01-tokenization/code/corpus.txt / 与 code/corpus.txt 内容相同 -->
+<script type="text/plain" id="corpus-src">A language model reads text as a sequence of tokens. A token can be a word, a piece of a word, a single character, or even a single byte.
+The model never sees letters directly. It sees token ids, which are integers, and it looks up one vector for each id.
+Tokenization is the first step of every language model, and the last step too: the model predicts the next token, and the tokenizer turns the tokens back into text.
+Byte pair encoding starts from bytes and repeatedly merges the most frequent pair of neighbouring tokens into a new token.
+After many merges, frequent words such as the, model and token become single tokens, while rare words are split into smaller pieces.
+The tokenizer learns its merges once, before training the model, and then keeps them fixed.
+A larger vocabulary makes sequences shorter, but the embedding table and the output layer become larger.
+Numbers like 2024, 3.14159 and 1000000 are often split into several tokens, which is one reason why models find arithmetic hard.
+Spaces matter: " hello" and "hello" are different tokens, and so are "Hello" and "hello".
+def tokenize(text): return [vocab[t] for t in text.split()]
+for i in range(10): print(i * i)
+语言模型把文本看作一串词元。词元可以是一个词、一个词的一部分、一个字，甚至是一个字节。
+模型从来不会直接看到文字，它看到的是词元编号，也就是整数，然后为每个编号查出一个向量。
+分词是每个语言模型的第一步，也是最后一步：模型预测下一个词元，分词器再把词元还原成文本。
+字节对编码从字节开始，不断把最常见的相邻词元对合并成一个新的词元。
+经过多次合并，常见的词会变成一个词元，罕见的词会被拆成更小的片段。
+一个汉字在 UTF-8 中通常占三个字节，所以没有学过中文的分词器会把一个汉字拆成多个词元。
+词表越大，序列越短，但是嵌入矩阵和输出层也越大。
+</script>
+
+<script>
+(() => {
+  // ================= BPE core (mirrors code/bpe.py) =================
+  const PRE = /'(?:s|t|re|ve|m|ll|d)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+/gu;
+  const enc = new TextEncoder();
+  const dec = new TextDecoder("utf-8", { fatal: true });
+  const pretokenize = s => s.match(PRE) || [];
+  const key = (a, b) => a + "," + b;
+
+  function countPairs(words) {  // words: Map(joined ids -> {ids, freq})
+    const pairs = new Map();
+    for (const { ids, freq } of words.values())
+      for (let i = 0; i + 1 < ids.length; i++) {
+        const k = key(ids[i], ids[i + 1]);
+        pairs.set(k, (pairs.get(k) || 0) + freq);
+      }
+    return pairs;
+  }
+  function bestPair(pairs) {  // most frequent; ties -> smallest ids (same as Python)
+    let best = null;
+    for (const [k, c] of pairs) {
+      const [a, b] = k.split(",").map(Number);
+      if (!best || c > best.c || (c === best.c && (a < best.a || (a === best.a && b < best.b)))) best = { a, b, c };
+    }
+    return best;
+  }
+  function mergeIds(ids, a, b, id) {
+    const out = [];
+    for (let i = 0; i < ids.length; i++) {
+      if (i + 1 < ids.length && ids[i] === a && ids[i + 1] === b) { out.push(id); i++; }
+      else out.push(ids[i]);
+    }
+    return out;
+  }
+  function wordTable(text) {
+    const words = new Map();
+    for (const w of pretokenize(text)) {
+      const ids = [...enc.encode(w)];
+      const k = ids.join(" ");
+      if (words.has(k)) words.get(k).freq++; else words.set(k, { ids, freq: 1, text: w });
+    }
+    return words;
+  }
+  function mergeStep(words, state) {
+    const pairs = countPairs(words);
+    const best = bestPair(pairs);
+    if (!best || best.c < 2) return null;
+    const id = 256 + state.merges.length;
+    state.merges.push([best.a, best.b, best.c]);
+    state.vocab.push(new Uint8Array([...state.vocab[best.a], ...state.vocab[best.b]]));
+    state.rank.set(key(best.a, best.b), state.merges.length - 1);
+    for (const w of words.values()) w.ids = mergeIds(w.ids, best.a, best.b, id);
+    return { best, pairs, id };
+  }
+  function newState() {
+    return { merges: [], rank: new Map(), vocab: Array.from({ length: 256 }, (_, i) => new Uint8Array([i])) };
+  }
+  function train(text, n) {
+    const words = wordTable(text), state = newState();
+    for (let s = 0; s < n; s++) if (!mergeStep(words, state)) break;
+    return state;
+  }
+  // encode with only the first `n` merges / 只用前 n 条合并规则编码
+  function encodeWord(bytes, st, n, trace) {
+    let ids = [...bytes];
+    while (ids.length > 1) {
+      let bestR = Infinity, bi = -1;
+      for (let i = 0; i + 1 < ids.length; i++) {
+        const r = st.rank.get(key(ids[i], ids[i + 1]));
+        if (r !== undefined && r < n && r < bestR) { bestR = r; bi = i; }
+      }
+      if (bi < 0) break;
+      const [a, b] = st.merges[bestR];
+      ids = mergeIds(ids, a, b, 256 + bestR);
+      if (trace) trace.push({ rank: bestR, a, b, ids: ids.slice() });
+    }
+    return ids;
+  }
+  const encode = (text, st, n) => pretokenize(text).flatMap(w => encodeWord(enc.encode(w), st, n));
+
+  // ================= display helpers =================
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const hex = b => [...b].map(x => x.toString(16).padStart(2, "0")).join(" ");
+  function showBytes(b) {  // readable token text, or null if not valid UTF-8
+    try { return dec.decode(b).replace(/ /g, "·").replace(/\n/g, "↵").replace(/\t/g, "⇥"); }
+    catch (e) { return null; }
+  }
+  function chip(bytes, id, opts = {}) {
+    const txt = showBytes(bytes);
+    const h = ((id ?? 0) * 47) % 360;
+    const label = txt === null ? `<${hex(bytes)}>` : txt;
+    const title = `${id !== undefined ? "id " + id + " · " : ""}${hex(bytes)}`;
+    return `<span class="chip ${txt === null ? "raw" : ""} ${opts.cls || ""}" style="--h:${h}" title="${esc(title)}">${esc(label)}${opts.sub !== undefined ? `<sub>${opts.sub}</sub>` : ""}</span>`;
+  }
+  const chips = (ids, st, sub) => ids.map(i => chip(st.vocab[i], i, { sub: sub ? i : undefined })).join("");
+
+  // ================= state =================
+  const CORPUS0 = $("corpus-src").textContent;
+  const MAXM = 400;
+  let corpus = CORPUS0;
+  let model = train(corpus, MAXM);
+  let nMerges = MAXM;  // clamped to the merges actually learned / 会被截断到实际学到的次数
+
+  // ================= 1. granularity =================
+  const PRESETS = [
+    ["英文", "English", "The model predicts the next token."],
+    ["中文", "Chinese", "模型预测下一个词元。"],
+    ["生僻词", "Rare word", "Tokenizers split unbelievably rare words."],
+    ["数字", "Numbers", "3.14159 + 1000000 = 1000003.14159"],
+    ["代码", "Code", "for i in range(10): print(i * i)"],
+    ["表情", "Emoji", "I ❤️ tokens 🤖"],
+  ];
+  function renderPresets() {
+    $("presets").innerHTML = PRESETS.map((p, i) => `<button data-i="${i}">${tr(p[0], p[1])}</button>`).join("");
+    $("presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      $("text").value = PRESETS[+b.dataset.i][2]; renderGran();
+    }));
+  }
+  function renderGran() {
+    const text = $("text").value;
+    const bytes = [...enc.encode(text)];
+    const chars = [...text];
+    const pre = pretokenize(text);
+    const bpe = encode(text, model, nMerges);
+    const rows = [
+      [tr("字节", "Bytes"), "UTF-8", bytes.length, bytes.map(b => chip(new Uint8Array([b]), b)).join("")],
+      [tr("字符", "Characters"), tr("Unicode 码位", "code points"), chars.length, chars.map(c => chip(enc.encode(c), c.codePointAt(0))).join("")],
+      [tr("预分词", "Pre-tokens"), tr("按空格和类别切", "split on spaces & type"), pre.length, pre.map((w, i) => chip(enc.encode(w), i * 7 + 3)).join("")],
+      ["BPE", tr(`${nMerges} 次合并`, `${nMerges} merges`), bpe.length, chips(bpe, model)],
+    ];
+    $("gran").innerHTML = rows.map(r =>
+      `<div class="name">${r[0]}<span class="count">${r[2]}</span><small>${r[1]}</small></div><div class="chips">${r[3] || "&nbsp;"}</div>`).join("");
+    const ratio = bpe.length ? (bytes.length / bpe.length).toFixed(2) : "–";
+    $("gran-note").innerHTML = tr(
+      `${bytes.length} 个字节 → ${bpe.length} 个 BPE 词元，平均每个词元 <b>${ratio}</b> 字节。虚线框是不完整的 UTF-8 字节（比如被拆开的汉字或表情）。字符级的“词表”要覆盖所有 Unicode 字符（超过 14 万个），而按词切分又会遇到没见过的新词，BPE 介于两者之间。`,
+      `${bytes.length} bytes → ${bpe.length} BPE tokens, <b>${ratio}</b> bytes per token on average. Dashed chips are incomplete UTF-8 bytes (a split Chinese character or emoji). A character-level vocabulary would need every Unicode character (over 140,000), and word-level splitting breaks on unseen words; BPE sits in between.`);
+    renderTraps();
+  }
+  function setMerges(n) {
+    // training stops early once every pair is unique / 所有相邻对都只出现一次时训练提前结束
+    $("merges").max = $("merges2").max = model.merges.length;
+    nMerges = Math.min(n, model.merges.length);
+    $("merges").value = $("merges2").value = nMerges;
+    $("merges-v").textContent = $("merges2-v").textContent = nMerges;
+    $("vocab-v").textContent = tr(`词表大小 = 256 + ${nMerges} = ${256 + nMerges}`, `vocab size = 256 + ${nMerges} = ${256 + nMerges}`);
+    renderGran(); renderEnc(); renderTrade();
+  }
+
+  // ================= 2. toy training =================
+  const TOY0 = "low low low low low lower lower newest newest newest newest newest newest widest widest widest";
+  let toy = null, toyLast = null, timer = null;
+  function toyReset() {
+    stopPlay();
+    toy = { words: wordTable($("toy").value), st: newState() };
+    toyLast = null;
+    renderToy();
+  }
+  function toyStep() {
+    const r = mergeStep(toy.words, toy.st);
+    toyLast = r;
+    if (!r) stopPlay();
+    renderToy();
+    return r;
+  }
+  function stopPlay() { if (timer) { clearInterval(timer); timer = null; } $("toy-play").classList.remove("on"); }
+  function renderToy() {
+    const st = toy.st, words = [...toy.words.values()].sort((x, y) => y.freq - x.freq);
+    const newId = toyLast ? toyLast.id : -1;
+    $("toy-words").innerHTML = words.map(w =>
+      `<div class="name mono">${esc(w.text.replace(/ /g, "·"))}<span class="count">×${w.freq}</span></div>
+       <div class="chips">${w.ids.map(i => chip(st.vocab[i], i, { cls: i === newId ? "new" : "" })).join("")}</div>`).join("");
+    const pairs = [...countPairs(toy.words)].map(([k, c]) => { const [a, b] = k.split(",").map(Number); return { a, b, c }; })
+      .sort((x, y) => y.c - x.c || x.a - y.a || x.b - y.b).slice(0, 8);
+    $("toy-pairs").innerHTML = `<tr><th>${tr("相邻对", "pair")}</th><th>${tr("次数", "count")}</th></tr>` +
+      (pairs.length ? pairs.map((p, i) => `<tr class="${i === 0 && p.c >= 2 ? "win" : ""}"><td>${chip(st.vocab[p.a], p.a)} + ${chip(st.vocab[p.b], p.b)}</td><td class="n">${p.c}</td></tr>`).join("")
+        : `<tr><td colspan="2" class="hint">${tr("没有可合并的对了", "no pairs left")}</td></tr>`);
+    $("toy-merges").innerHTML = st.merges.length
+      ? st.merges.map(([a, b], i) => `<span class="mono" style="margin-right:6px">${i + 1}.</span>${chip(st.vocab[256 + i], 256 + i, { cls: 256 + i === newId ? "new" : "" })}`).join(" ")
+      : `<span class="hint">${tr("还没有", "none yet")}</span>`;
+    const total = words.reduce((s, w) => s + w.ids.length * w.freq, 0);
+    $("toy-status").innerHTML = (toyLast
+      ? tr(`第 ${st.merges.length} 次合并：${chip(st.vocab[toyLast.best.a], toyLast.best.a)} + ${chip(st.vocab[toyLast.best.b], toyLast.best.b)} 出现 ${toyLast.best.c} 次 → 新词元 #${toyLast.id}。`,
+           `Merge ${st.merges.length}: ${chip(st.vocab[toyLast.best.a], toyLast.best.a)} + ${chip(st.vocab[toyLast.best.b], toyLast.best.b)} appears ${toyLast.best.c} times → new token #${toyLast.id}.`)
+      : st.merges.length ? tr("所有相邻对都只出现 1 次，训练结束。", "Every pair now appears only once; training stops.") : "")
+      + ` ${tr("语料共", "Corpus is")} <b>${total}</b> ${tr("个词元", "tokens")}.`;
+    $("toy-step").disabled = st.merges.length > 0 && toyLast === null;
+  }
+
+  // ================= 3. encode trace =================
+  const ENC_PRESETS = [" tokenization", " unbelievably", " model", "词元", "变成", " Hello"];
+  function renderEncPresets() {
+    $("enc-presets").innerHTML = ENC_PRESETS.map((w, i) => `<button data-i="${i}" class="mono">${esc(w.replace(/ /g, "·"))}</button>`).join("");
+    $("enc-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { $("enc-word").value = ENC_PRESETS[+b.dataset.i]; renderEnc(); }));
+  }
+  function renderEnc() {
+    const w = $("enc-word").value;
+    const words = pretokenize(w);
+    let rows = `<tr><th>${tr("步骤", "step")}</th><th>${tr("应用的合并（学到的顺序）", "merge applied (learned order)")}</th><th>${tr("结果", "result")}</th></tr>`;
+    words.forEach((word, wi) => {
+      const bytes = enc.encode(word), trace = [];
+      encodeWord(bytes, model, nMerges, trace);
+      const start = [...bytes];
+      if (words.length > 1) rows += `<tr><td colspan="3"><b>${tr("预分词", "pre-token")} ${wi + 1}:</b> <span class="mono">${esc(word.replace(/ /g, "·"))}</span></td></tr>`;
+      rows += `<tr><td>0</td><td class="hint">${tr("UTF-8 字节", "UTF-8 bytes")}</td><td><div class="chips">${chips(start, model)}</div></td></tr>`;
+      trace.forEach((t, i) => {
+        rows += `<tr><td>${i + 1}</td><td>#${t.rank + 1}: ${chip(model.vocab[t.a], t.a)} + ${chip(model.vocab[t.b], t.b)}</td><td><div class="chips">${chips(t.ids, model)}</div></td></tr>`;
+      });
+      const final = trace.length ? trace[trace.length - 1].ids : start;
+      rows += `<tr><td></td><td class="hint">${tr("最终编号", "final ids")}</td><td class="mono">[${final.join(", ")}]</td></tr>`;
+    });
+    $("enc-steps").innerHTML = rows;
+  }
+
+  // ================= 4. trade-off chart =================
+  let curve = [];
+  function computeCurve() {
+    curve = [];
+    const maxN = model.merges.length;
+    for (let n = 0; n <= maxN; n += 10) curve.push([n, encode(corpus, model, n).length]);
+    if (curve[curve.length - 1][0] !== maxN) curve.push([maxN, encode(corpus, model, maxN).length]);
+  }
+  function renderTrade() {
+    const W = 460, H = 240, L = 48, R = 12, T = 12, B = 34;
+    const maxN = Math.max(10, model.merges.length), maxY = curve[0][1];
+    const x = n => L + (W - L - R) * n / maxN, y = v => T + (H - T - B) * (1 - v / maxY);
+    let s = "";
+    for (let k = 0; k <= 4; k++) {
+      const v = maxY * k / 4;
+      s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${Math.round(v)}</text>`;
+    }
+    for (let n = 0; n <= maxN; n += 100) s += `<text x="${x(n)}" y="${H - B + 16}" text-anchor="middle">${n}</text>`;
+    s += `<line class="axis" x1="${L}" x2="${W - R}" y1="${H - B}" y2="${H - B}"/>`;
+    s += `<polyline class="line" points="${curve.map(([n, v]) => `${x(n)},${y(v)}`).join(" ")}"/>`;
+    const cur = encode(corpus, model, nMerges).length;
+    s += `<circle class="dot" cx="${x(nMerges)}" cy="${y(cur)}" r="5"/>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${tr("合并次数", "merges")}</text>`;
+    s += `<text x="12" y="${(T + H - B) / 2}" transform="rotate(-90 12 ${(T + H - B) / 2})" text-anchor="middle">${tr("语料词元数", "corpus tokens")}</text>`;
+    $("chart").innerHTML = s;
+
+    const d = +$("dmodel").value, V = 256 + nMerges;
+    const bytes = enc.encode(corpus).length;
+    const fmt = v => v.toLocaleString();
+    $("stats").innerHTML = `
+      <span>${tr("词表大小 V", "vocab size V")}</span><b>${fmt(V)}</b>
+      <span>${tr("语料词元数", "corpus tokens")}</span><b>${fmt(cur)} <span class="count">(${tr("原始字节", "raw bytes")} ${fmt(bytes)}, ${(bytes / cur).toFixed(2)}×)</span></b>
+      <span>${tr("嵌入矩阵", "embedding table")} V × d</span><b>${fmt(V * d)}</b>
+      <span>${tr("输出层", "output layer")} d × V</span><b>${fmt(V * d)}</b>`;
+    $("trade-note").innerHTML = tr(
+      `曲线后段变平，是因为这段语料太小，常见的词都已经合并完了。真实的分词器在海量文本上训练，词表通常有 3 万到 15 万个词元，例如 Llama 3 的 128,256 个词元 × 4096 维 ≈ <b>5.25 亿</b>个嵌入参数。`,
+      `The curve flattens because this corpus is tiny and the common words are already merged. Real tokenizers train on huge corpora with vocabularies of roughly 30k to 150k tokens; Llama 3's 128,256 tokens × 4096 dims ≈ <b>525M</b> embedding parameters.`);
+  }
+
+  // ================= 5. traps =================
+  function renderTraps() {
+    const groups = [
+      [tr("空格与大小写", "Spaces & case"), ["hello", " hello", "Hello", " HELLO"],
+        tr("看起来是同一个词，编号却完全不同。模型必须分别学会它们的含义。", "They look like the same word but get completely different ids; the model has to learn each one separately.")],
+      [tr("数字", "Numbers"), ["2024", "2025", "1000000", "3.14159"],
+        tr("数字被切成不规则的片段，位数对不齐，这是模型做算术容易出错的原因之一。", "Numbers break into irregular chunks that don't line up by digit, one reason arithmetic is hard for models.")],
+      [tr("没见过的字", "Unseen characters"), ["词元", "变", "🤖"],
+        tr("训练语料里很少出现的字会被拆回 UTF-8 字节，占用更多词元。中文等语言在以英文为主的分词器里往往更“贵”。", "Rare characters fall back to UTF-8 bytes and cost more tokens. Chinese and other languages are often more “expensive” in English-centric tokenizers.")],
+    ];
+    $("traps").innerHTML = groups.map(([title, items, note]) =>
+      `<h3>${title}</h3><div class="traps">` +
+      items.map(t => `<span class="mono">"${esc(t)}"</span><div class="chips">${chips(encode(t, model, nMerges), model, true)}</div>`).join("") +
+      `</div><p class="hint" style="margin:4px 0 0">${note}</p>`).join("");
+  }
+
+  // ================= 6. quiz =================
+  const QUIZ = [
+    { q: ["BPE 训练时每一步做什么？", "What does each BPE training step do?"],
+      opts: [["把最长的词拆开", "Split the longest word"], ["把出现最多的相邻词元对合并成新词元", "Merge the most frequent adjacent pair into a new token"], ["删除出现最少的词元", "Delete the rarest token"]],
+      a: 1, ex: ["词表从 256 个字节开始，每次合并新增一个词元。可以在第 2 节一步步观察。", "The vocabulary starts with 256 bytes and each merge adds one token. Step through it in part 2."] },
+    { q: ["为什么字节级 BPE 不需要 [UNK]（未知词）词元？", "Why does byte-level BPE need no [UNK] token?"],
+      opts: [["因为它的词表包含所有单词", "Its vocabulary contains every word"], ["因为任何文本都能退回到 256 个字节表示", "Any text can fall back to the 256 byte tokens"], ["因为模型会自动忽略未知字符", "The model ignores unknown characters"]],
+      a: 1, ex: ["任何字符串都是 UTF-8 字节序列，而 256 个字节都在词表里。试试第 3 节里的表情或生僻字。", "Every string is a sequence of UTF-8 bytes, and all 256 bytes are in the vocabulary. Try an emoji or a rare character in part 3."] },
+    { q: ["词表从 3.2 万扩大到 12.8 万（d_model = 4096），输入嵌入矩阵增加了多少参数？", "Growing the vocabulary from 32k to 128k (d_model = 4096) adds how many input-embedding parameters?"],
+      opts: [["约 400 万", "About 4M"], ["约 4 亿", "About 400M"], ["约 40 亿", "About 4B"]],
+      a: 1, ex: ["(128,000 − 32,000) × 4096 ≈ 3.9 亿。如果输出层不与嵌入层共享权重，还要再加同样多。", "(128,000 − 32,000) × 4096 ≈ 393M, and as many again for the output layer if its weights are not tied to the embedding."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() {
+    renderPresets(); renderEncPresets();
+    setMerges(nMerges);
+    renderToy(); renderQuiz();
+  }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+
+  $("text").value = PRESETS[0][2];
+  $("toy").value = TOY0;
+  $("enc-word").value = ENC_PRESETS[0];
+  $("corpus").value = CORPUS0;
+  $("text").addEventListener("input", renderGran);
+  $("enc-word").addEventListener("input", renderEnc);
+  $("merges").addEventListener("input", e => setMerges(+e.target.value));
+  $("merges2").addEventListener("input", e => setMerges(+e.target.value));
+  $("dmodel").addEventListener("change", renderTrade);
+  $("toy").addEventListener("change", toyReset);
+  $("toy-step").addEventListener("click", () => { stopPlay(); toyStep(); });
+  $("toy-reset").addEventListener("click", toyReset);
+  $("toy-play").addEventListener("click", () => {
+    if (timer) return stopPlay();
+    $("toy-play").classList.add("on");
+    timer = setInterval(() => { if (!toyStep()) stopPlay(); }, 900);
+  });
+  $("retrain").addEventListener("click", () => {
+    corpus = $("corpus").value;
+    model = train(corpus, MAXM);
+    computeCurve();
+    setMerges(+$("merges").value);
+  });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+
+  // Exposed for curious readers: try BPE.encode("hello") in the console
+  // 方便在浏览器控制台里试玩：BPE.encode("你好")
+  window.BPE = { train, pretokenize, encode: (t, n = nMerges) => encode(t, model, n), get model() { return model; } };
+
+  computeCurve();
+  toy = { words: wordTable(TOY0), st: newState() };
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
