@@ -111,7 +111,7 @@ In this chapter's corpus every person word combines three attributes (royal/comm
 ### 3.5 Embeddings inside a Transformer
 
 - **Static vs contextual**: the embedding layer always returns the same vector for the same id, so “bank” (money or river) has only one embedding. Telling the senses apart is the job of the attention layers that follow, which adjust the vector using context (see [04 Attention](../04-attention/README.en.md)).
-- **Position**: the embedding layer knows nothing about a token's position, so positional information must be added (03 Positional encoding, coming soon).
+- **Position**: the embedding layer knows nothing about a token's position, so positional information must be added (see [03 Positional encoding](../03-positional-encoding/README.en.md)).
 - **Weight tying**: the output layer is also a $d \times V$ matrix, and some models (GPT-2, for example) share it with the embedding matrix, saving $V \times d$ parameters.
 - **Size**: the embedding matrix has $V \times d$ parameters, which can be a large share of a small model (see the vocabulary-size trade-off in [01 Tokenization](../01-tokenization/README.en.md)).
 

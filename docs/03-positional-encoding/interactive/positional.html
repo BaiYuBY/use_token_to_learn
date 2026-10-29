@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>位置编码交互演示 · Positional Encoding Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --heat-pos: 197, 34, 31;
+    --heat-neg: 63, 81, 181;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --heat-pos: 242, 139, 130;
+      --heat-neg: 140, 158, 255;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px;
+    padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .scroll { overflow-x: auto; }
+  .ok { color: var(--good); font-weight: 700; }
+  .diff { color: var(--bad); font-weight: 700; }
+
+  /* section 1 */
+  .sentence { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .tok { padding: 2px 10px; border-radius: 6px; border: 1px solid var(--line); background: var(--bg); font-family: ui-monospace, Menlo, Consolas, monospace; }
+  .tok.hi { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+  table.vec { border-collapse: separate; border-spacing: 2px; font-size: .72rem; }
+  table.vec th { font-weight: 500; color: var(--muted); padding: 0 8px 0 0; text-align: right; font-family: ui-monospace, Menlo, Consolas, monospace; white-space: nowrap; }
+  table.vec td { width: 36px; height: 22px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  table.vec tr.hi th { color: var(--accent); font-weight: 700; }
+  table.vec tr.hi td { outline: 2px solid var(--accent); }
+
+  /* canvases & charts */
+  canvas.heat { width: 100%; display: block; border-radius: 8px; border: 1px solid var(--line); cursor: crosshair; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart .axis { stroke: var(--muted); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .clocks { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 6px; }
+  .clocks figure { margin: 0; text-align: center; font-size: .7rem; color: var(--muted); }
+  .clocks svg { width: 100%; height: auto; display: block; }
+  .stat { display: grid; grid-template-columns: auto 1fr; gap: 2px 12px; font-size: .92rem; }
+  .stat b { font-variant-numeric: tabular-nums; }
+  svg.rope { width: 100%; max-width: 360px; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; }
+
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">位置编码 · 交互演示</span><span lang="en">Positional Encoding · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">注意力本身分不清词的顺序。看看模型是怎样知道“谁在前、谁在后”的。</span>
+        <span lang="en">Attention alone cannot tell word order. See how a model learns what comes first and what comes later.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. permutation -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">没有位置信息，词序就消失了</span><span lang="en">Without positions, word order disappears</span></h2>
+    <p class="hint">
+      <span lang="zh">“狗咬人”和“人咬狗”用的是同样的词。下面每一行是一个词经过一层自注意力（不加掩码）之后的输出向量。交换 dog 和 man，再看 bites 的输出有没有变化。</span>
+      <span lang="en">“dog bites man” and “man bites dog” use the same words. Each row below is a word's output after one layer of self-attention (no mask). Swap dog and man and see whether the output for “bites” changes.</span>
+    </p>
+    <div class="controls">
+      <button id="swap"><span lang="zh">交换 dog ⇄ man</span><span lang="en">Swap dog ⇄ man</span></button>
+      <button id="use-pe"><span lang="zh">加入位置编码</span><span lang="en">Add positional encoding</span></button>
+    </div>
+    <div class="sentence" id="sentence"></div>
+    <div class="scroll"><table class="vec" id="perm-out"></table></div>
+    <div class="callout" id="perm-note"></div>
+  </section>
+
+  <!-- 2. sinusoidal -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">正弦位置编码：一组转速不同的时钟</span><span lang="en">Sinusoidal encoding: a set of clocks at different speeds</span></h2>
+    <p class="hint">
+      <span lang="zh">每两维是一对 (sin, cos)，可以看成一个时钟的指针：位置每加 1，第 i 个时钟转过 ω<sub>i</sub> = 1 / base<sup>2i/d</sup> 弧度。前面的时钟转得快（像秒针），后面的转得慢（像时针），合起来就能唯一地表示每个位置。在热力图上点一行，或拖动滑块选位置。</span>
+      <span lang="en">Every two dimensions form a (sin, cos) pair, like the hand of a clock: each step in position turns clock i by ω<sub>i</sub> = 1 / base<sup>2i/d</sup> radians. The first clocks spin fast (like a second hand), the last ones slowly (like an hour hand), and together they identify every position. Click a row of the heatmap or drag the slider to pick a position.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">位置</span><span lang="en">position</span> <input id="pos" type="range" min="0" max="127" value="10"><span id="pos-v" class="mono"></span></label>
+      <label>d_model <select id="dm"><option>16</option><option selected>32</option><option>64</option><option>128</option></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><canvas class="heat" id="heat" aria-label="sinusoidal heatmap"></canvas><div class="hint" id="heat-hover">&nbsp;</div></div>
+      <div class="col">
+        <h3><span lang="zh">这个位置上的时钟</span><span lang="en">The clocks at this position</span></h3>
+        <div class="clocks" id="clocks"></div>
+      </div>
+    </div>
+    <h3><span lang="zh">点积只取决于相对距离</span><span lang="en">The dot product depends only on the distance</span></h3>
+    <p class="hint">
+      <span lang="zh">曲线是 PE[p] · PE[p + k]，横轴是相对距离 k。拖动上面的“位置”滑块改变 p，曲线完全不动：两个位置的相似度只和它们相隔多远有关。</span>
+      <span lang="en">The curve is PE[p] · PE[p + k] against the offset k. Drag the position slider above to change p: the curve does not move at all, because the similarity of two positions depends only on how far apart they are.</span>
+    </p>
+    <svg class="chart" id="dot-chart" viewBox="0 0 640 200"></svg>
+  </section>
+
+  <!-- 3. RoPE -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">RoPE：把 q 和 k 按位置旋转</span><span lang="en">RoPE: rotate q and k by their positions</span></h2>
+    <p class="hint">
+      <span lang="zh">RoPE 不把位置向量“加”到输入上，而是在计算注意力分数前，把 query 和 key 的每一对分量按位置旋转。下面画的是其中一对：q 在位置 m 转过 m·θ，k 在位置 n 转过 n·θ，它们的夹角只差 (m − n)·θ。点“同时右移”，两个位置一起变，分数却保持不变。</span>
+      <span lang="en">RoPE does not add a position vector to the input. Before scores are computed, it rotates every pair of components of the query and the key by their positions. One pair is drawn below: q at position m turns by m·θ and k at position n by n·θ, so their angle changes by (m − n)·θ. Press “shift both” and both positions move while the score stays the same.</span>
+    </p>
+    <div class="controls">
+      <label>m (query) <input id="rm" type="range" min="0" max="64" value="7"><span id="rm-v" class="mono"></span></label>
+      <label>n (key) <input id="rn" type="range" min="0" max="64" value="3"><span id="rn-v" class="mono"></span></label>
+      <label><span lang="zh">第几对</span><span lang="en">pair</span> i <input id="ri" type="range" min="0" max="15" value="2"><span id="ri-v" class="mono"></span></label>
+      <button id="shift"><span lang="zh">同时右移 +10</span><span lang="en">Shift both +10</span></button>
+      <button id="reset-rope"><span lang="zh">重置</span><span lang="en">Reset</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="rope" id="rope" viewBox="-120 -120 240 240"></svg></div>
+      <div class="col">
+        <div class="stat" id="rope-stats"></div>
+        <div class="callout" id="rope-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. base & decay -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">RoPE 的 base：远处的词能“看”多清楚</span><span lang="en">RoPE's base: how clearly distant words are seen</span></h2>
+    <p class="hint">
+      <span lang="zh">假设 q 和 k 完全相同，曲线显示它们相隔不同距离时的注意力分数（已归一化）。距离越远，各对分量转过的角度越乱，分数整体下降。调大 base，所有时钟都转得更慢，远距离的衰减就变缓。长上下文模型常这样做，例如 Llama 3 用了 500,000。</span>
+      <span lang="en">Assume q and k are identical; the curve shows their (normalized) score at different distances. The farther apart they are, the more scrambled the rotation angles and the lower the score. Increasing the base slows every clock down so distant scores decay more gently. Long-context models do this; Llama 3, for example, uses 500,000.</span>
+    </p>
+    <div class="controls">
+      <label>base <input id="base" type="range" min="0" max="6" step="1" value="2"><span id="base-v" class="mono"></span></label>
+      <label>d_head <select id="dh"><option>64</option><option selected>128</option></select></label>
+    </div>
+    <svg class="chart" id="decay" viewBox="0 0 640 230"></svg>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">03 · Positional Encoding</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const heatStyle = (v, max = 1) => {
+    const a = Math.min(1, Math.abs(v) / max);
+    return `background:rgba(var(${v >= 0 ? "--heat-pos" : "--heat-neg"}), ${0.08 + 0.8 * a});color:${a > 0.6 ? "var(--bg)" : "var(--ink)"}`;
+  };
+
+  // ---------- math (mirrors code/positional.py) ----------
+  const omega = (i, d, base) => Math.pow(base, -2 * i / d);
+  function pe(pos, d, base = 10000) {
+    const v = new Array(d);
+    for (let i = 0; i < d / 2; i++) { const a = pos * omega(i, d, base); v[2 * i] = Math.sin(a); v[2 * i + 1] = Math.cos(a); }
+    return v;
+  }
+  const dot = (a, b) => a.reduce((s, x, i) => s + x * b[i], 0);
+  function rope(v, m, base = 10000) {
+    const d = v.length, out = new Array(d);
+    for (let i = 0; i < d / 2; i++) {
+      const a = m * omega(i, d, base), c = Math.cos(a), s = Math.sin(a);
+      out[2 * i] = v[2 * i] * c - v[2 * i + 1] * s;
+      out[2 * i + 1] = v[2 * i] * s + v[2 * i + 1] * c;
+    }
+    return out;
+  }
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const randn = () => { let u = 0, v = 0; while (!u) u = rand(); while (!v) v = rand(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); };
+  const randVec = d => Array.from({ length: d }, randn);
+  const matVec = (M, v) => M.map(row => dot(row, v));
+
+  // ================= 1. permutation =================
+  const D1 = 8;
+  const WORDS = { the: randVec(D1), dog: randVec(D1), bites: randVec(D1), man: randVec(D1) };
+  const [WQ, WK, WV] = [0, 1, 2].map(() => Array.from({ length: D1 }, () => randVec(D1).map(x => x / Math.sqrt(D1))));
+  const ORIG = ["the", "dog", "bites", "the", "man"];
+  let swapped = false, usePE = false;
+  function attendAll(words) {
+    const X = words.map((w, p) => usePE ? WORDS[w].map((x, k) => x + pe(p, D1)[k]) : WORDS[w]);
+    const Q = X.map(x => matVec(WQ, x)), K = X.map(x => matVec(WK, x)), V = X.map(x => matVec(WV, x));
+    return Q.map(q => {
+      const s = K.map(k => dot(q, k) / Math.sqrt(D1)), mx = Math.max(...s);
+      const e = s.map(x => Math.exp(x - mx)), z = e.reduce((a, b) => a + b, 0);
+      return V[0].map((_, j) => V.reduce((acc, v, t) => acc + e[t] / z * v[j], 0));
+    });
+  }
+  function renderPerm() {
+    const words = swapped ? ["the", "man", "bites", "the", "dog"] : ORIG;
+    $("sentence").innerHTML = words.map((w, p) => `<span class="tok ${w === "bites" ? "hi" : ""}">${w}<sub class="hint"> ${usePE ? p : ""}</sub></span>`).join("");
+    const out = attendAll(words);
+    $("perm-out").innerHTML = out.map((row, p) => `<tr class="${words[p] === "bites" ? "hi" : ""}"><th>${words[p]}</th>${row.map(v => `<td style="${heatStyle(v, 1.2)}">${v.toFixed(2)}</td>`).join("")}</tr>`).join("");
+    const ref = attendAll(ORIG)[2], cur = out[2];
+    const diff = Math.sqrt(ref.reduce((s, x, i) => s + (x - cur[i]) ** 2, 0));
+    const same = diff < 1e-9;
+    $("use-pe").classList.toggle("on", usePE);
+    $("swap").classList.toggle("on", swapped);
+    $("perm-note").innerHTML = !swapped
+      ? tr("现在是原句 “the dog bites the man”。点“交换”看看会发生什么。", "This is the original “the dog bites the man”. Press swap to see what happens.")
+      : same
+        ? tr(`<span class="ok">bites 的输出与原句完全相同。</span>没有位置信息时，注意力只看到一袋词：交换词的位置只会让输出行跟着交换，模型分不清是谁咬了谁。现在打开“加入位置编码”。`,
+             `<span class="ok">The output for “bites” is exactly the same as before.</span> Without positions, attention only sees a bag of words: moving words around just moves their output rows, so the model cannot tell who bit whom. Now turn on positional encoding.`)
+        : tr(`<span class="diff">bites 的输出变了</span>（与原句相差 ${diff.toFixed(2)}）。每个位置加上了不同的位置向量，同一个词出现在不同位置时输入就不同了，模型终于能区分词序。`,
+             `<span class="diff">The output for “bites” changed</span> (distance ${diff.toFixed(2)} from the original). Each position now adds its own vector, so the same word at a different position gives a different input, and the model can finally tell the orders apart.`);
+  }
+
+  // ================= 2. sinusoidal =================
+  const MAXP = 128;
+  let posSel = 10;
+  function renderHeat() {
+    const d = +$("dm").value, cv = $("heat"), ctx = cv.getContext("2d");
+    const W = cv.clientWidth, H = Math.round(W * 0.62), r = window.devicePixelRatio || 1;
+    cv.width = W * r; cv.height = H * r; cv.style.height = H + "px"; ctx.setTransform(r, 0, 0, r, 0, 0);
+    const cw = W / d, ch = H / MAXP;
+    const pos = css("--heat-pos"), neg = css("--heat-neg"), bg = css("--bg");
+    ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+    for (let p = 0; p < MAXP; p++) {
+      const v = pe(p, d);
+      for (let k = 0; k < d; k++) {
+        ctx.fillStyle = `rgba(${v[k] >= 0 ? pos : neg}, ${0.08 + 0.85 * Math.abs(v[k])})`;
+        ctx.fillRect(k * cw, p * ch, Math.ceil(cw), Math.ceil(ch));
+      }
+    }
+    ctx.strokeStyle = css("--accent"); ctx.lineWidth = 2;
+    ctx.strokeRect(1, posSel * ch - 1, W - 2, ch + 2);
+  }
+  function renderClocks() {
+    const d = +$("dm").value, v = pe(posSel, d);
+    $("pos-v").textContent = posSel;
+    $("clocks").innerHTML = Array.from({ length: d / 2 }, (_, i) => {
+      const s = v[2 * i], c = v[2 * i + 1];  // angle a: (cos a, sin a) as the hand
+      const turns = posSel * omega(i, d, 10000) / (2 * Math.PI);
+      return `<figure><svg viewBox="-22 -22 44 44"><circle r="19" fill="none" stroke="${css("--line")}" stroke-width="2"/>
+        <line x1="0" y1="0" x2="${16 * c}" y2="${-16 * s}" stroke="${css("--accent")}" stroke-width="3" stroke-linecap="round"/>
+        <circle r="2.5" fill="${css("--ink")}"/></svg>i=${i}<br>${turns < 10 ? turns.toFixed(2) : turns.toFixed(0)} ${tr("圈", "turns")}</figure>`;
+    }).join("");
+    renderHeat();
+    renderDotChart();
+  }
+  function renderDotChart() {
+    const d = +$("dm").value, W = 640, H = 200, L = 40, R = 10, T = 12, B = 30;
+    const ks = []; for (let k = -40; k <= 40; k++) ks.push(k);
+    const ys = ks.map(k => dot(pe(posSel, d), pe(posSel + k, d)));  // PE is defined for any position / 任意位置都有定义
+    const ymin = Math.min(...ys), ymax = d / 2;
+    const x = k => L + (W - L - R) * (k + 40) / 80, y = v => T + (H - T - B) * (1 - (v - ymin) / (ymax - ymin));
+    let s = "";
+    for (let k = -40; k <= 40; k += 10) s += `<line class="grid" x1="${x(k)}" x2="${x(k)}" y1="${T}" y2="${H - B}"/><text x="${x(k)}" y="${H - B + 14}" text-anchor="middle">${k}</text>`;
+    s += `<text x="${L - 6}" y="${y(ymax) + 4}" text-anchor="end">${ymax}</text><text x="${L - 6}" y="${y(ymin) + 4}" text-anchor="end">${ymin.toFixed(0)}</text>`;
+    s += `<polyline fill="none" stroke="${css("--primary")}" stroke-width="2" points="${ks.map((k, j) => `${x(k).toFixed(1)},${y(ys[j]).toFixed(1)}`).join(" ")}"/>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 2}" text-anchor="middle">${tr("相对距离 k", "offset k")}</text>`;
+    $("dot-chart").innerHTML = s;
+  }
+  function heatPick(e, apply) {
+    const r = $("heat").getBoundingClientRect(), d = +$("dm").value;
+    const p = Math.floor((e.clientY - r.top) / r.height * MAXP), k = Math.floor((e.clientX - r.left) / r.width * d);
+    if (p < 0 || p >= MAXP || k < 0 || k >= d) return;
+    const v = pe(p, d)[k], i = Math.floor(k / 2);
+    $("heat-hover").textContent = tr(`位置 ${p}，第 ${k} 维（第 ${i} 对的 ${k % 2 ? "cos" : "sin"}）= ${v.toFixed(3)}`,
+      `position ${p}, dim ${k} (${k % 2 ? "cos" : "sin"} of pair ${i}) = ${v.toFixed(3)}`);
+    if (apply) { posSel = p; $("pos").value = p; renderClocks(); }
+  }
+
+  // ================= 3. RoPE =================
+  const DR = 32;
+  seed = 42;
+  const Q = randVec(DR), K = randVec(DR);
+  let rm = 7, rn = 3, lastScore = null;
+  function renderRope() {
+    const i = +$("ri").value, th = omega(i, DR, 10000);
+    $("rm-v").textContent = rm; $("rn-v").textContent = rn; $("ri-v").textContent = i;
+    $("rm").value = Math.min(rm, 64); $("rn").value = Math.min(rn, 64);
+    const qp = [Q[2 * i], Q[2 * i + 1]], kp = [K[2 * i], K[2 * i + 1]];
+    const rot = (v, a) => [v[0] * Math.cos(a) - v[1] * Math.sin(a), v[0] * Math.sin(a) + v[1] * Math.cos(a)];
+    const qr = rot(qp, rm * th), kr = rot(kp, rn * th);
+    const sc = 90 / Math.max(Math.hypot(...qp), Math.hypot(...kp));
+    const arrow = (v, color, label, dash) => {
+      const x = v[0] * sc, y = -v[1] * sc, a = Math.atan2(y, x);
+      return `<line x1="0" y1="0" x2="${x}" y2="${y}" stroke="${color}" stroke-width="3" ${dash ? 'stroke-dasharray="4 4" opacity=".45"' : ""}/>
+        <polygon points="${x},${y} ${x - 9 * Math.cos(a - .4)},${y - 9 * Math.sin(a - .4)} ${x - 9 * Math.cos(a + .4)},${y - 9 * Math.sin(a + .4)}" fill="${color}" ${dash ? 'opacity=".45"' : ""}/>
+        <text x="${x * 1.15}" y="${y * 1.15 + 4}" fill="${color}" text-anchor="middle" font-size="12" font-weight="700">${label}</text>`;
+    };
+    let g = `<circle r="${Math.hypot(...qp) * sc}" fill="none" stroke="${css("--line")}"/><circle r="${Math.hypot(...kp) * sc}" fill="none" stroke="${css("--line")}"/>`;
+    g += arrow(qp, css("--primary"), "q₀", true) + arrow(kp, css("--accent"), "k₀", true);
+    g += arrow(qr, css("--primary"), `q@${rm}`) + arrow(kr, css("--accent"), `k@${rn}`);
+    $("rope").innerHTML = g;
+    const pairScore = dot(qr, kr);
+    const full = dot(rope(Q, rm), rope(K, rn));
+    const same = lastScore !== null && Math.abs(full - lastScore.v) < 1e-9 && lastScore.delta === rm - rn && lastScore.m !== rm;
+    $("rope-stats").innerHTML = `
+      <span>${tr("相对距离", "distance")} m − n</span><b>${rm - rn}</b>
+      <span>θ<sub>${i}</sub></span><b>${th.toFixed(4)} rad</b>
+      <span>${tr("这一对的贡献", "this pair's score")}</span><b>${pairScore.toFixed(3)}</b>
+      <span>${tr("完整分数", "full score")} q·k (d=${DR})</span><b style="color:var(--accent)">${full.toFixed(4)}</b>`;
+    $("rope-note").innerHTML = same
+      ? tr(`<span class="ok">两个位置都右移了，但距离仍是 ${rm - rn}，完整分数一点没变。</span>这就是 RoPE 的核心性质：注意力分数只取决于相对位置。`,
+           `<span class="ok">Both positions moved but the distance is still ${rm - rn}, so the full score did not change at all.</span> That is RoPE's key property: scores depend only on relative position.`)
+      : tr(`虚线是旋转前的 q₀、k₀。旋转后两者的夹角改变了 (m − n)·θ = ${((rm - rn) * th).toFixed(2)} rad。不同的“对”转速不同（试试改 i），完整分数是所有对的贡献之和。`,
+           `Dashed arrows are q₀ and k₀ before rotation. After rotating, their angle has changed by (m − n)·θ = ${((rm - rn) * th).toFixed(2)} rad. Different pairs turn at different speeds (try changing i); the full score sums all pairs.`);
+    lastScore = { v: full, delta: rm - rn, m: rm };
+  }
+
+  // ================= 4. base & decay =================
+  const BASES = [500, 2000, 10000, 50000, 100000, 500000, 1000000];
+  function renderDecay() {
+    const base = BASES[+$("base").value], dh = +$("dh").value;
+    $("base-v").textContent = Math.round(base).toLocaleString();
+    const W = 640, H = 230, L = 40, R = 12, T = 12, B = 34, maxD = 8192;
+    const ones = new Array(dh).fill(1);
+    const curve = b => {
+      const pts = [];
+      for (let k = 0; k <= 300; k++) {
+        const dist = Math.round(Math.pow(maxD, k / 300)) - 1;
+        pts.push([dist, dot(ones, rope(ones, dist, b)) / dh]);
+      }
+      return pts;
+    };
+    const x = dist => L + (W - L - R) * Math.log(dist + 1) / Math.log(maxD + 1);
+    const y = v => T + (H - T - B) * (1 - (v + 0.2) / 1.2);
+    let s = "";
+    [1, 10, 100, 1000, 8192].forEach(t => { s += `<line class="grid" x1="${x(t)}" x2="${x(t)}" y1="${T}" y2="${H - B}"/><text x="${x(t)}" y="${H - B + 14}" text-anchor="middle">${t.toLocaleString()}</text>`; });
+    [0, 0.5, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 4}" text-anchor="end">${v}</text>`; });
+    const line = (pts, color, w) => `<polyline fill="none" stroke="${color}" stroke-width="${w}" points="${pts.map(([d, v]) => `${x(d)},${y(v)}`).join(" ")}"/>`;
+    s += line(curve(10000), css("--muted"), 1);
+    s += line(curve(base), css("--primary"), 1.6);
+    s += `<text x="${W - R}" y="${T + 12}" text-anchor="end">— base ${Math.round(base).toLocaleString()}   <tspan fill="${css("--muted")}">— 10,000</tspan></text>`;
+    s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${tr("相对距离（对数刻度）", "distance (log scale)")}</text>`;
+    $("decay").innerHTML = s;
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["为什么 Transformer 需要位置编码？", "Why does a Transformer need positional encoding?"],
+      opts: [["为了让嵌入向量更长", "To make embeddings longer"], ["因为自注意力对输入顺序不敏感，交换词只会交换输出", "Because self-attention ignores order: swapping words just swaps the outputs"], ["为了减少计算量", "To reduce computation"]],
+      a: 1, ex: ["没有位置信息时，注意力把输入当成一袋词（第 1 节）。因果掩码能提供一点顺序信息，但通常仍会显式加入位置编码。", "Without positions attention treats the input as a bag of words (part 1). A causal mask leaks some order information, but models still add explicit positions."] },
+    { q: ["RoPE 中，q 在位置 107、k 在位置 103 的分数，与 q 在位置 7、k 在位置 3 相比？", "With RoPE, how does the score for q at 107 and k at 103 compare with q at 7 and k at 3?"],
+      opts: [["更大", "Larger"], ["相同", "The same"], ["更小", "Smaller"]],
+      a: 1, ex: ["两种情况的相对距离都是 4，旋转后的夹角变化相同，所以分数相同（第 3 节的“同时右移”）。", "Both have distance 4, so the rotations change the angle by the same amount and the scores match (“shift both” in part 3)."] },
+    { q: ["想让 RoPE 模型更好地处理更长的上下文，常见的调整是？", "A common tweak to help a RoPE model handle longer contexts is to:"],
+      opts: [["把 base 调大，让旋转变慢", "Raise the base so rotations are slower"], ["把 base 调小，让旋转变快", "Lower the base so rotations are faster"], ["去掉所有位置编码", "Remove all positional encoding"]],
+      a: 0, ex: ["更大的 base 让每一对转得更慢，远距离的角度不会“绕太多圈”，衰减更平缓（第 4 节）。位置插值是另一种常见做法。", "A larger base slows every pair so distant angles don't wrap around as much and decay is gentler (part 4). Position interpolation is another common approach."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderPerm(); renderClocks(); lastScore = null; renderRope(); renderDecay(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("swap").addEventListener("click", () => { swapped = !swapped; renderPerm(); });
+  $("use-pe").addEventListener("click", () => { usePE = !usePE; renderPerm(); });
+  $("pos").addEventListener("input", e => { posSel = +e.target.value; renderClocks(); });
+  $("dm").addEventListener("change", renderClocks);
+  $("heat").addEventListener("pointermove", e => heatPick(e, false));
+  $("heat").addEventListener("pointerdown", e => heatPick(e, true));
+  $("rm").addEventListener("input", e => { rm = +e.target.value; renderRope(); });
+  $("rn").addEventListener("input", e => { rn = +e.target.value; renderRope(); });
+  $("ri").addEventListener("input", () => { lastScore = null; renderRope(); });
+  $("shift").addEventListener("click", () => { rm += 10; rn += 10; renderRope(); });
+  $("reset-rope").addEventListener("click", () => { rm = 7; rn = 3; lastScore = null; renderRope(); });
+  $("base").addEventListener("input", renderDecay);
+  $("dh").addEventListener("change", renderDecay);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  window.addEventListener("resize", renderHeat);
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
