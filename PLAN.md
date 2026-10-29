@@ -1,0 +1,186 @@
+# 大语言模型可视化知识仓库：构建计划
+
+> 目标：用 **Markdown 讲解 + 静态图（PNG/SVG）+ 交互页面（HTML）+ 可运行代码** 的组合，系统讲清大语言模型（LLM）的核心知识点。每个知识点都要做到“看得懂、能复现、可交互”。
+
+---
+
+## 1. 设计原则
+
+| 原则 | 具体做法 |
+| --- | --- |
+| **一个知识点一个目录** | 讲解、图片、交互页、生成脚本放在一起，方便维护 |
+| **图可复现** | PNG/SVG 一律由 `scripts/` 或主题目录下的 Python 脚本生成，不提交手工截图（概念示意图例外） |
+| **GitHub 上直接能看** | 正文用 Markdown，流程/结构图优先用 Mermaid（GitHub 原生渲染），静态图用 PNG/SVG |
+| **交互放 HTML** | GitHub 不渲染 HTML，交互页通过 GitHub Pages 访问，Markdown 里放链接和截图预览 |
+| **由浅入深** | 每篇分「直觉 → 图解 → 公式 → 代码 → 延伸阅读」五段 |
+| **中文为主** | 术语首次出现时附英文，如“注意力（Attention）” |
+
+---
+
+## 2. 仓库目录结构
+
+```text
+use_token_to_learn/
+├── README.md                  # 总览、学习路线图、目录索引
+├── PLAN.md                    # 本计划
+├── CONTRIBUTING.md            # 写作规范、图表规范、提交流程
+├── mkdocs.yml                 # 静态站点配置（GitHub Pages）
+├── requirements.txt           # 生成图表/站点所需 Python 依赖
+├── Makefile                   # make figures / make site / make lint
+├── templates/
+│   ├── topic/README.md        # 知识点讲解模板
+│   └── interactive.html       # 交互页模板（单文件，CDN 引入库）
+├── scripts/
+│   ├── build_figures.py       # 遍历所有 */figures/*.py 生成图片
+│   └── style.py               # 统一 matplotlib 配色、字体（含中文字体）
+├── docs/                      # 全部知识内容
+│   ├── 00-overview/
+│   ├── 01-tokenization/
+│   │   ├── README.md          # 讲解正文
+│   │   ├── assets/            # 生成的 png/svg
+│   │   ├── figures/           # 生成图片的脚本
+│   │   ├── interactive/       # 交互 HTML
+│   │   └── code/              # 可运行的最小示例
+│   ├── 02-embedding/
+│   └── ...
+└── .github/workflows/
+    ├── figures.yml            # PR 中检查图片能否重新生成
+    ├── lint.yml               # markdownlint + 死链检查
+    └── pages.yml              # 构建并发布 GitHub Pages
+```
+
+---
+
+## 3. 知识点大纲（按学习顺序）
+
+| 编号 | 模块 | 主要知识点 | 重点可视化 |
+| --- | --- | --- | --- |
+| 00 | 总览 | LLM 是什么、发展时间线、整体训练→推理流程 | 时间线图、全景 Mermaid 流程图 |
+| 01 | 分词 Tokenization | BPE、WordPiece、SentencePiece、词表大小的影响 | **交互**：输入文本实时显示切分；BPE 合并过程动画 |
+| 02 | 词嵌入 Embedding | one-hot vs 稠密向量、语义空间 | 2D/3D 降维散点图（PCA / t-SNE），交互可旋转 |
+| 03 | 位置编码 | 正弦位置编码、可学习位置编码、RoPE、ALiBi | 正弦编码热力图；RoPE 旋转动画 |
+| 04 | 注意力机制 | Q/K/V、缩放点积、因果掩码、多头注意力 | **交互**：注意力权重热力图；矩阵乘法逐步演示 |
+| 05 | Transformer 结构 | 残差、LayerNorm/RMSNorm、FFN/SwiGLU、Decoder-only | 结构框图（SVG）、张量形状流转图 |
+| 06 | 预训练 | 下一个 token 预测、交叉熵、数据清洗与配比 | loss 曲线、数据流水线图 |
+| 07 | Scaling Laws | 参数量/数据量/算力关系、Chinchilla 最优 | 对数坐标拟合曲线，交互滑块调参数 |
+| 08 | 微调 | SFT、指令微调、LoRA/QLoRA、全参 vs 参数高效 | LoRA 低秩分解示意图、参数量对比柱状图 |
+| 09 | 对齐 | RLHF（奖励模型 + PPO）、DPO、Constitutional AI | 三阶段流程图、偏好对比示意 |
+| 10 | 解码与采样 | greedy、beam search、temperature、top-k、top-p | **交互**：调节温度看概率分布变化 |
+| 11 | 推理优化 | KV Cache、量化（INT8/INT4）、投机解码、FlashAttention、批处理 | KV Cache 动画；显存占用计算器（交互） |
+| 12 | 长上下文 | 上下文窗口扩展、位置插值、稀疏注意力 | 注意力模式对比图 |
+| 13 | 混合专家 MoE | 路由、负载均衡、稀疏激活 | token 路由动画 |
+| 14 | 多模态 | 视觉编码器、图文对齐（CLIP）、视觉语言模型 | 架构框图 |
+| 15 | 提示工程与 RAG | few-shot、思维链、检索增强、向量检索 | RAG 流程图、向量相似度示意 |
+| 16 | Agent 与工具调用 | function calling、ReAct、多智能体 | 时序图（Mermaid sequenceDiagram） |
+| 17 | 评测 | 困惑度、基准测试、LLM-as-judge、污染问题 | 雷达图、排行榜表格 |
+| 18 | 安全与可解释性 | 幻觉、越狱、探针、稀疏自编码器特征 | 激活可视化 |
+
+---
+
+## 4. 单个知识点的标准模板
+
+每个 `docs/NN-topic/README.md` 统一结构：
+
+```markdown
+# 注意力机制（Attention）
+
+> 一句话总结：……
+
+## 1. 直觉：为什么需要它
+## 2. 图解
+   ![](assets/attention-heatmap.png)
+   👉 [打开交互演示](https://<user>.github.io/use_token_to_learn/04-attention/interactive/attention.html)
+## 3. 数学形式
+   $$\mathrm{Attention}(Q,K,V)=\mathrm{softmax}\left(\frac{QK^\top}{\sqrt{d_k}}\right)V$$
+## 4. 最小代码实现
+   见 code/attention.py（NumPy / PyTorch，< 50 行）
+## 5. 常见误区
+## 6. 自测题
+## 7. 延伸阅读（论文 / 博客链接）
+```
+
+---
+
+## 5. 各类可视化文件的规范
+
+### 5.1 Markdown（`.md`）
+- 公式用 `$...$` / `$$...$$`（GitHub 与 MkDocs 都支持）
+- 流程图、时序图、结构图优先用 Mermaid 代码块，便于修改、便于 diff
+
+### 5.2 静态图（`.png` / `.svg`）
+- 统一由 `figures/*.py` 生成，使用 `scripts/style.py` 中的配色和中文字体
+- 数据图用 PNG（150 dpi，宽 ≤ 1600px）；结构示意图优先 SVG
+- 文件名用英文短横线命名：`attention-heatmap.png`
+- 每张图在 Markdown 中写有意义的 alt 文本
+
+### 5.3 交互页（`.html`）
+- **单文件**，无构建步骤，可直接双击打开
+- 依赖只从 CDN 引入并锁定版本（如 D3.js、Plotly、Three.js）
+- 适配手机宽度，支持亮/暗色
+- 每个交互页在 Markdown 中配一张静态截图 + 链接，保证不打开 Pages 也能理解
+
+### 5.4 代码（`code/`）
+- 最小可运行示例，依赖仅 `numpy` / `torch` / `matplotlib`
+- 可选提供 Jupyter Notebook，并附 Colab 链接
+
+---
+
+## 6. 工具链与自动化
+
+| 环节 | 工具 | 作用 |
+| --- | --- | --- |
+| 站点 | **MkDocs Material** | 把 `docs/` 发布成带搜索、目录、公式、Mermaid 的网站，并能直接托管 HTML 交互页 |
+| 部署 | GitHub Actions + GitHub Pages | push 到 main 自动发布 |
+| 生成图 | `make figures` | 运行所有图表脚本 |
+| 质量检查 | markdownlint、lychee（死链检查） | 在 PR 中自动运行 |
+| 图表一致性 | CI 中重新生成图片 | 防止脚本和图片不同步 |
+
+---
+
+## 7. 分阶段路线图
+
+### 阶段 0：搭骨架（第 1 周）
+- [ ] 建立目录结构、`README.md`、`CONTRIBUTING.md`、模板
+- [ ] 配置 `mkdocs.yml`、`requirements.txt`、`Makefile`
+- [ ] 配置 GitHub Actions：lint + Pages 部署
+- [ ] 写 `scripts/style.py`（统一配色与中文字体）
+
+### 阶段 1：核心原理（第 2–4 周）——先做“最有代表性”的样板
+- [ ] 01 分词（含交互 BPE 演示）
+- [ ] 04 注意力（含交互热力图）← **作为第一个完整样板，定下质量标准**
+- [ ] 02 嵌入、03 位置编码、05 Transformer 结构
+
+### 阶段 2：训练（第 5–7 周）
+- [ ] 06 预训练、07 Scaling Laws、08 微调、09 对齐
+
+### 阶段 3：推理（第 8–9 周）
+- [ ] 10 解码采样（交互）、11 推理优化（显存计算器）、12 长上下文、13 MoE
+
+### 阶段 4：应用与前沿（第 10–12 周）
+- [ ] 14 多模态、15 提示工程与 RAG、16 Agent、17 评测、18 安全与可解释性
+
+### 阶段 5：打磨
+- [ ] 00 总览与学习路线图（所有模块完成后回头写最合适）
+- [ ] 术语表 `glossary.md`、论文清单 `papers.md`
+- [ ] 每章自测题与答案
+
+---
+
+## 8. 每个知识点的完成标准（Definition of Done）
+
+- [ ] README 按模板写完五段
+- [ ] 至少 1 张静态图，且有生成脚本
+- [ ] 至少 1 个 Mermaid 图或结构图
+- [ ] 核心概念至少 1 个交互页（适用时）
+- [ ] 最小代码可运行
+- [ ] 附 3 条以上延伸阅读
+- [ ] 通过 lint 和死链检查
+
+---
+
+## 9. 待确认的问题
+
+1. **语言**：纯中文，还是中英双语？
+2. **站点**：是否启用 GitHub Pages（推荐，否则 HTML 交互页无法在线直接打开）？
+3. **代码框架**：示例代码以 NumPy（更直观）还是 PyTorch（更贴近实际）为主？
+4. **从哪个知识点开始**：建议先做「04 注意力机制」作为完整样板。
