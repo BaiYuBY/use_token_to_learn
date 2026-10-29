@@ -35,6 +35,13 @@
 | 层归一化 / RMS 归一化 | LayerNorm / RMSNorm | 把每个词元的向量缩放到稳定的范围 | [05](05-transformer/README.md) |
 | 前馈网络 | FFN (feed-forward network) | 对每个词元单独做的非线性变换；大模型中参数占比最高 | [05](05-transformer/README.md) |
 | 交叉熵 | cross-entropy | 预测下一个词元时使用的损失函数 | [05](05-transformer/README.md) |
+| 困惑度 | perplexity | 交叉熵的指数，可理解为模型平均在几个词之间犹豫 | [06](06-pretraining/README.md) |
+| 过拟合 / 背诵 | overfitting / memorization | 训练损失下降而验证损失上升，模型只记住了训练数据 | [06](06-pretraining/README.md) |
+| 去重 | deduplication | 去掉完全相同或高度相似的训练文档 | [06](06-pretraining/README.md) |
+| 轮数 | epoch | 把某份数据完整看一遍算一轮 | [06](06-pretraining/README.md) |
+| 学习率预热 / 余弦衰减 / WSD | warmup / cosine decay / WSD | 学习率先升后降的调度方式 | [06](06-pretraining/README.md) |
+| 梯度裁剪 | gradient clipping | 把梯度范数限制在阈值以内，防止训练被巨大梯度破坏 | [06](06-pretraining/README.md) |
+| 算力利用率 | MFU (model FLOPs utilization) | 实际达到的算力占硬件峰值的比例 | [06](06-pretraining/README.md) |
 | 推理强度 | reasoning effort | 控制推理模型回答前思考多久 | [问答](qa/reasoning-effort.md) |
 | 测试时计算 | test-time compute | 在使用模型时多花算力（如更长的思考）来提升效果 | [问答](qa/reasoning-effort.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | 把模型高效地部署成服务的软件，如 vLLM、SGLang、DeepInfer | [问答](qa/deepinfer.md) |

@@ -21,6 +21,7 @@
 | 03 位置编码 Positional Encoding | [中文](docs/03-positional-encoding/README.md) · [EN](docs/03-positional-encoding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/03-positional-encoding/interactive/positional.html) | [positional.py](docs/03-positional-encoding/code/positional.py) |
 | 04 注意力机制 Attention | [中文](docs/04-attention/README.md) · [EN](docs/04-attention/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html) | [attention.py](docs/04-attention/code/attention.py) |
 | 05 Transformer 结构 Block | [中文](docs/05-transformer/README.md) · [EN](docs/05-transformer/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/05-transformer/interactive/transformer.html) | [transformer.py](docs/05-transformer/code/transformer.py) |
+| 06 预训练 Pre-training | [中文](docs/06-pretraining/README.md) · [EN](docs/06-pretraining/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/06-pretraining/interactive/pretraining.html) | [pretrain.py](docs/06-pretraining/code/pretrain.py) |
 
 ## 前沿问答
 
