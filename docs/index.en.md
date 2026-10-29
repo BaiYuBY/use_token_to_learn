@@ -21,6 +21,16 @@ Each chapter follows the same rhythm:
 | 03 | [Positional encoding](03-positional-encoding/README.md) | [Positional encoding playground](03-positional-encoding/interactive/positional.html?lang=en) | ✅ done |
 | 04 | [Attention](04-attention/README.md) | [Attention playground](04-attention/interactive/attention.html?lang=en) | ✅ done |
 | 05 | [Transformer block](05-transformer/README.md) | [Transformer playground](05-transformer/interactive/transformer.html?lang=en) | ✅ done |
-| 06+ | Pre-training, scaling laws, fine-tuning, alignment, decoding, inference, MoE, RAG, agents… | | 🚧 planned |
+| 06–10 | Training: pre-training, scaling laws, fine-tuning, alignment, reasoning models and test-time compute | | 🚧 planned |
+| 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
+| 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
+
+## Frontier Q&A
+
+Specific, often very recent questions, one per page, with sources and a check date:
+
+- [How are reasoning effort levels (low / medium / high / xhigh) set?](qa/reasoning-effort.en.md)
+- [What is DeepSeek's open-source DeepInfer, and why does it matter?](qa/deepinfer.en.md)
+- [All Q&A](qa/index.en.md) · [Glossary](glossary.en.md)
 
 See [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md) in the repository for the full roadmap.

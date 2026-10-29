@@ -57,6 +57,14 @@ docs/NN-topic/
 make check     # 运行所有代码示例 + 构建网站（严格模式）
 ```
 
+## 前沿问答 / Frontier Q&A
+
+- 复制 [`templates/qa/`](templates/qa/) 到 `docs/qa/<slug>.md` 与 `docs/qa/<slug>.en.md`。Copy the Q&A template.
+- 必须写“核实日期”，并优先引用一手资料（官方文档、论文、代码仓库）；把报道和推测与确认的事实分开。Always add a check date and prefer primary sources.
+- 计划中的章节不加链接，写成后再补上。Don't link chapters that don't exist yet.
+- 新术语加入 `docs/glossary.md` 与 `docs/glossary.en.md`。Add new terms to the glossary.
+- 更新 `docs/qa/index*.md`、`docs/index*.md`、根目录 `README.md` 和 `mkdocs.yml` 的导航。Update the indexes and nav.
+
 ## 新章节完成标准 / Definition of done
 
 - [ ] `README.md` 与 `README.en.md` 都已写完

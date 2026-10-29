@@ -22,6 +22,13 @@
 | 04 注意力机制 Attention | [中文](docs/04-attention/README.md) · [EN](docs/04-attention/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/04-attention/interactive/attention.html) | [attention.py](docs/04-attention/code/attention.py) |
 | 05 Transformer 结构 Block | [中文](docs/05-transformer/README.md) · [EN](docs/05-transformer/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/05-transformer/interactive/transformer.html) | [transformer.py](docs/05-transformer/code/transformer.py) |
 
+## 前沿问答
+
+具体又新鲜的问题，一问一页（[全部问答](docs/qa/index.md) · [术语表](docs/glossary.md)）：
+
+- [推理强度（low / medium / high / xhigh）是怎么设置的？](docs/qa/reasoning-effort.md)
+- [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](docs/qa/deepinfer.md)
+
 完整的大纲和路线图见 [PLAN.md](PLAN.md)，写作规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 在本地浏览
