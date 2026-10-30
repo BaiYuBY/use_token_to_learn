@@ -71,6 +71,7 @@ plugins:
             DeepInfer 是什么: What is DeepInfer
             大模型的算力怎么算: How LLM compute is counted
             CNN、RNN、KNN 与大模型: CNNs, RNNs, KNN and LLMs
+            怎么让输出更可靠: Making outputs reliable
             术语表: Glossary
 
 markdown_extensions:
@@ -120,4 +121,5 @@ nav:
       - DeepInfer 是什么: qa/deepinfer.md
       - 大模型的算力怎么算: qa/compute.md
       - CNN、RNN、KNN 与大模型: qa/classic-models.md
+      - 怎么让输出更可靠: qa/reliability.md
   - 术语表: glossary.md

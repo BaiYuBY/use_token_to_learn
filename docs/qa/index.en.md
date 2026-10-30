@@ -10,6 +10,7 @@ Answers to specific, often very recent questions: what a new parameter means, wh
 | [What is DeepSeek's open-source DeepInfer, and why does it matter?](deepinfer.en.md) | 2026-10-29 | inference engines, serving, MoE | 13 Inference serving systems (planned) |
 | [How is LLM compute measured, where does it go, and how does it compare with RNNs, CNNs and KNN?](compute.en.md) (🎮 [compute calculator](interactive/compute.html?lang=en)) | 2026-10-30 | compute, FLOPs, training and inference cost | [07 Scaling laws](../07-scaling-laws/README.en.md), [08 Fine-tuning](../08-finetuning/README.en.md), 12 Inference optimization (planned) |
 | [How do CNNs, RNNs and KNN work, and how are they different from LLMs?](classic-models.en.md) (🎮 [playground](interactive/classic-models.html?lang=en)) | 2026-10-30 | CNN, RNN, LSTM, KNN, model comparison | [02 Embedding](../02-embedding/README.en.md), [04 Attention](../04-attention/README.en.md), [05 Transformer block](../05-transformer/README.en.md) |
+| [How do I make LLM outputs reliable, and stop the model making things up?](reliability.en.md) (🎮 [playground](interactive/reliability.html?lang=en)) | 2026-10-30 | reliability, prompt engineering, role-play, validation and retries, hallucination | [08 Fine-tuning](../08-finetuning/README.en.md), [10 Reasoning models](../10-reasoning/README.en.md), [11 Decoding and sampling](../11-decoding/README.en.md) |
 
 ## Structure of every page
 

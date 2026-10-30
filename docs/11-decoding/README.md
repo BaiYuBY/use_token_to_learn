@@ -2,7 +2,7 @@
 
 > **一句话总结：** 语言模型每一步只输出“下一个词元”的概率分布，怎么从中挑一个词由**解码策略**决定。贪心解码和束搜索追求高概率，稳妥但单调，还容易重复；采样带来多样性，温度控制分布的尖锐程度，top-k、top-p、min-p 砍掉不可靠的“长尾”；重复惩罚打破循环；约束解码把格式规则编译成状态机，保证输出一定合乎格式。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/decoding.html?lang=zh)**（模型直接在浏览器里运行）
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/decoding.html?lang=zh)**（模型直接在浏览器里运行） · 📓 [Notebook](11-decoding.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/11-decoding/11-decoding.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/decoding.html?lang=zh)
 

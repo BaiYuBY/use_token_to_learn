@@ -99,3 +99,8 @@
 | 预填充 / 解码 | prefill / decode | 一次性处理整段输入 / 之后逐个生成新词元 | [问答](qa/deepinfer.md) |
 | 投机解码 | speculative decoding | 先便宜地猜几个词元，再让大模型一次性验证 | [问答](qa/deepinfer.md) |
 | 专家并行 | EP (expert parallelism) | 把 MoE 的不同专家放到不同的卡上 | [问答](qa/deepinfer.md) |
+| 幻觉 / 编造 | hallucination / fabrication | 生成看似合理但与事实或资料不符的内容 | [问答](qa/reliability.md) |
+| 校验与重试 | validate and retry | 用程序检查输出，不通过就重试；只能消除校验器看得到的错误 | [问答](qa/reliability.md) |
+| 选择性预测 / 拒答 | selective prediction / abstention | 没把握时不作答、转人工，用覆盖率换准确率 | [问答](qa/reliability.md) |
+| 人设漂移 | persona drift | 多轮对话后模型逐渐不再遵循系统提示中的角色设定 | [问答](qa/reliability.md) |
+| 模型评委 | LLM-as-judge | 让另一个模型按评分表给输出打分，需先与人工打分对齐 | [问答](qa/reliability.md) |

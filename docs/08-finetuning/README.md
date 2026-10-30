@@ -2,7 +2,7 @@
 
 > **一句话总结：** 预训练出来的模型只会“接着写”。微调用少量有针对性的数据继续训练，让它学会按指令回答（监督微调，SFT），或者适应某个领域。全参数微调效果好，但非常费显存。LoRA 冻结原有权重，只学一个低秩的修改量，可训练参数和显存都少得多。QLoRA 再把冻结的权重压缩到 4 位，让一张卡也能微调几百亿参数的模型。无论用哪种方法，都要提防“灾难性遗忘”。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/finetune.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/finetune.html?lang=zh)** · 📓 [Notebook](08-finetuning.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/08-finetuning/08-finetuning.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/finetune.html?lang=zh)
 

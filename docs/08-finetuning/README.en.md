@@ -2,7 +2,7 @@
 
 > **In one sentence:** A pre-trained model only knows how to continue text. Fine-tuning keeps training it on a small, targeted dataset so it learns to answer instructions (supervised fine-tuning, SFT) or to adapt to a domain. Full fine-tuning works well but needs a lot of GPU memory. LoRA freezes the original weights and learns only a low-rank change, so it trains far fewer parameters and needs far less memory. QLoRA also squeezes the frozen weights into 4 bits, so a single GPU can fine-tune models with tens of billions of parameters. Whatever the method, watch out for catastrophic forgetting.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/finetune.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/finetune.html?lang=en)** · 📓 [Notebook](08-finetuning.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/08-finetuning/08-finetuning.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/finetune.html?lang=en)
 

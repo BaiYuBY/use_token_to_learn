@@ -2,7 +2,7 @@
 
 > **一句话总结：** 一个 Transformer 块 = 注意力（词元之间交流）+ 前馈网络（每个词元单独加工），两者都先归一化、再通过残差连接加回主干；把同样的块叠 N 层，前后接上嵌入层和输出层，就是一个完整的 GPT。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/transformer.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/transformer.html?lang=zh)** · 📓 [Notebook](05-transformer.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/05-transformer/05-transformer.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/transformer.html?lang=zh)
 

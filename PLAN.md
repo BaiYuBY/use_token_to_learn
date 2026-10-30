@@ -129,7 +129,7 @@ use_token_to_learn/
 
 ### 5.4 代码（`code/`）
 - 最小可运行示例，依赖仅 `numpy` / `torch` / `matplotlib`
-- 可选提供 Jupyter Notebook，并附 Colab 链接
+- 每章一个 Jupyter Notebook（`NN-topic.ipynb`），由 `scripts/make_notebooks.py` 根据 `code/*.py` 自动生成，附 Colab 链接；`make check` 会检查它是否与代码同步
 
 ---
 
@@ -181,6 +181,7 @@ use_token_to_learn/
 - [x] DeepSeek 开源的 DeepInfer 是什么？
 - [x] 大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？（附算力计算器）
 - [x] CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？
+- [x] 怎么让大模型的输出更可靠（提示词、角色扮演、校验重试、投票、拒答）？怎么减少编造？
 - [ ] ……之后的新问题随时加入
 
 ### 阶段 5：打磨

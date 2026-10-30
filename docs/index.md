@@ -38,6 +38,7 @@
 - [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](qa/deepinfer.md)
 - [大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？](qa/compute.md)（附[算力计算器](qa/interactive/compute.html)）
 - [CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？](qa/classic-models.md)（附[交互演示](qa/interactive/classic-models.html)）
+- [怎么让大模型的输出更可靠？怎么减少编造？](qa/reliability.md)（附[交互演示](qa/interactive/reliability.html)）
 - [全部问答](qa/index.md) · [术语表](glossary.md)（含“推理 inference / reasoning”的区分）
 
 完整路线图见仓库中的 [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md)。

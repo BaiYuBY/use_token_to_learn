@@ -2,7 +2,7 @@
 
 > **一句话总结：** 嵌入层为每个词元编号准备一个可学习的向量；训练会让出现在相似上下文中的词，向量指向相似的方向。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/embedding.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/embedding.html?lang=zh)** · 📓 [Notebook](02-embedding.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/02-embedding/02-embedding.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/embedding.html?lang=zh)
 

@@ -2,7 +2,7 @@
 
 > **一句话总结：** 语言模型的损失随参数量、数据量和算力的增长呈幂律下降，规律稳定到可以用小实验预测大模型。在固定算力下，模型和数据应该按比例一起扩大（Chinchilla：约 20 个词元/参数）；但如果还要考虑推理成本，更小的模型配更多数据往往更划算。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/scaling.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/scaling.html?lang=zh)** · 📓 [Notebook](07-scaling-laws.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/07-scaling-laws/07-scaling-laws.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/scaling.html?lang=zh)
 

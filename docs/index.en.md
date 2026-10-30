@@ -38,6 +38,7 @@ Specific, often very recent questions, one per page, with sources and a check da
 - [What is DeepSeek's open-source DeepInfer, and why does it matter?](qa/deepinfer.en.md)
 - [How is LLM compute measured, where does it go, and how does it compare with RNNs, CNNs and KNN?](qa/compute.en.md) (with a [compute calculator](qa/interactive/compute.html?lang=en))
 - [How do CNNs, RNNs and KNN work, and how are they different from LLMs?](qa/classic-models.en.md) (with a [playground](qa/interactive/classic-models.html?lang=en))
+- [How do I make LLM outputs reliable, and stop the model making things up?](qa/reliability.en.md) (with a [playground](qa/interactive/reliability.html?lang=en))
 - [All Q&A](qa/index.en.md) · [Glossary](glossary.en.md)
 
 See [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md) in the repository for the full roadmap.

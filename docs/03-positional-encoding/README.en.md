@@ -2,7 +2,7 @@
 
 > **In one sentence:** self-attention has no idea of word order, and positional encoding hands the model the “which position” information, either by adding it to the input (sinusoidal, learned) or by rotating q and k when scores are computed (RoPE).
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/positional.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/positional.html?lang=en)** · 📓 [Notebook](03-positional-encoding.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/03-positional-encoding/03-positional-encoding.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/positional.html?lang=en)
 

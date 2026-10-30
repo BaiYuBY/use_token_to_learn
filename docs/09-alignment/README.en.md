@@ -2,7 +2,7 @@
 
 > **In one sentence:** SFT teaches a model how to answer; alignment teaches it which answers are better. You collect people's preferences between pairs of answers, train a reward model to imitate them, then use reinforcement learning (RLHF, usually PPO) to raise the reward while a KL penalty keeps the model close to the SFT model. DPO merges these steps and learns straight from the preference pairs. A reward model only approximates human preference, and if you optimize too hard the model games it (reward hacking).
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/alignment.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/alignment.html?lang=en)** · 📓 [Notebook](09-alignment.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/09-alignment/09-alignment.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/alignment.html?lang=en)
 

@@ -2,7 +2,7 @@
 
 > **In one sentence:** the embedding layer keeps one learnable vector per token id, and training makes words that appear in similar contexts point in similar directions.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/embedding.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/embedding.html?lang=en)** · 📓 [Notebook](02-embedding.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/02-embedding/02-embedding.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/embedding.html?lang=en)
 

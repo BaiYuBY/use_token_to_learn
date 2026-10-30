@@ -2,7 +2,7 @@
 
 > **一句话总结：** 模型每生成一个词元，只做一次固定量的计算。让它先写出思考过程（思维链），等于把一道难题拆成很多步、把计算分摊到很多词元上。推理模型就是专门练过“先想再答”的模型：它们用可以自动判对错的题目做强化学习（如 DeepSeek-R1 的 GRPO），学会写更长、更可靠的思考过程。思考越长，难题答得越对，但也越慢、越贵；这就是“测试时计算”和“推理强度”的取舍。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/reasoning.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/reasoning.html?lang=zh)** · 📓 [Notebook](10-reasoning.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/10-reasoning/10-reasoning.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/reasoning.html?lang=zh)
 

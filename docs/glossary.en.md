@@ -99,3 +99,8 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 预填充 / 解码 | prefill / decode | Process the whole input at once / then generate new tokens one by one | [Q&A](qa/deepinfer.en.md) |
 | 投机解码 | speculative decoding | Guess a few tokens cheaply, then have the large model verify them in one go | [Q&A](qa/deepinfer.en.md) |
 | 专家并行 | EP (expert parallelism) | Put different MoE experts on different accelerators | [Q&A](qa/deepinfer.en.md) |
+| 幻觉 / 编造 | hallucination / fabrication | Plausible-sounding content that contradicts the facts or the source | [Q&A](qa/reliability.en.md) |
+| 校验与重试 | validate and retry | Check outputs in code and retry on failure; only removes errors the validator can see | [Q&A](qa/reliability.en.md) |
+| 选择性预测 / 拒答 | selective prediction / abstention | Decline to answer when unsure and hand off, trading coverage for accuracy | [Q&A](qa/reliability.en.md) |
+| 人设漂移 | persona drift | Over many turns the model gradually stops following the persona in its system prompt | [Q&A](qa/reliability.en.md) |
+| 模型评委 | LLM-as-judge | Another model grades outputs against a rubric; check it against human grades first | [Q&A](qa/reliability.en.md) |

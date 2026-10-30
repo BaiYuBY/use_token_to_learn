@@ -2,7 +2,7 @@
 
 > **In one sentence:** a Transformer block = attention (tokens talk to each other) + a feed-forward network (each token is processed on its own), each normalized first and added back to the main stream through a residual connection; stack N identical blocks, add an embedding layer and an output layer, and you have a complete GPT.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/transformer.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/transformer.html?lang=en)** · 📓 [Notebook](05-transformer.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/05-transformer/05-transformer.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/transformer.html?lang=en)
 
