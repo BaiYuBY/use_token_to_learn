@@ -104,6 +104,8 @@ Loss is an average and shows little detail. The left panel places chapter 06's a
 - **Interpolation plus fine-tuning** has recovered its loss, yet reaches only about 75%. 100 steps are enough to restore the average loss, but not to fully repair precise attention.
 - **The sliding window** stays at about 100% throughout.
 
+These accuracies vary a lot between training runs: retrain the same code from different random initial weights and plain RoPE's accuracy around position 300 can land anywhere from 60% to 95%, while NTK stays above 85%. So in this small experiment “plain RoPE gets worse far away” is only a tendency; the loss curves above are the steadier evidence.
+
 The right panel shows the effect of window size:
 
 - **Windows of 1–2** see only the nearest noun, whose number is the opposite, so accuracy is 50% or lower.
