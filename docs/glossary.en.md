@@ -47,6 +47,18 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 算力最优 | compute-optimal | The model size and data split with the lowest loss for a given training budget | [07](07-scaling-laws/README.en.md) |
 | 等算力曲线 | isoFLOP curve | Loss of runs with equal compute but different model sizes | [07](07-scaling-laws/README.en.md) |
 | 涌现 | emergent abilities | Abilities that seem to appear suddenly at a certain scale | [07](07-scaling-laws/README.en.md) |
+| 微调 | fine-tuning | Continuing to train a pre-trained model on a smaller, targeted dataset | [08](08-finetuning/README.en.md) |
+| 监督微调 / 指令微调 | SFT / instruction tuning | Fine-tuning on instruction–response examples so the model follows instructions | [08](08-finetuning/README.en.md) |
+| 对话模板 | chat template / prompt template | The fixed text format that joins an instruction and its response | [08](08-finetuning/README.en.md) |
+| 损失掩码 | loss masking | Computing the loss only on the response, not the prompt | [08](08-finetuning/README.en.md) |
+| 参数高效微调 | PEFT (parameter-efficient fine-tuning) | Fine-tuning that trains only a small fraction of the parameters, such as LoRA | [08](08-finetuning/README.en.md) |
+| 低秩适配 | LoRA (low-rank adaptation) | Freeze W and learn a low-rank update BA that can be merged into W afterwards | [08](08-finetuning/README.en.md) |
+| QLoRA | QLoRA | Store the frozen base in 4-bit NF4 and train LoRA on top | [08](08-finetuning/README.en.md) |
+| 量化 | quantization | Representing weights with fewer bits, e.g. INT8, INT4, NF4 | [08](08-finetuning/README.en.md) |
+| 灾难性遗忘 | catastrophic forgetting | Losing earlier abilities while learning a new task | [08](08-finetuning/README.en.md) |
+| 回放 | replay | Mixing the original training data into fine-tuning to reduce forgetting | [08](08-finetuning/README.en.md) |
+| 浮点运算次数 | FLOPs | A count of arithmetic work; an (m×k)(k×n) matrix multiply takes about 2mkn | [Q&A](qa/compute.en.md) |
+| 显存带宽 | memory bandwidth | Bytes per second moved to and from GPU memory; the main limit when decoding token by token | [Q&A](qa/compute.en.md) |
 | 推理强度 | reasoning effort | How long a reasoning model thinks before answering | [Q&A](qa/reasoning-effort.en.md) |
 | 测试时计算 | test-time compute | Spending more compute at use time (e.g. longer thinking) to improve results | [Q&A](qa/reasoning-effort.en.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | Software that serves a model efficiently, e.g. vLLM, SGLang, DeepInfer | [Q&A](qa/deepinfer.en.md) |

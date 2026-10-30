@@ -1,0 +1,565 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>微调交互演示 · Fine-tuning Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  canvas.hm { width: 100%; max-width: 260px; aspect-ratio: 1; image-rendering: pixelated; border: 1px solid var(--line); border-radius: 6px; display: block; }
+  .hm-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hm-wrap figure { margin: 0; flex: 1 1 200px; max-width: 260px; }
+  .hm-wrap figcaption { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+  .tokens { display: flex; flex-wrap: wrap; gap: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; margin: 8px 0; }
+  .tokens span { min-width: 1.3em; text-align: center; padding: 2px 3px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); }
+  .tokens span.resp { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tokens span.prompt.train { background: var(--b1); color: var(--bg); border-color: var(--b1); }
+  .tokens span.nl { color: var(--muted); }
+  .tokens .br { flex-basis: 100%; height: 0; padding: 0; border: 0; background: none; }
+  input[type=text] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; width: 9em; }
+  table.t td.ok { color: var(--good); }
+  table.t td.no { color: var(--bad); }
+  table.t td.mono, table.t th.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  #rs-samples th, #rs-samples td { text-align: left; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">微调 · 交互演示</span><span lang="en">Fine-tuning · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">预训练让模型学会续写文本，微调让它学会按指令回答。本页的实验数据来自本章代码在 CPU 上的真实训练：一个只会续写 Python 代码的小模型，用全参数微调、LoRA 和 QLoRA 学习三种指令。</span>
+        <span lang="en">Pre-training teaches a model to continue text; fine-tuning teaches it to answer instructions. The experiments on this page come from real CPU training runs of this chapter's code: a small model that only knows how to continue Python code learns three instructions through full fine-tuning, LoRA and QLoRA.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. LoRA -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">LoRA：冻结 W，只学一个低秩的修改量</span><span lang="en">LoRA: freeze W and learn only a low-rank change</span></h2>
+    <p class="hint">
+      <span lang="zh">全参数微调要更新整个 d×d 的权重矩阵 W。LoRA 把 W 冻结，另外学两个小矩阵：B（d×r）和 A（r×d），用 W + (α/r)·BA 代替 W。r 远小于 d，所以要训练的参数少得多。训练完可以把 BA 直接加进 W，推理时没有任何额外开销。</span>
+      <span lang="en">Full fine-tuning updates the whole d×d weight matrix W. LoRA freezes W and learns two small matrices instead, B (d×r) and A (r×d), using W + (α/r)·BA in place of W. Since r is much smaller than d, far fewer parameters are trained. Afterwards BA can be added into W, so inference costs nothing extra.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">矩阵宽度</span><span lang="en">width</span> d <input id="lo-d" type="range" min="6" max="14" step="1" value="12"><span id="lo-d-v" class="mono"></span></label>
+      <label><span lang="zh">秩</span><span lang="en">rank</span> r <input id="lo-r" type="range" min="0" max="8" step="1" value="3"><span id="lo-r-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="lo-svg" viewBox="0 0 420 230"></svg></div>
+      <div class="col"><div class="kv" id="lo-stats"></div><div class="callout" id="lo-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. low rank -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">为什么低秩就够了？看看真实的 ΔW</span><span lang="en">Why is low rank enough? Look at a real ΔW</span></h2>
+    <p class="hint">
+      <span lang="zh">左图是本章实验中全参数微调后某一层权重的变化量 ΔW = W<sub>微调后</sub> − W<sub>微调前</sub>（96×96）。用奇异值分解只保留前 r 个方向，右图是秩为 r 的近似。拖动 r：很少几个方向就能抓住大部分变化，这正是 LoRA 的出发点。</span>
+      <span lang="en">On the left is the change ΔW = W<sub>after</sub> − W<sub>before</sub> in one layer (96×96) after full fine-tuning in this chapter's experiment. Keeping only the top r directions of its singular value decomposition gives the rank-r approximation on the right. Drag r: a handful of directions capture most of the change, which is the idea behind LoRA.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">保留的秩</span><span lang="en">rank kept</span> r <input id="lr-r" type="range" min="1" max="96" step="1" value="8"><span id="lr-r-v" class="mono"></span></label>
+    </div>
+    <div class="hm-wrap">
+      <figure><canvas class="hm" id="lr-full" width="96" height="96"></canvas><figcaption><span lang="zh">全参数微调的 ΔW</span><span lang="en">ΔW from full fine-tuning</span></figcaption></figure>
+      <figure><canvas class="hm" id="lr-approx" width="96" height="96"></canvas><figcaption id="lr-cap"></figcaption></figure>
+      <div class="col" style="flex:1 1 260px">
+        <svg class="chart" id="lr-sv" viewBox="0 0 360 200"></svg>
+        <div class="callout" id="lr-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. SFT data -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">SFT 的数据：模板与损失掩码</span><span lang="en">SFT data: a template and a loss mask</span></h2>
+    <p class="hint">
+      <span lang="zh">每条训练样本都按固定模板拼成一段文本（这里用 Alpaca 风格）。模型仍然只是“预测下一个字符”，但通常只在<b>回答</b>部分计算损失：提问是给定的，不需要学会生成它。下面每个格子是一个字符，橙色是计入损失的目标。</span>
+      <span lang="en">Each training example is turned into one piece of text with a fixed template (Alpaca style here). The model still just predicts the next character, but the loss is usually computed only on the <b>response</b>: the prompt is given and need not be generated. Each cell below is one character; orange cells are targets that count in the loss.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">指令</span><span lang="en">task</span> <select id="sf-task"></select></label>
+      <label><span lang="zh">单词</span><span lang="en">word</span> <input id="sf-word" type="text" value="lambda" maxlength="12"></label>
+      <button id="sf-mask" class="on"><span lang="zh">只学回答（掩码）</span><span lang="en">response only (masked)</span></button>
+    </div>
+    <div class="tokens" id="sf-tokens"></div>
+    <div class="callout" id="sf-note"></div>
+  </section>
+
+  <!-- 4. results -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">实验：全参数、LoRA、QLoRA，以及遗忘</span><span lang="en">Experiment: full, LoRA, QLoRA, and forgetting</span></h2>
+    <p class="hint" id="rs-intro"></p>
+    <div class="controls" id="rs-methods"></div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="rs-scatter" viewBox="0 0 420 260"></svg>
+        <p class="hint"><span lang="zh">横轴：在 Python 代码上的损失，越靠右忘得越多。纵轴：三个任务的平均测试正确率。虚线圈是所选方法试过的其他学习率（验证集正确率）：学习率越大，通常忘得越多。</span><span lang="en">x: loss on held-out Python code; further right means more forgetting. y: mean test accuracy over the three tasks. Dashed rings are the other learning rates tried for the selected method (validation accuracy): a larger learning rate usually forgets more.</span></p></div>
+      <div class="col"><div class="kv" id="rs-stats"></div><div class="callout" id="rs-note"></div></div>
+    </div>
+    <h3><span lang="zh">在没见过的单词上的回答</span><span lang="en">Answers on words never seen in training</span></h3>
+    <div class="controls" id="rs-tasks"></div>
+    <div class="scroll"><table class="t" id="rs-samples"></table></div>
+  </section>
+
+  <!-- 5. memory -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">显存账：为什么 LoRA 和 QLoRA 能在一张卡上微调大模型</span><span lang="en">The memory bill: why LoRA and QLoRA fit big models on one GPU</span></h2>
+    <p class="hint">
+      <span lang="zh">混合精度 AdamW 训练时，每个参数要存：BF16 权重 2 字节、梯度 2 字节、FP32 主权重 4 字节、Adam 的两个状态 8 字节，共 16 字节。LoRA 冻结的权重只需存 2 字节，梯度和优化器状态只为很少的 LoRA 参数保存。QLoRA 再把冻结的权重压缩到 4 位。激活值另算，它取决于批大小和序列长度。</span>
+      <span lang="en">With mixed-precision AdamW, each parameter needs a 2-byte BF16 weight, a 2-byte gradient, a 4-byte FP32 master copy and 8 bytes of Adam state: 16 bytes in total. LoRA keeps frozen weights at 2 bytes and stores gradients and optimizer state only for the few LoRA parameters. QLoRA also squeezes the frozen weights into 4 bits. Activations come on top and depend on batch size and sequence length.</span>
+    </p>
+    <div class="controls" id="mem-models"></div>
+    <div class="controls">
+      <label><span lang="zh">LoRA 秩</span><span lang="en">LoRA rank</span> r <input id="mem-r" type="range" min="0" max="8" step="1" value="4"><span id="mem-r-v" class="mono"></span></label>
+      <label><span lang="zh">加在哪些层</span><span lang="en">applied to</span> <select id="mem-t"><option value="all">q k v o + FFN</option><option value="qv">q, v</option></select></label>
+      <label><span lang="zh">单卡显存</span><span lang="en">GPU memory</span> <select id="mem-gpu"><option value="24">24 GB</option><option value="48">48 GB</option><option value="80" selected>80 GB</option></select></label>
+    </div>
+    <svg class="chart" id="mem-chart" viewBox="0 0 640 200"></svg>
+    <div class="legend"><span><span class="dot" style="background:var(--b3)"></span><span lang="zh">权重</span><span lang="en">weights</span></span><span><span class="dot" style="background:var(--b1)"></span><span lang="zh">梯度</span><span lang="en">gradients</span></span><span><span class="dot" style="background:var(--b4)"></span><span lang="zh">优化器状态</span><span lang="en">optimizer state</span></span></div>
+    <div class="callout" id="mem-note"></div>
+  </section>
+
+  <!-- 6. NF4 -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">QLoRA 的 NF4：把 16 个等级放在最需要的地方</span><span lang="en">QLoRA's NF4: put the 16 levels where they are needed</span></h2>
+    <p class="hint">
+      <span lang="zh">4 位只能表示 16 个值。量化时先把每一块（例如 64 个）权重除以块内的最大绝对值，缩放到 [−1, 1]，再取最近的等级。神经网络的权重大致呈正态分布，大多数值挤在 0 附近。INT4 的等级均匀分布；NF4 按正态分布的分位数放置等级，0 附近更密，所以误差更小。</span>
+      <span lang="en">4 bits can represent only 16 values. Each block of weights (say 64) is divided by its largest magnitude to fit in [−1, 1], then every weight snaps to the nearest level. Neural-network weights are roughly normal, so most values crowd near 0. INT4 spaces its levels evenly; NF4 places them at quantiles of a normal distribution, denser near 0, so its error is smaller.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">块大小</span><span lang="en">block size</span> <select id="nf-block"><option>16</option><option selected>64</option><option>256</option><option>4096</option></select></label>
+      <label><span lang="zh">权重分布</span><span lang="en">weights</span> <select id="nf-dist"><option value="normal" lang="zh">正态分布</option><option value="heavy">heavy-tailed / 含离群值</option></select></label>
+      <button id="nf-new"><span lang="zh">重新采样</span><span lang="en">resample</span></button>
+    </div>
+    <svg class="chart" id="nf-chart" viewBox="0 0 640 220"></svg>
+    <div class="legend"><span><span class="dot" style="background:var(--accent)"></span>NF4</span><span><span class="dot" style="background:var(--muted)"></span>INT4</span></div>
+    <div class="row">
+      <div class="col"><div class="kv" id="nf-stats"></div></div>
+      <div class="col"><div class="callout" id="nf-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">08 · Fine-tuning</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Results of the fine-tuning runs, generated by figures/finetune_figures.py -->
+<script src="finetune_data.js"></script>
+<script>
+(() => {
+  const F = window.FINETUNE_DATA;
+  const $ = id => document.getElementById(id);
+  if (!F) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>finetune_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const human = v => v >= 1e12 ? +(v / 1e12).toPrecision(3) + "T" : v >= 1e9 ? +(v / 1e9).toPrecision(3) + "B" : v >= 1e6 ? +(v / 1e6).toPrecision(3) + "M" : v >= 1e3 ? +(v / 1e3).toPrecision(3) + "K" : +v.toPrecision(3) + "";
+  const pct = v => (v * 100).toFixed(v < 0.1 && v > 0 ? 1 : 0) + "%";
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+  const mean = o => Object.values(o).reduce((a, b) => a + b, 0) / Object.values(o).length;
+
+  // ================= 1. LoRA shapes =================
+  function renderLo() {
+    const d = 2 ** +$("lo-d").value, r = 2 ** +$("lo-r").value;
+    $("lo-d-v").textContent = d.toLocaleString(); $("lo-r-v").textContent = r;
+    const S = 150, w = Math.max(3, S * Math.min(1, r / d)), x0 = 20, y0 = 30;
+    const fg = css("--muted"), b = css("--bg");
+    const box = (x, y, ww, hh, fill, label, sub) => `<rect x="${x}" y="${y}" width="${ww}" height="${hh}" fill="${fill}" rx="3"/>` +
+      `<text x="${x + ww / 2}" y="${y - 8}" text-anchor="middle" style="fill:${css("--ink")};font-size:13px;font-weight:700">${label}</text>` +
+      (sub ? `<text x="${x + ww / 2}" y="${y + hh + 16}" text-anchor="middle">${sub}</text>` : "");
+    let s = box(x0, y0, S, S, css("--b1"), "W", `${d}×${d} · ${tr("冻结", "frozen")} ❄`);
+    s += `<text x="${x0 + S + 22}" y="${y0 + S / 2 + 6}" text-anchor="middle" style="fill:${fg};font-size:20px">+</text>`;
+    const bx = x0 + S + 44;
+    s += box(bx, y0, w, S, css("--accent"), "B", `${d}×${r}`);
+    s += box(bx + w + 14, y0, S, w, css("--accent"), "A", `${r}×${d}`);
+    s += `<text x="${bx + w + 14 + S / 2}" y="${y0 + w + 34}" text-anchor="middle" style="fill:${fg}">${tr("只训练 B 和 A", "train only B and A")} 🔥</text>`;
+    $("lo-svg").innerHTML = s;
+    const full = d * d, lora = 2 * d * r;
+    $("lo-stats").innerHTML = kv([
+      [tr("全参数微调：可训练参数", "full fine-tuning: trainable"), full.toLocaleString()],
+      [tr("LoRA：可训练参数 2dr", "LoRA: trainable 2dr"), lora.toLocaleString()],
+      [tr("比例", "ratio"), pct(lora / full)],
+      [tr("ΔW = BA 的秩最多为", "rank of ΔW = BA at most"), r],
+    ]);
+    $("lo-note").innerHTML = r >= d / 2
+      ? tr("r 接近 d 时，LoRA 的参数甚至比 W 还多，就失去了意义。实际中 r 通常取 8–64。", "When r approaches d, LoRA has as many parameters as W or more, which defeats the point. In practice r is usually 8–64.")
+      : tr(`B 初始化为 0，所以训练开始时 BA = 0，模型和原来完全一样；A 随机初始化。缩放系数 α/r 让换一个 r 时不必重新调学习率。d = ${d}、r = ${r} 时，每个矩阵只需训练 ${pct(lora / full)} 的参数。`,
+           `B starts at 0, so BA = 0 and the model is unchanged at the start; A starts random. The α/r factor means changing r does not require re-tuning the learning rate. With d = ${d} and r = ${r}, each matrix trains only ${pct(lora / full)} of the parameters.`);
+  }
+
+  // ================= 2. low rank of a real ΔW =================
+  const U = F.delta.U, Sv = F.delta.S, Vt = F.delta.Vt, n = Sv.length;
+  const full = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => { let v = 0; for (let k = 0; k < n; k++) v += U[i][k] * Sv[k] * Vt[k][j]; return v; }));
+  const vmax = Math.max(...full.flat().map(Math.abs)) * 0.6;
+  const energy = Sv.map(s => s * s), etotal = energy.reduce((a, b) => a + b, 0);
+  function paint(canvas, M) {
+    const ctx = canvas.getContext("2d"), img = ctx.createImageData(n, n);
+    const neg = [63, 81, 181], pos = [232, 113, 10], mid = css("--bg") === "#ffffff" || !css("--bg").startsWith("#1") ? [255, 255, 255] : [20, 22, 27];
+    for (let i = 0; i < n; i++) for (let j = 0; j < n; j++) {
+      const t = Math.max(-1, Math.min(1, M[i][j] / vmax)), c = t < 0 ? neg : pos, a = Math.abs(t), p = 4 * (i * n + j);
+      for (let k = 0; k < 3; k++) img.data[p + k] = Math.round(mid[k] + (c[k] - mid[k]) * a);
+      img.data[p + 3] = 255;
+    }
+    ctx.putImageData(img, 0, 0);
+  }
+  function renderLr() {
+    const r = +$("lr-r").value;
+    $("lr-r-v").textContent = r;
+    const approx = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => { let v = 0; for (let k = 0; k < r; k++) v += U[i][k] * Sv[k] * Vt[k][j]; return v; }));
+    paint($("lr-full"), full); paint($("lr-approx"), approx);
+    const kept = energy.slice(0, r).reduce((a, b) => a + b, 0) / etotal;
+    $("lr-cap").innerHTML = tr(`秩 ${r} 的近似：保留 ${pct(kept)} 的能量`, `Rank-${r} approximation: ${pct(kept)} of the energy`);
+    const svg = $("lr-sv"), W = 360, H = 200, L = 34, B = 26, T = 10, m = 40, bw = (W - L - 10) / m, smax = Sv[0];
+    let s = "";
+    for (let k = 0; k < m; k++) {
+      const h = (H - T - B) * Sv[k] / smax;
+      s += `<rect x="${L + k * bw}" y="${H - B - h}" width="${bw - 1}" height="${h}" fill="${k < r ? css("--accent") : css("--b1")}"/>`;
+    }
+    s += `<text x="${L}" y="${H - 8}">1</text><text x="${L + (m - 1) * bw}" y="${H - 8}">${m}</text>`;
+    s += `<text x="${(L + W) / 2}" y="${H - 8}" text-anchor="middle">${tr("奇异值（前 40 个）", "singular values (top 40)")}</text>`;
+    svg.innerHTML = s;
+    const need = p => { let c = 0; for (let k = 0; k < n; k++) { c += energy[k]; if (c / etotal >= p) return k + 1; } return n; };
+    $("lr-note").innerHTML = tr(`这一层（${F.delta.layer}）的 ΔW 有 96 个方向，但前 ${need(0.5)} 个就占了一半能量，${need(0.9)} 个占 90%。作为对照，一个随机矩阵需要 ${F.random_rank.half} 个方向才占一半、${F.random_rank.p90} 个才占 90%。本章 LoRA r=8 实验正是在这个层上学一个秩为 8 的 ΔW。`,
+      `This layer's (${F.delta.layer}) ΔW has 96 directions, yet the top ${need(0.5)} hold half the energy and ${need(0.9)} hold 90%. For comparison, a random matrix needs ${F.random_rank.half} directions for half and ${F.random_rank.p90} for 90%. The LoRA r=8 run in this chapter learns a rank-8 ΔW for exactly this layer.`);
+  }
+
+  // ================= 3. SFT template =================
+  const TASKS = { Upper: w => w.toUpperCase(), Reverse: w => [...w].reverse().join(""), Length: w => String(w.length) };
+  $("sf-task").innerHTML = Object.keys(TASKS).map(t => `<option>${t}</option>`).join("");
+  $("sf-task").value = "Reverse";
+  let masked = true;
+  function renderSf() {
+    const task = $("sf-task").value, word = ($("sf-word").value.toLowerCase().match(/[a-z]+/) || ["lambda"])[0];
+    const prompt = F.template.replace("{task}", task).replace("{word}", word), answer = TASKS[task](word) + "\n";
+    const text = prompt + answer;
+    let s = "";
+    [...text].forEach((c, i) => {
+      const resp = i >= prompt.length, counted = i > 0 && (resp || !masked);
+      const cls = resp ? "resp" : "prompt" + (counted ? " train" : "");
+      s += `<span class="${cls}${c === "\n" ? " nl" : ""}">${c === "\n" ? "↵" : c === " " ? "␣" : c.replace("<", "&lt;")}</span>`;
+      if (c === "\n") s += `<span class="br"></span>`;
+    });
+    $("sf-tokens").innerHTML = s;
+    const nLoss = masked ? answer.length : text.length - 1;
+    $("sf-note").innerHTML = tr(`整条样本 ${text.length} 个字符，计入损失的目标 <b>${nLoss}</b> 个（${pct(nLoss / (text.length - 1))}）。`, `The example has ${text.length} characters; <b>${nLoss}</b> targets count in the loss (${pct(nLoss / (text.length - 1))}).`) + " " +
+      (masked ? tr("提问部分（灰色）仍然作为输入，模型能看到它，只是不要求模型学会生成它。结尾的 ↵ 也要学：模型要学会何时停下。",
+                   "The prompt (grey) is still input that the model sees; it is just not asked to learn to generate it. The final ↵ is learned too: the model must learn when to stop.")
+              : tr("不加掩码时，大部分损失都花在重复的模板上（每条样本的模板都一样）。本章实验中，这样训练的准确率见第 4 节的“全参数（不掩码）”。",
+                   "Without the mask, most of the loss goes to the template, which is identical in every example. See “full (no mask)” in part 4 for how this did in the experiment."));
+  }
+
+  // ================= 4. results =================
+  const key = r => r.method === "lora" && !r.replay ? "lora" + r.r : r.tag;
+  const RUNS = Object.fromEntries(F.runs.map(r => [key(r), r]));
+  const LABEL = k => ({
+    full: tr("全参数", "full"), qlora: "QLoRA r=8", scratch: tr("从零训练", "from scratch"),
+    "full-nomask": tr("全参数（不掩码）", "full (no mask)"), "full-replay": tr("全参数 + replay", "full + replay"), "lora-replay": "LoRA r=8 + replay",
+  })[k] || `LoRA r=${k.slice(4)}`;
+  const ORDER = ["full", ...F.ranks.map(r => "lora" + r), "qlora", "scratch", "full-nomask", "full-replay", "lora-replay"];
+  let sel = "lora8", sampleTask = "Reverse";
+  function color(k) { return k.startsWith("lora") && !k.includes("replay") ? css("--b2") : k === "full" ? css("--accent") : k.includes("replay") ? css("--good") : css("--muted"); }
+  function renderRs() {
+    $("rs-intro").innerHTML = tr(`底座模型先在 Python 标准库源码上预训练（在代码上的损失 ${F.base.code_loss.toFixed(2)}），然后每种方法各微调 ${F.steps} 步，学习率在 ${F.sweep.lora.length} 个候选中按验证集挑选。测试用的单词都没在训练中出现过。微调前，模型三个任务的正确率都是 0：它只会接着写代码。`,
+      `The base model is first pre-trained on the Python standard library's source code (loss on code ${F.base.code_loss.toFixed(2)}). Each method then fine-tunes for ${F.steps} steps, with the learning rate picked from ${F.sweep.lora.length} candidates on a validation set. Test words never appear in training. Before fine-tuning, accuracy on all three tasks is 0: the model only knows how to continue code.`);
+    $("rs-methods").innerHTML = ORDER.filter(k => RUNS[k]).map(k => `<button data-k="${k}" class="${k === sel ? "on" : ""}">${LABEL(k)}</button>`).join("");
+    $("rs-methods").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { sel = b.dataset.k; renderRs(); }));
+    // scatter
+    const svg = $("rs-scatter"), W = 420, H = 260, L = 44, R = 12, T = 12, B = 34;
+    const xs = F.runs.flatMap(r => [r.code_loss, ...(r.sweep || []).map(t => t.code_loss)]).concat([F.base.code_loss]), x0 = 0, x1 = Math.ceil(Math.max(...xs) + 0.5);
+    const fx = v => L + (W - L - R) * (v - x0) / (x1 - x0), fy = v => T + (H - T - B) * (1 - v);
+    let s = "";
+    [0, .25, .5, .75, 1].forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${pct(v)}</text>`; });
+    for (let v = 0; v <= x1; v += x1 > 12 ? 4 : 2) s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`;
+    s += `<text x="${(L + W) / 2}" y="${H - 4}" text-anchor="middle">${tr("代码上的损失（遗忘）", "loss on code (forgetting)")}</text>`;
+    s += `<circle cx="${fx(F.base.code_loss)}" cy="${fy(0)}" r="6" fill="none" stroke="${css("--ink")}" stroke-width="2"/><text x="${fx(F.base.code_loss) + 8}" y="${fy(0) - 6}">${tr("微调前", "base")}</text>`;
+    // other learning rates of the selected method, by validation accuracy / 所选方法的其他学习率（验证集）
+    (RUNS[sel].sweep || []).filter(t => t.lr !== RUNS[sel].lr).forEach(t => {
+      s += `<circle cx="${fx(t.code_loss)}" cy="${fy(t.val_acc)}" r="5" fill="none" stroke="${color(sel)}" stroke-width="1.5" stroke-dasharray="2 2"><title>lr ${t.lr}</title></circle>` +
+        `<text x="${fx(t.code_loss) + 7}" y="${fy(t.val_acc) + 4}" style="font-size:10px">lr ${t.lr}</text>`;
+    });
+    ORDER.filter(k => RUNS[k]).forEach(k => {
+      const r = RUNS[k], on = k === sel;
+      s += `<circle cx="${fx(r.code_loss)}" cy="${fy(mean(r.test_acc))}" r="${on ? 8 : 5}" fill="${color(k)}" stroke="${on ? css("--ink") : "none"}" stroke-width="2" style="cursor:pointer" data-k="${k}"><title>${LABEL(k)}</title></circle>`;
+    });
+    svg.innerHTML = s;
+    svg.querySelectorAll("circle[data-k]").forEach(c => c.addEventListener("click", () => { sel = c.dataset.k; renderRs(); }));
+    const r = RUNS[sel];
+    $("rs-stats").innerHTML = kv([
+      [tr("可训练参数", "trainable parameters"), `${r.params.toLocaleString()} <span class="hint">(${pct(r.params / F.base.params)})</span>`],
+      [tr("选中的学习率", "chosen learning rate"), r.sweep ? r.lr : `${r.lr} <span class="hint">${tr("（沿用）", "(reused)")}</span>`],
+      ...F.tasks.map(t => [t, pct(r.test_acc[t])]),
+      [tr("代码上的损失", "loss on code"), `${F.base.code_loss.toFixed(2)} → <span class="${r.code_loss > F.base.code_loss + 1 ? "bad" : "good"}">${r.code_loss.toFixed(2)}</span>`],
+    ]);
+    $("rs-note").innerHTML = NOTES[sel] ? tr(...NOTES[sel]) : "";
+    // samples
+    $("rs-tasks").innerHTML = F.tasks.map(t => `<button data-t="${t}" class="${t === sampleTask ? "on" : ""}">${t}</button>`).join("");
+    $("rs-tasks").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { sampleTask = b.dataset.t; renderRs(); }));
+    const cols = [["base", tr("微调前", "base")], ["full", tr("全参数", "full")], ["lora8", "LoRA r=8"]];
+    $("rs-samples").innerHTML = `<tr><th>${tr("输入", "input")}</th><th>${tr("正确答案", "answer")}</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr>` +
+      F.sample_words.map((w, i) => {
+        const want = TASKS[sampleTask](w);
+        return `<tr><td class="mono">${sampleTask}: ${w}</td><td class="mono">${want}</td>` + cols.map(([c]) => {
+          const got = F.samples[c][sampleTask][i];
+          return `<td class="mono ${got === want ? "ok" : "no"}">${got === "" ? "∅" : got.replace(/</g, "&lt;")}</td>`;
+        }).join("") + "</tr>";
+      }).join("");
+  }
+  const NOTES = {};
+  function buildNotes() {
+    const g = k => RUNS[k], acc = k => pct(mean(g(k).test_acc));
+    NOTES.full = [`全参数微调更新全部 ${g("full").params.toLocaleString()} 个参数，正确率 ${acc("full")}。但代码上的损失从 ${F.base.code_loss.toFixed(2)} 升到 ${g("full").code_loss.toFixed(2)}：模型几乎忘光了怎么写代码，这就是<b>灾难性遗忘</b>。`,
+      `Full fine-tuning updates all ${g("full").params.toLocaleString()} parameters and reaches ${acc("full")}. But the loss on code rises from ${F.base.code_loss.toFixed(2)} to ${g("full").code_loss.toFixed(2)}: the model has almost forgotten how to write code. This is <b>catastrophic forgetting</b>.`];
+    F.ranks.forEach(r => { NOTES["lora" + r] = [`LoRA r=${r} 只训练 ${pct(g("lora" + r).params / F.base.params)} 的参数，正确率 ${acc("lora" + r)}。秩越小，大体上能学到的越少；在这个很小的模型上，r=32（${acc("lora32")}）才接近全参数微调（${acc("full")}）。`, `LoRA r=${r} trains only ${pct(g("lora" + r).params / F.base.params)} of the parameters and reaches ${acc("lora" + r)}. A smaller rank broadly learns less; on this tiny model only r=32 (${acc("lora32")}) comes close to full fine-tuning (${acc("full")}).`]; });
+    NOTES.qlora = [`QLoRA 把冻结的底座权重压缩成 4 位 NF4，再在上面训练 LoRA。正确率 ${acc("qlora")}，同秩的 LoRA 为 ${acc("lora8")}。在这个很小的模型上，量化误差有一定影响；QLoRA 论文在大模型上报告的是与 16 位微调相当。显存却省了约 3/4。`, `QLoRA stores the frozen base weights in 4-bit NF4 and trains LoRA on top. It reaches ${acc("qlora")}, against ${acc("lora8")} for LoRA at the same rank. On this tiny model quantization error costs something; the QLoRA paper reports parity with 16-bit fine-tuning on large models. The frozen weights take about 3/4 less memory.`];
+    NOTES.scratch = [`同样的结构、同样的 ${F.steps} 步，但从随机权重开始：正确率只有 ${acc("scratch")}。预训练学到的“字符知识”让微调快得多。`, `Same architecture, same ${F.steps} steps, but from random weights: only ${acc("scratch")}. What pre-training learned about characters makes fine-tuning far faster.`];
+    NOTES["full-nomask"] = [`不加损失掩码、在整条样本上训练：正确率 ${acc("full-nomask")}，对比加掩码的 ${acc("full")}。大部分梯度花在了每条都一样的模板上。`, `Training on the whole example without the loss mask: ${acc("full-nomask")}, versus ${acc("full")} with the mask. Most of the gradient goes to the template, which is the same in every example.`];
+    NOTES["full-replay"] = [`每批额外混入 16 段预训练文本（replay）：正确率 ${acc("full-replay")}，代码上的损失只到 ${g("full-replay").code_loss.toFixed(2)}，遗忘大大减少。`, `Mixing 16 rows of pre-training text into every batch (replay): ${acc("full-replay")} accuracy, and the loss on code only reaches ${g("full-replay").code_loss.toFixed(2)}. Far less forgetting.`];
+    NOTES["lora-replay"] = [`LoRA 加 replay：正确率 ${acc("lora-replay")}，代码上的损失 ${g("lora-replay").code_loss.toFixed(2)}。注意，只训练少量参数的 LoRA 本身并不能防止遗忘：没有 replay 时，它的代码损失也升到了 ${g("lora8").code_loss.toFixed(2)}（全参数为 ${g("full").code_loss.toFixed(2)}）。`, `LoRA with replay: ${acc("lora-replay")} accuracy, loss on code ${g("lora-replay").code_loss.toFixed(2)}. Note that training few parameters does not by itself prevent forgetting: without replay, LoRA's loss on code also rose to ${g("lora8").code_loss.toFixed(2)} (full: ${g("full").code_loss.toFixed(2)}).`];
+  }
+
+  // ================= 5. memory =================
+  // Published configurations: layers, width, FFN width, KV heads (of d/128 query heads), vocabulary
+  // 官方公布的结构：层数、宽度、FFN 宽度、KV 头数、词表大小
+  const MODELS = [
+    { name: "Llama 2 7B", L: 32, d: 4096, ffn: 11008, kv: 32, V: 32000 },
+    { name: "Llama 2 13B", L: 40, d: 5120, ffn: 13824, kv: 40, V: 32000 },
+    { name: "Llama 3 8B", L: 32, d: 4096, ffn: 14336, kv: 8, V: 128256 },
+    { name: "Llama 3 70B", L: 80, d: 8192, ffn: 28672, kv: 8, V: 128256 },
+    { name: "Llama 3 405B", L: 126, d: 16384, ffn: 53248, kv: 8, V: 128256 },
+  ];
+  let mem = MODELS[0];
+  $("mem-models").innerHTML = MODELS.map((m, i) => `<button data-i="${i}" class="${i ? "" : "on"}">${m.name}</button>`).join("");
+  $("mem-models").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { mem = MODELS[+b.dataset.i]; $("mem-models").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); renderMem(); }));
+  function shapes(m) {
+    const kvd = m.kv * 128;
+    return { q: [m.d, m.d], k: [m.d, kvd], v: [m.d, kvd], o: [m.d, m.d], gate: [m.d, m.ffn], up: [m.d, m.ffn], down: [m.ffn, m.d] };
+  }
+  function renderMem() {
+    const r = 2 ** +$("mem-r").value, gpu = +$("mem-gpu").value;
+    $("mem-r-v").textContent = r;
+    const sh = shapes(mem), targets = $("mem-t").value === "qv" ? ["q", "v"] : Object.keys(sh);
+    const n = mem.L * Object.values(sh).reduce((a, [i, o]) => a + i * o, 0) + 2 * mem.V * mem.d;
+    const nl = mem.L * targets.reduce((a, t) => a + r * (sh[t][0] + sh[t][1]), 0);
+    const rows = [
+      [tr("全参数", "Full"), { w: 2 * n, g: 2 * n, o: 12 * n }],
+      ["LoRA", { w: 2 * n + 2 * nl, g: 2 * nl, o: 12 * nl }],
+      ["QLoRA", { w: 4.127 / 8 * n + 2 * nl, g: 2 * nl, o: 12 * nl }],
+    ];
+    const svg = $("mem-chart"), W = 640, L = 70, R = 90, rowH = 52, T = 10;
+    const max = Math.max(...rows.map(([, p]) => p.w + p.g + p.o)), fx = v => (W - L - R) * v / max;
+    let s = "";
+    rows.forEach(([name, p], i) => {
+      const y = T + i * rowH; let x = L;
+      s += `<text x="${L - 8}" y="${y + 24}" text-anchor="end" style="fill:${css("--ink")};font-size:13px">${name}</text>`;
+      [["w", "--b3"], ["g", "--b1"], ["o", "--b4"]].forEach(([k, c]) => { const w = fx(p[k]); s += `<rect x="${x}" y="${y + 8}" width="${Math.max(w, 0.5)}" height="26" fill="${css(c)}"/>`; x += w; });
+      const tot = (p.w + p.g + p.o) / 1e9;
+      s += `<text x="${x + 6}" y="${y + 26}" style="fill:${css("--ink")};font-size:13px">${tot >= 100 ? tot.toFixed(0) : tot.toFixed(1)} GB</text>`;
+    });
+    const gx = L + fx(gpu * 1e9);
+    if (gx < W - R) s += `<line x1="${gx}" x2="${gx}" y1="${T}" y2="${T + 3 * rowH}" stroke="${css("--bad")}" stroke-dasharray="4 3"/><text x="${gx + 4}" y="${T + 3 * rowH + 14}" style="fill:${css("--bad")}">${gpu} GB</text>`;
+    svg.innerHTML = s;
+    const cards = rows.map(([name, p]) => [name, Math.ceil((p.w + p.g + p.o) / (gpu * 1e9))]);
+    $("mem-note").innerHTML = tr(`${mem.name} 约 ${human(n)} 参数；LoRA r=${r} 只训练 ${human(nl)} 个（${pct(nl / n)}）。不算激活值，至少需要 ${gpu} GB 的卡：`, `${mem.name} has about ${human(n)} parameters; LoRA r=${r} trains only ${human(nl)} (${pct(nl / n)}). Ignoring activations, ${gpu} GB GPUs needed at least: `) +
+      cards.map(([name, c]) => `${name} <b>${c}</b>`).join(" · ") + tr("。QLoRA 论文正是用这个思路，在一张 48 GB 的卡上微调了 65B 模型。", ". This is how the QLoRA paper fine-tuned a 65B model on a single 48 GB GPU.");
+  }
+
+  // ================= 6. NF4 =================
+  const NF4 = [-1, -0.6961928, -0.5250731, -0.3949175, -0.2844414, -0.1847734, -0.0910500, 0, 0.0795803, 0.1609302, 0.2461123, 0.3379152, 0.4407098, 0.5626170, 0.7229568, 1];
+  const INT4 = Array.from({ length: 15 }, (_, i) => -1 + 2 * i / 14);
+  let seed = 1;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 0.5) / 2147483646; };
+  const gauss = () => Math.sqrt(-2 * Math.log(rand())) * Math.cos(2 * Math.PI * rand());
+  function sample(dist) {
+    seed = nfSeed;
+    return Array.from({ length: 16384 }, () => dist === "normal" ? gauss() : gauss() * (rand() < 0.01 ? 8 : 1));
+  }
+  let nfSeed = 7;
+  function quant(w, table, block) {
+    let err = 0; const normed = [];
+    for (let b = 0; b < w.length; b += block) {
+      const blk = w.slice(b, b + block), m = Math.max(...blk.map(Math.abs));
+      for (const v of blk) {
+        const x = v / m; let best = table[0];
+        for (const t of table) if (Math.abs(t - x) < Math.abs(best - x)) best = t;
+        err += (best * m - v) ** 2; normed.push(x);
+      }
+    }
+    return { rel: Math.sqrt(err / w.length) / Math.sqrt(w.reduce((a, v) => a + v * v, 0) / w.length), normed };
+  }
+  function renderNf() {
+    const block = +$("nf-block").value, w = sample($("nf-dist").value);
+    const qn = quant(w, NF4, block), qi = quant(w, INT4, block);
+    const svg = $("nf-chart"), W = 640, H = 220, L = 20, R = 20, T = 10, B = 28, bins = 80, hist = new Array(bins).fill(0);
+    qn.normed.forEach(x => { hist[Math.min(bins - 1, Math.floor((x + 1) / 2 * bins))]++; });
+    const hmax = Math.max(...hist), fx = v => L + (W - L - R) * (v + 1) / 2;
+    let s = "";
+    hist.forEach((h, i) => { const hh = (H - T - B - 30) * h / hmax; s += `<rect x="${fx(-1 + 2 * i / bins)}" y="${H - B - hh}" width="${(W - L - R) / bins - 1}" height="${hh}" fill="${css("--b1")}" opacity=".55"/>`; });
+    INT4.forEach(v => { s += `<line x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${T + 18}" stroke="${css("--muted")}" stroke-width="2"/>`; });
+    NF4.forEach(v => { s += `<line x1="${fx(v)}" x2="${fx(v)}" y1="${T + 22}" y2="${H - B}" stroke="${css("--accent")}" stroke-width="1.5"/>`; });
+    [-1, -0.5, 0, 0.5, 1].forEach(v => { s += `<text x="${fx(v)}" y="${H - 8}" text-anchor="middle">${v}</text>`; });
+    svg.innerHTML = s;
+    $("nf-stats").innerHTML = kv([
+      [tr("INT4 相对误差", "INT4 relative error"), qi.rel.toFixed(3)],
+      [tr("NF4 相对误差", "NF4 relative error"), `<span class="good">${qn.rel.toFixed(3)}</span>`],
+      [tr("每个参数的存储", "storage per parameter"), `4 + ${(32 / block).toFixed(2)} ${tr("位（块常数）", "bits (block constant)")}`],
+    ]);
+    $("nf-note").innerHTML = (block >= 1024
+      ? tr("块越大，一个离群值就会把整块的缩放拉大，其余权重挤在 0 附近的少数几个等级里，误差变大。", "With big blocks, one outlier stretches the whole block's scale and squeezes the other weights into a few levels near 0, so the error grows.")
+      : tr("块越小越准，但每块都要多存一个 32 位的缩放常数。QLoRA 用 64 的块，并对这些常数再做一次 8 位量化（双重量化），把额外开销从每个参数 0.5 位降到约 0.127 位。", "Smaller blocks are more accurate, but each block stores an extra 32-bit scale. QLoRA uses blocks of 64 and quantizes those constants again to 8 bits (double quantization), cutting the overhead from 0.5 to about 0.127 bits per parameter.")) +
+      tr(" 灰色短线是 INT4 的 15 个等级（对称，−7…7），橙线是 NF4 的 16 个等级。", " Short grey ticks are INT4's 15 levels (symmetric, −7…7); orange lines are NF4's 16 levels.");
+  }
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["LoRA 训练开始时，为什么模型的输出和原模型完全一样？", "Why does a LoRA model give exactly the original outputs at the start of training?"],
+      opts: [["因为 A 初始化为 0", "Because A starts at 0"], ["因为 B 初始化为 0，所以 BA = 0", "Because B starts at 0, so BA = 0"], ["因为学习率从 0 开始预热", "Because the learning rate warms up from 0"]],
+      a: 1, ex: ["B = 0 保证起点就是预训练模型；A 必须随机初始化，否则 B 的梯度也为 0，永远学不动。", "B = 0 makes the starting point the pre-trained model; A must be random, or B's gradient would also be 0 and nothing would ever learn."] },
+    { q: ["d = 4096、r = 8 时，一个 d×d 矩阵上的 LoRA 有多少可训练参数？", "With d = 4096 and r = 8, how many trainable parameters does LoRA add to one d×d matrix?"],
+      opts: [["8 × 4096 = 32,768", "8 × 4096 = 32,768"], ["2 × 8 × 4096 = 65,536", "2 × 8 × 4096 = 65,536"], ["4096² = 16,777,216", "4096² = 16,777,216"]],
+      a: 1, ex: ["B 是 4096×8，A 是 8×4096，合计 65,536，约为原矩阵的 0.4%。", "B is 4096×8 and A is 8×4096, 65,536 in total, about 0.4% of the matrix."] },
+    { q: ["SFT 时通常只在哪部分计算损失？", "In SFT, where is the loss usually computed?"],
+      opts: [["整条样本", "The whole example"], ["只在回答部分（包括结束符）", "Only on the response (including the end marker)"], ["只在提问部分", "Only on the prompt"]],
+      a: 1, ex: ["提问是给定的输入，模型要学的是如何回答以及何时停下。", "The prompt is given input; the model has to learn how to answer and when to stop."] },
+    { q: ["本章实验中，哪种做法最能减轻灾难性遗忘？", "In this chapter's experiment, what reduced catastrophic forgetting most?"],
+      opts: [["换成 LoRA", "Switching to LoRA"], ["在微调数据中混入预训练数据（replay）", "Mixing pre-training data into the fine-tuning data (replay)"], ["换成 QLoRA", "Switching to QLoRA"]],
+      a: 1, ex: ["本章的小实验里，没有 replay 时 LoRA 同样严重遗忘；混入预训练数据后，代码上的损失大幅回落，正确率几乎不受影响。", "In this small experiment, LoRA without replay forgot badly too; mixing in pre-training data brought the loss on code far down while barely affecting accuracy."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { buildNotes(); renderLo(); renderLr(); renderSf(); renderRs(); renderMem(); renderNf(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["lo-d", "lo-r"].forEach(id => $(id).addEventListener("input", renderLo));
+  $("lr-r").addEventListener("input", renderLr);
+  ["sf-task", "sf-word"].forEach(id => $(id).addEventListener("input", renderSf));
+  $("sf-mask").addEventListener("click", () => { masked = !masked; $("sf-mask").classList.toggle("on", masked); renderSf(); });
+  ["mem-r", "mem-t", "mem-gpu"].forEach(id => $(id).addEventListener("input", renderMem));
+  ["nf-block", "nf-dist"].forEach(id => $(id).addEventListener("input", renderNf));
+  $("nf-new").addEventListener("click", () => { nfSeed = nfSeed * 31 % 100003 + 1; renderNf(); });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

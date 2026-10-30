@@ -62,6 +62,7 @@ make check     # 运行所有代码示例 + 构建网站（严格模式）
 - 复制 [`templates/qa/`](templates/qa/) 到 `docs/qa/<slug>.md` 与 `docs/qa/<slug>.en.md`。Copy the Q&A template.
 - 必须写“核实日期”，并优先引用一手资料（官方文档、论文、代码仓库）；把报道和推测与确认的事实分开。Always add a check date and prefer primary sources.
 - 计划中的章节不加链接，写成后再补上。Don't link chapters that don't exist yet.
+- 需要交互演示时放在 `docs/qa/interactive/<slug>.html`，代码放在 `docs/qa/code/`，`make previews` 会生成 `docs/qa/assets/<slug>-preview[.en].png`。Q&A playgrounds go in `docs/qa/interactive/`, code in `docs/qa/code/`; previews are named after the page.
 - 新术语加入 `docs/glossary.md` 与 `docs/glossary.en.md`。Add new terms to the glossary.
 - 更新 `docs/qa/index*.md`、`docs/index*.md`、根目录 `README.md` 和 `mkdocs.yml` 的导航。Update the indexes and nav.
 
