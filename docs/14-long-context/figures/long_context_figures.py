@@ -15,6 +15,7 @@ from pathlib import Path
 
 import matplotlib.pyplot as plt
 import numpy as np
+import torch
 from matplotlib.ticker import FuncFormatter
 from style import COLORS, apply_style, save
 
@@ -35,6 +36,7 @@ WINDOWS = [1, 2, 3, 4, 6, 8, 16, 64]
 def run_experiments():
     data = encode(make_corpus(30000, seed=1))
     val = encode(make_corpus(3000, seed=999))
+    torch.manual_seed(0)  # seed the initial weights too / 初始权重也固定随机种子
     model = train(RoPEGPT(), data, steps=800)
     tuned = configure(copy.deepcopy(model), "pi", 8)
     train(tuned, data, steps=100, length=TEST_LEN, lr=2e-3)
