@@ -160,7 +160,7 @@ The constraint guarantees the **format**, not sensible content: at high temperat
 
 - **T = 0 is not always fully deterministic**: on a server, different batching and floating-point summation order can change the logits slightly and occasionally the chosen token.
 - **Stopping**: stop at the end token, at a maximum length, or at given stop sequences.
-- **Speculative decoding** does not change the output distribution; it only makes generation faster. See 12 Inference optimization (planned).
+- **Speculative decoding** does not change the output distribution; it only makes generation faster. See [12 Inference optimization](../12-inference-optimization/README.en.md).
 
 ## 4. Minimal code
 

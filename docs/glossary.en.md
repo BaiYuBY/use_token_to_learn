@@ -85,6 +85,11 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | min-p 采样 | min-p sampling | Drop tokens whose probability is below min_p times the top probability | [11](11-decoding/README.en.md) |
 | 重复 / 频率 / 存在惩罚 | repetition / frequency / presence penalty | Lower the scores of tokens that already appeared, to reduce repetition | [11](11-decoding/README.en.md) |
 | 约束解码 / 结构化输出 | constrained decoding / structured output | Zero out tokens that would break a grammar or JSON schema, so the output is always valid | [11](11-decoding/README.en.md) |
+| 多头潜在注意力 | MLA (multi-head latent attention) | Caches K and V as one compressed low-dimensional vector, shrinking the KV cache (DeepSeek-V2/V3) | [12](12-inference-optimization/README.en.md) |
+| 按组量化 | group-wise quantization | One scale per small group of weights (e.g. 32), more precise than one scale per tensor | [12](12-inference-optimization/README.en.md) |
+| FP8 | FP8 (E4M3 / E5M2) | An 8-bit floating-point format with native support on recent GPUs, used for inference and even training | [12](12-inference-optimization/README.en.md) |
+| FlashAttention / 在线 softmax | FlashAttention / online softmax | Computes attention tile by tile, merging the softmax as it goes; exact, with no T × T matrix stored | [12](12-inference-optimization/README.en.md) |
+| 受带宽限制 | memory-bound | Speed set by how fast memory can be read, not by compute; token-by-token decoding is the classic case | [12](12-inference-optimization/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |
@@ -95,9 +100,9 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 推理强度 | reasoning effort | How long a reasoning model thinks before answering | [Q&A](qa/reasoning-effort.en.md) |
 | 测试时计算 | test-time compute | Spending more compute at use time (e.g. longer thinking) to improve results | [Q&A](qa/reasoning-effort.en.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | Software that serves a model efficiently, e.g. vLLM, SGLang, DeepInfer | [Q&A](qa/deepinfer.en.md) |
-| KV 缓存 | KV cache | Stores attention keys/values already computed so they need not be recomputed | [Q&A](qa/deepinfer.en.md) |
-| 预填充 / 解码 | prefill / decode | Process the whole input at once / then generate new tokens one by one | [Q&A](qa/deepinfer.en.md) |
-| 投机解码 | speculative decoding | Guess a few tokens cheaply, then have the large model verify them in one go | [Q&A](qa/deepinfer.en.md) |
+| KV 缓存 | KV cache | Stores attention keys/values already computed so they need not be recomputed | [12](12-inference-optimization/README.en.md) |
+| 预填充 / 解码 | prefill / decode | Process the whole input at once / then generate new tokens one by one | [12](12-inference-optimization/README.en.md) |
+| 投机解码 | speculative decoding | Guess a few tokens cheaply, then have the large model verify them in one go | [12](12-inference-optimization/README.en.md) |
 | 专家并行 | EP (expert parallelism) | Put different MoE experts on different accelerators | [Q&A](qa/deepinfer.en.md) |
 | 幻觉 / 编造 | hallucination / fabrication | Plausible-sounding content that contradicts the facts or the source | [Q&A](qa/reliability.en.md) |
 | 校验与重试 | validate and retry | Check outputs in code and retry on failure; only removes errors the validator can see | [Q&A](qa/reliability.en.md) |

@@ -85,6 +85,11 @@
 | min-p 采样 | min-p sampling | 丢掉概率低于“最高概率 × min_p”的词元 | [11](11-decoding/README.md) |
 | 重复 / 频率 / 存在惩罚 | repetition / frequency / presence penalty | 降低已出现过的词元的分数，减少复读 | [11](11-decoding/README.md) |
 | 约束解码 / 结构化输出 | constrained decoding / structured output | 把不符合语法或 JSON 格式的词元概率置零，保证输出合法 | [11](11-decoding/README.md) |
+| 多头潜在注意力 | MLA (multi-head latent attention) | 把 K、V 压缩成一个低维向量缓存，大幅减小 KV 缓存（DeepSeek-V2/V3） | [12](12-inference-optimization/README.md) |
+| 按组量化 | group-wise quantization | 每若干个（如 32 个）权重共用一个缩放因子，比整个张量一个缩放更精确 | [12](12-inference-optimization/README.md) |
+| FP8 | FP8 (E4M3 / E5M2) | 8 位浮点数格式，新 GPU 原生支持，用于推理甚至训练 | [12](12-inference-optimization/README.md) |
+| FlashAttention / 在线 softmax | FlashAttention / online softmax | 分块计算注意力、边算边合并 softmax，不存 T × T 矩阵，结果精确 | [12](12-inference-optimization/README.md) |
+| 受带宽限制 | memory-bound | 速度由读写显存的快慢决定，而不是算力；逐词元解码就是典型 | [12](12-inference-optimization/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |
@@ -95,9 +100,9 @@
 | 推理强度 | reasoning effort | 控制推理模型回答前思考多久 | [问答](qa/reasoning-effort.md) |
 | 测试时计算 | test-time compute | 在使用模型时多花算力（如更长的思考）来提升效果 | [问答](qa/reasoning-effort.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | 把模型高效地部署成服务的软件，如 vLLM、SGLang、DeepInfer | [问答](qa/deepinfer.md) |
-| KV 缓存 | KV cache | 保存注意力中已算过的 key/value，避免重复计算 | [问答](qa/deepinfer.md) |
-| 预填充 / 解码 | prefill / decode | 一次性处理整段输入 / 之后逐个生成新词元 | [问答](qa/deepinfer.md) |
-| 投机解码 | speculative decoding | 先便宜地猜几个词元，再让大模型一次性验证 | [问答](qa/deepinfer.md) |
+| KV 缓存 | KV cache | 保存注意力中已算过的 key/value，避免重复计算 | [12](12-inference-optimization/README.md) |
+| 预填充 / 解码 | prefill / decode | 一次性处理整段输入 / 之后逐个生成新词元 | [12](12-inference-optimization/README.md) |
+| 投机解码 | speculative decoding | 先便宜地猜几个词元，再让大模型一次性验证 | [12](12-inference-optimization/README.md) |
 | 专家并行 | EP (expert parallelism) | 把 MoE 的不同专家放到不同的卡上 | [问答](qa/deepinfer.md) |
 | 幻觉 / 编造 | hallucination / fabrication | 生成看似合理但与事实或资料不符的内容 | [问答](qa/reliability.md) |
 | 校验与重试 | validate and retry | 用程序检查输出，不通过就重试；只能消除校验器看得到的错误 | [问答](qa/reliability.md) |

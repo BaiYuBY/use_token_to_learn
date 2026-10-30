@@ -149,7 +149,7 @@ assert counter.get_total_flops() == gpt_forward_flops(n, n_layers, d, t)
 - [06 Pre-training](../06-pretraining/README.en.md): the training loop and MFU
 - [07 Scaling laws](../07-scaling-laws/README.en.md): $C \approx 6ND$ and compute-optimal allocation
 - [08 Fine-tuning](../08-finetuning/README.en.md): the memory bill of training, and how LoRA and QLoRA cut it
-- **12 Inference optimization** and **13 Serving systems** (planned): KV cache, quantization, batching
+- **[12 Inference optimization](../12-inference-optimization/README.en.md)** and **13 Serving systems** (planned): KV cache, quantization, batching
 
 ## Sources
 
