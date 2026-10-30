@@ -24,6 +24,7 @@
 | 06 预训练 Pre-training | [中文](docs/06-pretraining/README.md) · [EN](docs/06-pretraining/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/06-pretraining/interactive/pretraining.html) | [pretrain.py](docs/06-pretraining/code/pretrain.py) |
 | 07 规模定律 Scaling Laws | [中文](docs/07-scaling-laws/README.md) · [EN](docs/07-scaling-laws/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/07-scaling-laws/interactive/scaling.html) | [scaling.py](docs/07-scaling-laws/code/scaling.py) |
 | 08 微调 Fine-tuning | [中文](docs/08-finetuning/README.md) · [EN](docs/08-finetuning/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/08-finetuning/interactive/finetune.html) | [lora.py](docs/08-finetuning/code/lora.py) · [sft.py](docs/08-finetuning/code/sft.py) |
+| 09 对齐 Alignment | [中文](docs/09-alignment/README.md) · [EN](docs/09-alignment/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/09-alignment/interactive/alignment.html) | [align.py](docs/09-alignment/code/align.py) |
 
 ## 前沿问答
 
@@ -32,6 +33,7 @@
 - [推理强度（low / medium / high / xhigh）是怎么设置的？](docs/qa/reasoning-effort.md)
 - [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](docs/qa/deepinfer.md)
 - [大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？](docs/qa/compute.md)（附[算力计算器](https://baiyuby.github.io/use_token_to_learn/qa/interactive/compute.html)）
+- [CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？](docs/qa/classic-models.md)（附[交互演示](https://baiyuby.github.io/use_token_to_learn/qa/interactive/classic-models.html)）
 
 完整的大纲和路线图见 [PLAN.md](PLAN.md)，写作规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 

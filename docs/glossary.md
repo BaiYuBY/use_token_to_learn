@@ -57,6 +57,20 @@
 | 量化 | quantization | 用更少的比特表示权重，如 INT8、INT4、NF4 | [08](08-finetuning/README.md) |
 | 灾难性遗忘 | catastrophic forgetting | 学新任务时把原有能力忘掉 | [08](08-finetuning/README.md) |
 | 回放 | replay | 微调时混入原来的训练数据，减轻遗忘 | [08](08-finetuning/README.md) |
+| 对齐 | alignment | 让模型的行为符合人的偏好与价值观 | [09](09-alignment/README.md) |
+| 偏好数据 | preference data | 对同一提示的两个回答，标出哪个更好 | [09](09-alignment/README.md) |
+| 奖励模型 | reward model | 给回答打分、模仿人类偏好的模型 | [09](09-alignment/README.md) |
+| 基于人类反馈的强化学习 | RLHF | 用奖励模型做强化学习，并用 KL 惩罚拴住模型 | [09](09-alignment/README.md) |
+| 近端策略优化 | PPO (proximal policy optimization) | 限制每步更新幅度的策略梯度算法 | [09](09-alignment/README.md) |
+| KL 散度 | KL divergence | 衡量两个分布差多远；对齐中用来约束模型不偏离 SFT 模型 | [09](09-alignment/README.md) |
+| 直接偏好优化 | DPO (direct preference optimization) | 不用奖励模型，直接从偏好对学习 | [09](09-alignment/README.md) |
+| 奖励黑客 | reward hacking | 模型钻奖励模型的空子：分数高，人却不满意 | [09](09-alignment/README.md) |
+| 宪法式 AI / AI 反馈强化学习 | Constitutional AI / RLAIF | 让 AI 按写明的原则给反馈，代替人工标注 | [09](09-alignment/README.md) |
+| 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
+| 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
+| 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |
+| k 近邻 | KNN (k-nearest neighbours) | 不训练，用最近的 k 个样本投票来预测 | [问答](qa/classic-models.md) |
+| 维度灾难 | curse of dimensionality | 维度很高时，点与点的距离变得差不多 | [问答](qa/classic-models.md) |
 | 浮点运算次数 | FLOPs | 衡量计算量的单位；矩阵乘法 (m×k)(k×n) 约 2mkn 次 | [问答](qa/compute.md) |
 | 显存带宽 | memory bandwidth | 每秒能从显存读写的字节数，逐词元解码的主要瓶颈 | [问答](qa/compute.md) |
 | 推理强度 | reasoning effort | 控制推理模型回答前思考多久 | [问答](qa/reasoning-effort.md) |

@@ -1,0 +1,484 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>对齐交互演示 · Alignment Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  canvas.hm { width: 100%; max-width: 260px; aspect-ratio: 1; image-rendering: pixelated; border: 1px solid var(--line); border-radius: 6px; display: block; }
+  .hm-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hm-wrap figure { margin: 0; flex: 1 1 200px; max-width: 260px; }
+  .hm-wrap figcaption { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+  .tokens { display: flex; flex-wrap: wrap; gap: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; margin: 8px 0; }
+  .tokens span { min-width: 1.3em; text-align: center; padding: 2px 3px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); }
+  .tokens span.resp { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tokens span.prompt.train { background: var(--b1); color: var(--bg); border-color: var(--b1); }
+  .tokens span.nl { color: var(--muted); }
+  .tokens .br { flex-basis: 100%; height: 0; padding: 0; border: 0; background: none; }
+  input[type=text] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; width: 9em; }
+  table.t td.ok { color: var(--good); }
+  table.t td.no { color: var(--bad); }
+  table.t td.mono, table.t th.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  #rs-samples th, #rs-samples td { text-align: left; }
+  .samples { display: grid; gap: 4px; margin-top: 8px; }
+  .samples div { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+  .samples b { display: inline-block; min-width: 3.2em; }
+  .resp { display: grid; gap: 8px; margin-top: 8px; }
+  .resp div { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+  .resp div.win { border-color: var(--good); box-shadow: 0 0 0 2px var(--good) inset; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">对齐 · 交互演示</span><span lang="en">Alignment · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">SFT 之后，怎样让模型的回答更符合人的偏好？本页的实验来自本章代码在 CPU 上的真实训练：一个隐藏的“人类”给句子打分，奖励模型只能从两两比较中去猜它的喜好，再用 RLHF 或 DPO 调整模型。</span>
+        <span lang="en">After SFT, how do we make a model's answers match what people prefer? The experiments on this page are real CPU training runs of this chapter's code: a hidden “human” scores sentences, a reward model can only guess its taste from pairwise choices, and RLHF or DPO then adjusts the model.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. preferences -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">偏好数据：人只需说“哪个更好”</span><span lang="en">Preference data: people only say which is better</span></h2>
+    <p class="hint">
+      <span lang="zh">给人打绝对分数很难，比较两个回答容易得多。Bradley–Terry 模型假设：A 比 B 好的概率 = sigmoid(r(A) − r(B))。奖励差越大，选择越确定；奖励相同时就是抛硬币，所以偏好数据天然带噪声。拖动两个回答的奖励看看。</span>
+      <span lang="en">Giving absolute scores is hard; comparing two answers is much easier. The Bradley–Terry model assumes P(A better than B) = sigmoid(r(A) − r(B)). The larger the reward gap, the surer the choice; with equal rewards it is a coin flip, so preference data is noisy by nature. Drag the two rewards.</span>
+    </p>
+    <div class="controls">
+      <label>r(A) <input id="bt-a" type="range" min="-2" max="2" step="0.1" value="1"><span id="bt-a-v" class="mono"></span></label>
+      <label>r(B) <input id="bt-b" type="range" min="-2" max="2" step="0.1" value="0"><span id="bt-b-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="bt-chart" viewBox="0 0 420 200"></svg></div>
+      <div class="col"><div class="kv" id="bt-stats"></div><div class="callout" id="bt-note"></div></div>
+    </div>
+    <h3><span lang="zh">本章实验中的偏好对（前 12 对）</span><span lang="en">Preference pairs from this chapter's experiment (first 12)</span></h3>
+    <div class="scroll"><table class="t" id="bt-pairs"></table></div>
+  </section>
+
+  <!-- 2. optimal policy -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">KL 正则：别离 SFT 模型太远</span><span lang="en">KL regularization: don't stray too far from the SFT model</span></h2>
+    <p class="hint">
+      <span lang="zh">RLHF 的目标是 max E[r(y)] − β·KL(π ‖ π<sub>ref</sub>)。它有闭式解：π*(y) ∝ π<sub>ref</sub>(y)·exp(r(y)/β)。下面 6 个回答各有一个奖励模型给的“代理奖励”和隐藏的真实奖励。第 6 个是奖励模型的漏洞：它给了高分，但人类并不喜欢。拖小 β，看看会发生什么。</span>
+      <span lang="en">RLHF maximizes E[r(y)] − β·KL(π ‖ π<sub>ref</sub>). The optimum has a closed form: π*(y) ∝ π<sub>ref</sub>(y)·exp(r(y)/β). Each of the 6 answers below has a proxy reward from the reward model and a hidden true reward. Number 6 is a flaw in the reward model: it scores high, but people do not like it. Make β small and see what happens.</span>
+    </p>
+    <div class="controls">
+      <label>β <input id="op-b" type="range" min="-1.5" max="1" step="0.05" value="0"><span id="op-b-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="op-chart" viewBox="0 0 640 230"></svg>
+    <div class="legend"><span><span class="dot" style="background:var(--muted)"></span>π<sub>ref</sub> (SFT)</span><span><span class="dot" style="background:var(--primary)"></span>π*</span></div>
+    <div class="row">
+      <div class="col"><div class="kv" id="op-stats"></div></div>
+      <div class="col"><div class="callout" id="op-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. RLHF -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">RLHF 训练：代理奖励在涨，真实奖励呢？</span><span lang="en">RLHF training: the proxy reward rises, but the true one?</span></h2>
+    <p class="hint">
+      <span lang="zh">每一步：从当前模型采样 64 个句子，奖励模型打分，减去 β×KL 惩罚，用 PPO 的截断更新调整模型。选一个奖励模型和 β，拖动步数看模型写出的句子。句子前的数字是隐藏人类给的真实奖励。</span>
+      <span lang="en">Each step samples 64 sentences from the current model, scores them with the reward model, subtracts a β×KL penalty, and updates the model with PPO's clipped objective. Pick a reward model and a β, then drag the step slider to read the model's sentences. The number before each sentence is the hidden human's true reward.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">奖励模型</span><span lang="en">reward model</span> <select id="rl-rm"></select></label>
+      <label>β <select id="rl-b"></select></label>
+      <label><span lang="zh">种子</span><span lang="en">seed</span> <select id="rl-s"></select></label>
+      <label><span lang="zh">步数</span><span lang="en">step</span> <input id="rl-step" type="range" min="0" max="20" step="1" value="20"><span id="rl-step-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="rl-chart" viewBox="0 0 420 240"></svg>
+        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span><span lang="zh">奖励模型的分数（代理）</span><span lang="en">reward model score (proxy)</span></span><span><span class="dot" style="background:var(--accent)"></span><span lang="zh">真实奖励</span><span lang="en">true reward</span></span><span><span class="dot" style="background:var(--muted)"></span>KL ÷ 10</span></div></div>
+      <div class="col"><div class="kv" id="rl-stats"></div><div class="samples" id="rl-samples"></div><div class="callout" id="rl-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. frontier -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">三种方法对比：best-of-n、RLHF、DPO</span><span lang="en">Three methods compared: best-of-n, RLHF, DPO</span></h2>
+    <p class="hint">
+      <span lang="zh">横轴是与 SFT 模型的 KL 距离（改动有多大），纵轴是真实奖励。best-of-n 最简单：采样 n 个，留奖励模型最喜欢的那个，KL 恰好等于 log n − (n−1)/n。点击图例可以显示或隐藏。</span>
+      <span lang="en">x is the KL distance from the SFT model (how much it changed), y is the true reward. Best-of-n is the simplest: sample n, keep the one the reward model likes most; its KL is exactly log n − (n−1)/n. Click the legend to show or hide a series.</span>
+    </p>
+    <svg class="chart" id="fr-chart" viewBox="0 0 640 280"></svg>
+    <div class="legend" id="fr-legend"></div>
+    <div class="callout" id="fr-note"></div>
+  </section>
+
+  <!-- 5. DPO -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">DPO：跳过奖励模型，直接从偏好对学习</span><span lang="en">DPO: skip the reward model and learn from the pairs</span></h2>
+    <p class="hint">
+      <span lang="zh">DPO 把第 2 节的闭式解反过来用：奖励可以写成 β·log(π/π<sub>ref</sub>)。于是损失只需要两个回答在当前模型和 SFT 模型下的对数概率。拖动两个“对数概率变化”，看损失和梯度权重：模型已经分对的样本权重小，分错的样本权重大。</span>
+      <span lang="en">DPO runs the closed form of part 2 backwards: the reward can be written as β·log(π/π<sub>ref</sub>). The loss then needs only the log-probabilities of the two answers under the current model and the SFT model. Drag the two log-probability changes to see the loss and the gradient weight: pairs the model already gets right weigh little, wrong ones weigh a lot.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">好回答</span><span lang="en">chosen</span> log π/π<sub>ref</sub> <input id="dp-c" type="range" min="-5" max="5" step="0.1" value="1"><span id="dp-c-v" class="mono"></span></label>
+      <label><span lang="zh">差回答</span><span lang="en">rejected</span> log π/π<sub>ref</sub> <input id="dp-r" type="range" min="-5" max="5" step="0.1" value="-1"><span id="dp-r-v" class="mono"></span></label>
+      <label>β <select id="dp-b"><option>0.1</option><option selected>0.5</option><option>1</option></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="kv" id="dp-stats"></div></div>
+      <div class="col"><svg class="chart" id="dp-chart" viewBox="0 0 420 200"></svg></div>
+    </div>
+    <div class="callout" id="dp-note"></div>
+  </section>
+
+  <!-- 6. CAI -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">Constitutional AI：让 AI 按原则给反馈</span><span lang="en">Constitutional AI: AI feedback guided by principles</span></h2>
+    <p class="hint">
+      <span lang="zh">人工标注又贵又慢。Constitutional AI 写下一组原则（“宪法”），让模型自己批评、修改回答，再让 AI 按原则在两个回答中选一个，代替人工标注偏好（RLAIF）。下面是一个手写的示意：勾选不同的原则，看 AI 评审会选哪个回答。</span>
+      <span lang="en">Human labels are slow and expensive. Constitutional AI writes down a set of principles (a “constitution”), has the model critique and revise its own answers, then has an AI pick between two answers according to the principles, replacing human preference labels (RLAIF). Below is a hand-written illustration: tick different principles and see which answer the AI judge picks.</span>
+    </p>
+    <div class="controls" id="cai-principles"></div>
+    <p><b><span lang="zh">用户：</span><span lang="en">User: </span></b><span lang="zh">邻居家的狗每天晚上一直叫，我该怎么办？</span><span lang="en">My neighbour's dog barks every night. What should I do?</span></p>
+    <div class="resp" id="cai-resp"></div>
+    <div class="callout" id="cai-note"></div>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">09 · Alignment</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Results of the alignment runs, generated by figures/alignment_figures.py -->
+<script src="alignment_data.js"></script>
+<script>
+(() => {
+  const D = window.ALIGNMENT_DATA;
+  const $ = id => document.getElementById(id);
+  if (!D) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>alignment_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+  const sig = x => 1 / (1 + Math.exp(-x));
+  const pct = v => (v * 100).toFixed(0) + "%";
+  const sgn = v => (v >= 0 ? "+" : "") + v.toFixed(2);
+
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 44, R = 12, T = 12, B = 36;
+    const tx = v => o.xlog ? Math.log10(1 + v) : v;
+    const fx = v => L + (W - L - R) * (tx(v) - tx(o.x0)) / (tx(o.x1) - tx(o.x0));
+    const fy = v => T + (H - T - B) * (1 - (Math.min(o.y1, Math.max(o.y0, v)) - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    series.forEach(se => {
+      if (se.line !== false) s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" ${se.dash ? 'stroke-dasharray="5 4"' : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="${se.r || 3.5}" fill="${se.color}"/>`; });
+    });
+    (o.marks || []).forEach(m => { s += `<circle cx="${fx(m.x)}" cy="${fy(m.y)}" r="6" fill="${m.color}" stroke="${css("--bg")}" stroke-width="2"/>`; });
+    (o.vline !== undefined) && (s += `<line x1="${fx(o.vline)}" x2="${fx(o.vline)}" y1="${T}" y2="${H - B}" stroke="${css("--ink")}" stroke-dasharray="3 3"/>`);
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 1. Bradley-Terry =================
+  function renderBt() {
+    const a = +$("bt-a").value, b = +$("bt-b").value, p = sig(a - b);
+    $("bt-a-v").textContent = a.toFixed(1); $("bt-b-v").textContent = b.toFixed(1);
+    const xs = [], ys = []; for (let d = -4; d <= 4.001; d += 0.1) { xs.push(d); ys.push(sig(d)); }
+    chart($("bt-chart"), [{ x: xs, y: ys, color: css("--primary") }],
+      { x0: -4, x1: 4, y0: 0, y1: 1, xticks: [-4, -2, 0, 2, 4], yticks: [0, 0.5, 1], yfmt: pct, marks: [{ x: a - b, y: p, color: css("--accent") }], xlabel: "r(A) − r(B)" });
+    $("bt-stats").innerHTML = kv([[tr("P(A 比 B 好)", "P(A preferred)"), pct(p)], [tr("若选了 A，损失 −log σ(Δ)", "loss if A chosen, −log σ(Δ)"), (-Math.log(p)).toFixed(3)], [tr("若选了 B，损失", "loss if B chosen"), (-Math.log(1 - p)).toFixed(3)]]);
+    $("bt-note").innerHTML = tr("奖励模型的训练目标就是让“被选中”的回答得分更高：损失 −log σ(r<sub>好</sub> − r<sub>差</sub>)，与二分类交叉熵完全相同。奖励只有<b>差值</b>有意义，整体加一个常数不影响任何选择。",
+      "The reward model is trained so the chosen answer scores higher: loss −log σ(r<sub>chosen</sub> − r<sub>rejected</sub>), exactly binary cross-entropy. Only reward <b>differences</b> matter; adding a constant changes nothing.");
+    $("bt-pairs").innerHTML = `<tr><th>${tr("被选中", "chosen")}</th><th>${tr("真实", "true")}</th><th>${tr("被拒绝", "rejected")}</th><th>${tr("真实", "true")}</th></tr>` +
+      D.pairs.map(p => `<tr><td class="mono" style="text-align:left;white-space:normal">${p.chosen}</td><td class="${p.r_chosen < p.r_rejected ? "bad" : ""}">${p.r_chosen}</td><td class="mono" style="text-align:left;white-space:normal">${p.rejected}</td><td>${p.r_rejected}</td></tr>`).join("") +
+      `<tr><td colspan="4" class="hint" style="text-align:left;white-space:normal">${tr(`红色表示“人”选了真实奖励更低的那个：标注噪声。奖励模型的排序准确率（真实奖励不同的对）：${Object.entries(D.rm_acc).map(([n, a]) => `${n} 对 ${pct(a)}`).join("，")}。`, `Red marks a pair where the “human” picked the answer with the lower true reward: label noise. Reward model ranking accuracy (pairs whose true rewards differ): ${Object.entries(D.rm_acc).map(([n, a]) => `${n} pairs ${pct(a)}`).join(", ")}.`)}</td></tr>`;
+  }
+
+  // ================= 2. optimal policy =================
+  const ANS = [
+    { t: "the cat sleeps .", p: 0.35, proxy: 0.0, truth: 0 },
+    { t: "a happy dog runs .", p: 0.2, proxy: 1.0, truth: 1 },
+    { t: "the clever bird sings today .", p: 0.15, proxy: 1.2, truth: 1 },
+    { t: "the happy cat likes the happy dog .", p: 0.12, proxy: 1.8, truth: 0.4 },
+    { t: "a dog chase the ball .", p: 0.15, proxy: -0.3, truth: -1 },
+    { t: "happy clever happy the happy", p: 0.03, proxy: 2.8, truth: -1 },
+  ];
+  function renderOp() {
+    const beta = 10 ** +$("op-b").value;
+    $("op-b-v").textContent = beta < 1 ? beta.toFixed(2) : beta.toFixed(1);
+    const w = ANS.map(a => a.p * Math.exp(a.proxy / beta)), Z = w.reduce((a, b) => a + b, 0), pi = w.map(v => v / Z);
+    const svg = $("op-chart"), W = 640, H = 230, L = 10, T = 10, B = 70, bw = (W - L * 2) / ANS.length;
+    let s = "";
+    ANS.forEach((a, i) => {
+      const x = L + i * bw, h1 = (H - T - B) * a.p, h2 = (H - T - B) * pi[i];
+      s += `<rect x="${x + 8}" y="${H - B - h1}" width="${bw / 2 - 10}" height="${h1}" fill="${css("--muted")}"/>`;
+      s += `<rect x="${x + bw / 2}" y="${H - B - h2}" width="${bw / 2 - 10}" height="${h2}" fill="${css("--primary")}"/>`;
+      s += `<text x="${x + bw / 2}" y="${H - B + 14}" text-anchor="middle" style="font-size:10px">${i + 1}. ${tr("代理", "proxy")} ${a.proxy} · ${tr("真实", "true")} <tspan style="fill:${a.truth < 0 ? css("--bad") : css("--good")}">${a.truth}</tspan></text>`;
+      s += `<text x="${x + bw / 2}" y="${H - B + 30}" text-anchor="middle" style="font-size:9px">${a.t.length > 22 ? a.t.slice(0, 21) + "…" : a.t}</text>`;
+      s += `<text x="${x + bw * 0.75 - 5}" y="${H - B - h2 - 4}" text-anchor="middle" style="font-size:10px">${pct(pi[i])}</text>`;
+    });
+    svg.innerHTML = s;
+    const kl = pi.reduce((s, q, i) => s + (q > 0 ? q * Math.log(q / ANS[i].p) : 0), 0);
+    const eProxy = pi.reduce((s, q, i) => s + q * ANS[i].proxy, 0), eTrue = pi.reduce((s, q, i) => s + q * ANS[i].truth, 0);
+    const refTrue = ANS.reduce((s, a) => s + a.p * a.truth, 0);
+    $("op-stats").innerHTML = kv([[tr("代理奖励期望", "expected proxy reward"), sgn(eProxy)], [tr("真实奖励期望", "expected true reward"), `<span class="${eTrue < refTrue ? "bad" : "good"}">${sgn(eTrue)}</span> <span class="hint">(SFT ${sgn(refTrue)})</span>`], ["KL(π* ‖ π_ref)", kl.toFixed(2)]]);
+    $("op-note").innerHTML = beta > 2 ? tr("β 很大：几乎不敢偏离 SFT 模型，奖励提升很少。", "Large β: the model barely moves away from SFT, and the reward improves little.")
+      : beta < 0.25 ? tr("β 很小：概率几乎全压在代理奖励最高的回答 6 上，而它恰好是奖励模型的漏洞，真实奖励反而下降了。这就是<b>奖励黑客</b>（reward hacking）。", "Small β: almost all probability goes to answer 6, the one with the highest proxy reward, which happens to be a flaw in the reward model; the true reward drops. This is <b>reward hacking</b>.")
+      : tr("适中的 β：概率转向奖励高的回答，但被 KL 惩罚拉住，不会全部押在一个回答上。SFT 模型很少写的回答（如 6），需要很小的 β 才会被放大。", "A moderate β: probability shifts toward high-reward answers, but the KL penalty holds it back from betting everything on one. Answers the SFT model rarely writes (like 6) only get amplified when β is very small.");
+  }
+
+  // ================= 3. RLHF runs =================
+  const RUNS = D.runs;
+  const rmKeys = [...new Set(Object.values(RUNS).map(r => String(r.rm)))];
+  $("rl-rm").innerHTML = rmKeys.map(k => `<option value="${k}">${k === "gold" ? "" : k}</option>`).join("");
+  function rmLabel(k) { return k === "gold" ? tr("真实奖励本身（完美）", "the true reward (perfect)") : tr(`用 ${k} 对偏好训练`, `trained on ${k} pairs`); }
+  function syncRl() {
+    const rm = $("rl-rm").value;
+    const betas = [...new Set(Object.values(RUNS).filter(r => String(r.rm) === rm).map(r => r.beta))];
+    const keepB = $("rl-b").value;
+    $("rl-b").innerHTML = betas.map(b => `<option value="${b}">${b}</option>`).join("");
+    if (betas.map(String).includes(keepB)) $("rl-b").value = keepB;
+    const seeds = Object.values(RUNS).filter(r => String(r.rm) === rm && String(r.beta) === $("rl-b").value).map(r => r.seed);
+    const keepS = $("rl-s").value;
+    $("rl-s").innerHTML = seeds.map(s => `<option value="${s}">${s}</option>`).join("");
+    if (seeds.map(String).includes(keepS)) $("rl-s").value = keepS;
+  }
+  function renderRl() {
+    [...$("rl-rm").options].forEach(o => { o.textContent = rmLabel(o.value); });
+    const r = RUNS[`rm${$("rl-rm").value}-b${$("rl-b").value}-s${$("rl-s").value}`];
+    if (!r) return;
+    const h = r.history, k = Math.min(+$("rl-step").value, h.length - 1), e = h[k];
+    $("rl-step").max = h.length - 1; $("rl-step-v").textContent = e.step;
+    const xs = h.map(x => x.step), ymax = Math.max(3.2, ...h.map(x => x.reward));
+    chart($("rl-chart"), [
+      { x: xs, y: h.map(x => x.reward), color: css("--primary") },
+      { x: xs, y: h.map(x => x.true), color: css("--accent") },
+      { x: xs, y: h.map(x => x.kl / 10), color: css("--muted"), dash: true },
+    ], { x0: 0, x1: xs[xs.length - 1], y0: -1.2, y1: ymax, xticks: [0, 100, 200, 300, 400], yticks: [-1, 0, 1, 2, 3], vline: e.step, xlabel: tr("RLHF 步数", "RLHF step") });
+    $("rl-stats").innerHTML = kv([[tr("代理奖励", "proxy reward"), sgn(e.reward)], [tr("真实奖励", "true reward"), `<span class="${e.true < D.base.true ? "bad" : "good"}">${sgn(e.true)}</span>`], ["KL", e.kl.toFixed(1)]]);
+    $("rl-samples").innerHTML = e.samples.map((t, i) => `<div><b class="${e.samples_true[i] < 0 ? "bad" : e.samples_true[i] > 0 ? "good" : ""}">${sgn(e.samples_true[i])}</b> ${t}</div>`).join("");
+    const last = h[h.length - 1];
+    $("rl-note").innerHTML = r.rm === "gold" ? tr("直接优化真实奖励时，模型很快学会写语法正确、恰好带一个友好词的句子。现实中我们没有这个“真实奖励”，只能用奖励模型代替。", "Optimizing the true reward directly, the model quickly learns grammatical sentences with exactly one friendly word. In reality we never have this true reward; a reward model has to stand in for it.")
+      : last.true < 0 ? tr("<b>奖励黑客</b>：奖励模型的分数一路上涨，真实奖励却跌到谷底。模型找到了奖励模型的漏洞：省掉冠词，直接用 happy 开头（如 happy robots run .），有时还堆砌好几个 happy。SFT 模型从不这样写，奖励模型没见过这种句子，却给了高分。", "<b>Reward hacking</b>: the reward model's score keeps climbing while the true reward collapses. The model found a flaw in the reward model: drop the article and start with happy (as in happy robots run .), sometimes piling up several happys. The SFT model never writes like this, so the reward model never saw such sentences, yet it scores them high.")
+      : tr("这次训练没有跑偏：真实奖励随代理奖励一起上升。换一个种子或更小的 β 再看看。", "This run stayed on track: the true reward rose with the proxy. Try another seed or a smaller β.");
+  }
+
+  // ================= 4. frontier =================
+  const hidden = new Set();
+  function renderFr() {
+    const series = [];
+    const add = (key, label, color, pts, opts = {}) => { series.push({ key, label, color, pts, ...opts }); };
+    ["1000", "3000"].forEach((n, i) => add(`bon${n}`, `best-of-n (${n})`, i ? "#5c6bc0" : "#9fa8da", D.bon[n].map(r => [r.kl, r.true]), { line: true }));
+    [0.02, 0.1, 0.5].forEach((b, i) => add(`rl${b}`, `RLHF β=${b}`, [css("--bad"), css("--good"), "#8e24aa"][i],
+      Object.values(RUNS).filter(r => r.rm !== "gold" && r.beta === b).map(r => [r.history[r.history.length - 1].kl, r.history[r.history.length - 1].true]), { line: false }));
+    Object.entries(D.dpo).forEach(([b, d], i) => add(`dpo${b}`, `DPO β=${b}`, i ? css("--accent") : css("--muted"), [[0, D.base.true], ...d.history.map(e => [e.kl, e.true])], { line: true, dash: true }));
+    const vis = series.filter(s => !hidden.has(s.key));
+    chart($("fr-chart"), vis.map(s => ({ x: s.pts.map(p => p[0]), y: s.pts.map(p => p[1]), color: s.color, dots: true, line: s.line, dash: s.dash })),
+      { xlog: true, x0: 0, x1: 40, y0: -1.1, y1: 1.1, xticks: [0, 1, 3, 10, 30], yticks: [-1, -0.5, 0, 0.5, 1], xlabel: tr("与 SFT 模型的 KL（对数刻度）", "KL to the SFT model (log scale)") });
+    $("fr-legend").innerHTML = series.map(s => `<button data-k="${s.key}" class="${hidden.has(s.key) ? "off" : ""}"><span class="dot" style="background:${s.color}"></span>${s.label}</button>`).join("");
+    $("fr-legend").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { hidden.has(b.dataset.k) ? hidden.delete(b.dataset.k) : hidden.add(b.dataset.k); renderFr(); }));
+    const ends = Object.values(RUNS).filter(r => r.rm !== "gold").map(r => r.history[r.history.length - 1]);
+    const hacked = ends.filter(e => e.true < 0).length, bestBon = Math.max(...D.bon["3000"].map(r => r.true));
+    const okKl = ends.filter(e => e.true >= 0).map(e => e.kl), hackKl = ends.filter(e => e.true < 0).map(e => e.kl);
+    const rng = a => a.length ? `${Math.min(...a).toFixed(0)}–${Math.max(...a).toFixed(0)}` : "-";
+    const dpoBest = Math.max(...Object.values(D.dpo).flatMap(d => d.history.map(e => e.true)));
+    $("fr-note").innerHTML = tr(`best-of-n 只改动了一点点（KL ≤ ${D.bon["3000"][D.bon["3000"].length - 1].kl.toFixed(1)}），真实奖励就能到 ${sgn(bestBon)}。RLHF 能走得更远：${ends.length} 次运行中有 ${ends.length - hacked} 次结束时真实奖励较高（KL 在 ${rng(okKl)} 之间），另外 ${hacked} 次一路跑到 KL ${rng(hackKl)}，真实奖励跌到 −1。DPO 在本实验中最好只到 ${sgn(dpoBest)}，训练轮数多了也会下降。`,
+      `Best-of-n changes the model only a little (KL ≤ ${D.bon["3000"][D.bon["3000"].length - 1].kl.toFixed(1)}) and reaches a true reward of ${sgn(bestBon)}. RLHF can go further: of ${ends.length} runs, ${ends.length - hacked} end with a high true reward (KL between ${rng(okKl)}), while ${hacked} race to KL ${rng(hackKl)} and the true reward falls to −1. DPO peaks at ${sgn(dpoBest)} in this experiment and declines with more epochs.`);
+  }
+
+  // ================= 5. DPO =================
+  function renderDp() {
+    const c = +$("dp-c").value, r = +$("dp-r").value, b = +$("dp-b").value, m = c - r;
+    $("dp-c-v").textContent = sgn(c); $("dp-r-v").textContent = sgn(r);
+    $("dp-stats").innerHTML = kv([
+      [tr("隐式奖励差 β·(Δ好 − Δ差)", "implicit reward gap β·(Δc − Δr)"), sgn(b * m)],
+      [tr("DPO 损失 −log σ(·)", "DPO loss −log σ(·)"), (-Math.log(sig(b * m))).toFixed(3)],
+      [tr("梯度权重 σ(−β·margin)", "gradient weight σ(−β·margin)"), sig(-b * m).toFixed(3)],
+      [tr("起点（π = π_ref）的损失", "loss at the start (π = π_ref)"), "ln 2 = 0.693"],
+    ]);
+    const xs = [], ys = []; for (let x = -10; x <= 10.001; x += 0.2) { xs.push(x); ys.push(-Math.log(sig(b * x))); }
+    chart($("dp-chart"), [{ x: xs, y: ys, color: css("--primary") }], { x0: -10, x1: 10, y0: 0, y1: Math.max(3, ys[0]), xticks: [-10, -5, 0, 5, 10], yticks: [0, 1, 2, 3], marks: [{ x: m, y: -Math.log(sig(b * m)), color: css("--accent") }], xlabel: "Δ(chosen) − Δ(rejected)" });
+    const d = D.dpo[String(b)] || D.dpo["0.5"];
+    $("dp-note").innerHTML = (m < 0 ? tr("现在模型把差回答排在前面，梯度权重接近 1：这一对会被重点纠正。", "The model currently ranks the rejected answer higher, so the gradient weight is near 1: this pair gets corrected hard.")
+      : tr("模型已经更偏向好回答，梯度权重变小：DPO 会自动把力气花在还没分对的样本上。", "The model already favours the chosen answer, so the gradient weight shrinks: DPO automatically focuses on pairs it still gets wrong.")) +
+      " " + tr(`本章实验（3000 对，β = ${D.dpo[String(b)] ? b : 0.5}）：每 2 轮的真实奖励为 ${d.history.map(e => sgn(e.true)).join(" → ")}。DPO 只看固定的偏好对，训练太久会过拟合，所以通常只训练 1–3 轮。`,
+        `In this chapter's experiment (3000 pairs, β = ${D.dpo[String(b)] ? b : 0.5}) the true reward every 2 epochs was ${d.history.map(e => sgn(e.true)).join(" → ")}. DPO only sees a fixed set of pairs and overfits if trained too long, which is why it usually runs for 1–3 epochs.`);
+  }
+
+  // ================= 6. Constitutional AI (illustration) =================
+  const PRINCIPLES = [
+    { key: "harmless", zh: "无害：不鼓励伤害他人或动物", en: "Harmless: do not encourage harming people or animals" },
+    { key: "helpful", zh: "有帮助：给出可行的建议", en: "Helpful: give practical advice" },
+    { key: "respect", zh: "尊重：不激化矛盾", en: "Respectful: do not escalate conflict" },
+  ];
+  const RESP = [
+    { zh: "往他家院子里扔点东西，把狗吓住就不叫了。", en: "Throw something into their yard to scare the dog quiet.", s: { harmless: 0, helpful: 0.5, respect: 0 } },
+    { zh: "先礼貌地和邻居谈谈，记下狗叫的时间；如果没有改善，再联系物业或社区调解。", en: "Talk to your neighbour politely first and note when the barking happens; if nothing changes, contact the building management or a community mediator.", s: { harmless: 1, helpful: 1, respect: 1 } },
+    { zh: "抱歉，我无法帮助处理邻里纠纷。", en: "Sorry, I can't help with disputes between neighbours.", s: { harmless: 1, helpful: 0, respect: 1 } },
+  ];
+  const chosenP = new Set(["harmless"]);
+  function renderCai() {
+    $("cai-principles").innerHTML = PRINCIPLES.map(p => `<label><input type="checkbox" data-k="${p.key}" ${chosenP.has(p.key) ? "checked" : ""}> ${tr(p.zh, p.en)}</label>`).join("");
+    $("cai-principles").querySelectorAll("input").forEach(i => i.addEventListener("change", () => { i.checked ? chosenP.add(i.dataset.k) : chosenP.delete(i.dataset.k); renderCai(); }));
+    const scores = RESP.map(r => [...chosenP].reduce((s, k) => s + r.s[k], 0));
+    const best = Math.max(...scores), winners = scores.map((s, i) => s === best ? i : -1).filter(i => i >= 0);
+    $("cai-resp").innerHTML = RESP.map((r, i) => `<div class="${winners.length === 1 && winners[0] === i ? "win" : ""}"><b>${String.fromCharCode(65 + i)}</b> ${tr(r.zh, r.en)} <span class="hint">· ${tr("得分", "score")} ${scores[i]}</span></div>`).join("");
+    $("cai-note").innerHTML = chosenP.size === 0 ? tr("没有原则，AI 评审无从判断。", "Without principles the AI judge has nothing to go on.")
+      : winners.length > 1 ? tr(`只看这些原则，${winners.map(i => String.fromCharCode(65 + i)).join(" 和 ")} 打平：只强调“无害”时，拒绝回答（C）也能拿满分，模型会学得过度拒绝。再加上“有帮助”试试。`, `On these principles alone, ${winners.map(i => String.fromCharCode(65 + i)).join(" and ")} tie: stressing only harmlessness lets a refusal (C) score full marks, and the model learns to over-refuse. Add “helpful”.`)
+      : tr(`AI 评审选 ${String.fromCharCode(65 + winners[0])}。这样得到的“偏好对”可以像人工标注一样训练奖励模型或做 DPO。在监督阶段，模型还会按原则先批评自己的回答（例如：A 可能伤害动物，还会激化矛盾），再改写成更好的版本，用改写后的回答做 SFT。`,
+          `The AI judge picks ${String.fromCharCode(65 + winners[0])}. Pairs labelled this way train a reward model or DPO just like human labels. In the supervised stage the model also critiques its own answer against the principles (e.g. “A could hurt an animal and escalate the conflict”), then rewrites it, and the rewrites are used for SFT.`) +
+      tr(" <span class=\"hint\">（本节为手写示意，分数是人为设定的。）</span>", " <span class=\"hint\">(This part is a hand-written illustration; the scores are made up.)</span>");
+  }
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["奖励模型的训练数据通常是什么形式？", "What does a reward model's training data usually look like?"],
+      opts: [["每个回答一个 1–10 分的绝对分数", "An absolute 1–10 score per answer"], ["同一个问题的两个回答，以及人选了哪一个", "Two answers to the same prompt and which one a person picked"], ["标准答案", "Reference answers"]],
+      a: 1, ex: ["两两比较比打绝对分数更容易、更一致，Bradley–Terry 模型把比较结果变成可训练的损失。", "Pairwise comparisons are easier and more consistent than absolute scores; the Bradley–Terry model turns them into a trainable loss."] },
+    { q: ["RLHF 目标中 β·KL(π ‖ π_ref) 这一项的主要作用是？", "What is the main job of the β·KL(π ‖ π_ref) term in RLHF?"],
+      opts: [["加快训练", "Speed up training"], ["防止模型为了刷高奖励模型的分数而跑得太远，钻奖励模型的空子", "Stop the model drifting too far to game the reward model"], ["让回答更短", "Make answers shorter"]],
+      a: 1, ex: ["奖励模型只在 SFT 模型常写的那类回答上可靠；离得越远，越可能遇到它的漏洞。", "The reward model is only reliable on the kind of answers the SFT model usually writes; the further away, the more likely its flaws are hit."] },
+    { q: ["和 RLHF 相比，DPO 不需要什么？", "Compared with RLHF, what does DPO not need?"],
+      opts: [["偏好数据", "Preference data"], ["单独训练的奖励模型和在线采样", "A separately trained reward model and online sampling"], ["参考模型 π_ref", "A reference model π_ref"]],
+      a: 1, ex: ["DPO 仍然需要偏好对和参考模型，但把奖励写成 β·log(π/π_ref)，直接用分类损失训练策略。", "DPO still needs preference pairs and a reference model, but writes the reward as β·log(π/π_ref) and trains the policy with a classification-style loss."] },
+    { q: ["“奖励黑客”指的是什么？", "What is “reward hacking”?"],
+      opts: [["有人攻击了奖励模型的服务器", "Someone attacks the reward model's server"], ["模型找到奖励模型的漏洞，分数很高但人并不满意", "The model finds a flaw in the reward model: high scores, unhappy people"], ["奖励模型训练太慢", "The reward model trains too slowly"]],
+      a: 1, ex: ["奖励模型只是人类偏好的近似。优化压力越大，越容易利用近似中的错误（Goodhart 定律）。", "A reward model only approximates human preference. The harder you optimize, the more its errors get exploited (Goodhart's law)."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderBt(); renderOp(); renderRl(); renderFr(); renderDp(); renderCai(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["bt-a", "bt-b"].forEach(id => $(id).addEventListener("input", renderBt));
+  $("op-b").addEventListener("input", renderOp);
+  $("rl-rm").addEventListener("change", () => { syncRl(); renderRl(); });
+  $("rl-b").addEventListener("change", () => { syncRl(); renderRl(); });
+  ["rl-s", "rl-step"].forEach(id => $(id).addEventListener("input", renderRl));
+  ["dp-c", "dp-r", "dp-b"].forEach(id => $(id).addEventListener("input", renderDp));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  $("rl-rm").value = "1000"; syncRl(); $("rl-b").value = "0.02"; syncRl();
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

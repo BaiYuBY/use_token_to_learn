@@ -57,6 +57,20 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 量化 | quantization | Representing weights with fewer bits, e.g. INT8, INT4, NF4 | [08](08-finetuning/README.en.md) |
 | 灾难性遗忘 | catastrophic forgetting | Losing earlier abilities while learning a new task | [08](08-finetuning/README.en.md) |
 | 回放 | replay | Mixing the original training data into fine-tuning to reduce forgetting | [08](08-finetuning/README.en.md) |
+| 对齐 | alignment | Making a model's behaviour match human preferences and values | [09](09-alignment/README.en.md) |
+| 偏好数据 | preference data | Two answers to the same prompt, with the better one marked | [09](09-alignment/README.en.md) |
+| 奖励模型 | reward model | A model that scores answers, imitating human preferences | [09](09-alignment/README.en.md) |
+| 基于人类反馈的强化学习 | RLHF | Reinforcement learning against a reward model, held close to the SFT model by a KL penalty | [09](09-alignment/README.en.md) |
+| 近端策略优化 | PPO (proximal policy optimization) | A policy-gradient algorithm that limits how far each update moves | [09](09-alignment/README.en.md) |
+| KL 散度 | KL divergence | How far apart two distributions are; used in alignment to keep the model near the SFT model | [09](09-alignment/README.en.md) |
+| 直接偏好优化 | DPO (direct preference optimization) | Learning straight from preference pairs, with no reward model | [09](09-alignment/README.en.md) |
+| 奖励黑客 | reward hacking | The model games the reward model: high scores, unhappy people | [09](09-alignment/README.en.md) |
+| 宪法式 AI / AI 反馈强化学习 | Constitutional AI / RLAIF | An AI gives feedback by written principles instead of human labellers | [09](09-alignment/README.en.md) |
+| 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
+| 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
+| 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |
+| k 近邻 | KNN (k-nearest neighbours) | No training; predicts by letting the k closest examples vote | [Q&A](qa/classic-models.en.md) |
+| 维度灾难 | curse of dimensionality | In high dimensions, distances between points become nearly equal | [Q&A](qa/classic-models.en.md) |
 | 浮点运算次数 | FLOPs | A count of arithmetic work; an (m×k)(k×n) matrix multiply takes about 2mkn | [Q&A](qa/compute.en.md) |
 | 显存带宽 | memory bandwidth | Bytes per second moved to and from GPU memory; the main limit when decoding token by token | [Q&A](qa/compute.en.md) |
 | 推理强度 | reasoning effort | How long a reasoning model thinks before answering | [Q&A](qa/reasoning-effort.en.md) |
