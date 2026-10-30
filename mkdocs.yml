@@ -59,6 +59,7 @@ plugins:
             Transformer 结构: Transformer Block
             训练: Training
             预训练: Pre-training
+            规模定律: Scaling Laws
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -100,6 +101,7 @@ nav:
       - Transformer 结构: 05-transformer/README.md
   - 训练:
       - 预训练: 06-pretraining/README.md
+      - 规模定律: 07-scaling-laws/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

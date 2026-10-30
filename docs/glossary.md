@@ -42,6 +42,11 @@
 | 学习率预热 / 余弦衰减 / WSD | warmup / cosine decay / WSD | 学习率先升后降的调度方式 | [06](06-pretraining/README.md) |
 | 梯度裁剪 | gradient clipping | 把梯度范数限制在阈值以内，防止训练被巨大梯度破坏 | [06](06-pretraining/README.md) |
 | 算力利用率 | MFU (model FLOPs utilization) | 实际达到的算力占硬件峰值的比例 | [06](06-pretraining/README.md) |
+| 幂律 | power law | L ∝ x^(−α)，在双对数坐标下是直线 | [07](07-scaling-laws/README.md) |
+| 不可约损失 | irreducible loss | 数据本身的不确定性，再大的模型也降不下去的损失 | [07](07-scaling-laws/README.md) |
+| 算力最优 | compute-optimal | 在给定训练算力下损失最低的模型大小与数据量组合 | [07](07-scaling-laws/README.md) |
+| 等算力曲线 | isoFLOP curve | 算力相同、模型大小不同的一组实验的损失曲线 | [07](07-scaling-laws/README.md) |
+| 涌现 | emergent abilities | 在某个规模下看似突然出现的能力 | [07](07-scaling-laws/README.md) |
 | 推理强度 | reasoning effort | 控制推理模型回答前思考多久 | [问答](qa/reasoning-effort.md) |
 | 测试时计算 | test-time compute | 在使用模型时多花算力（如更长的思考）来提升效果 | [问答](qa/reasoning-effort.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | 把模型高效地部署成服务的软件，如 vLLM、SGLang、DeepInfer | [问答](qa/deepinfer.md) |

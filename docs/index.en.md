@@ -22,7 +22,8 @@ Each chapter follows the same rhythm:
 | 04 | [Attention](04-attention/README.md) | [Attention playground](04-attention/interactive/attention.html?lang=en) | ✅ done |
 | 05 | [Transformer block](05-transformer/README.md) | [Transformer playground](05-transformer/interactive/transformer.html?lang=en) | ✅ done |
 | 06 | [Pre-training](06-pretraining/README.md) | [Pre-training playground](06-pretraining/interactive/pretraining.html?lang=en) | ✅ done |
-| 07–10 | Training: scaling laws, fine-tuning, alignment, reasoning models and test-time compute | | 🚧 planned |
+| 07 | [Scaling laws](07-scaling-laws/README.md) | [Scaling laws playground](07-scaling-laws/interactive/scaling.html?lang=en) | ✅ done |
+| 08–10 | Training: fine-tuning, alignment, reasoning models and test-time compute | | 🚧 planned |
 | 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
 | 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
 

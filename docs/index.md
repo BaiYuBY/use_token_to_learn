@@ -22,7 +22,8 @@
 | 04 | [注意力机制 Attention](04-attention/README.md) | [注意力演示](04-attention/interactive/attention.html) | ✅ 已完成 |
 | 05 | [Transformer 结构](05-transformer/README.md) | [Transformer 演示](05-transformer/interactive/transformer.html) | ✅ 已完成 |
 | 06 | [预训练 Pre-training](06-pretraining/README.md) | [预训练演示](06-pretraining/interactive/pretraining.html) | ✅ 已完成 |
-| 07–10 | 训练：Scaling Laws、微调、对齐、推理模型与测试时计算 | | 🚧 计划中 |
+| 07 | [规模定律 Scaling Laws](07-scaling-laws/README.md) | [Scaling Laws 演示](07-scaling-laws/interactive/scaling.html) | ✅ 已完成 |
+| 08–10 | 训练：微调、对齐、推理模型与测试时计算 | | 🚧 计划中 |
 | 11–15 | 推理与部署：解码采样、推理优化、推理服务系统、长上下文、MoE | | 🚧 计划中 |
 | 16–20 | 应用与前沿：多模态、RAG、Agent、评测、安全与可解释性 | | 🚧 计划中 |
 

@@ -1,0 +1,435 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scaling Laws 交互演示 · Scaling Laws Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">Scaling Laws · 交互演示</span><span lang="en">Scaling Laws · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">模型多大、数据多少、算力怎么分？损失随规模的变化惊人地有规律。本页的实验数据来自本章代码在 CPU 上的 20 次真实训练。</span>
+        <span lang="en">How big a model, how much data, how to split the compute? Loss changes with scale with surprising regularity. The experimental data on this page comes from 20 real training runs of this chapter's code on a CPU.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. power law -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">幂律：在双对数坐标里是一条直线</span><span lang="en">Power laws: a straight line on log-log axes</span></h2>
+    <p class="hint">
+      <span lang="zh">L(x) = E + A·x<sup>−α</sup>。规模 x 每扩大 10 倍，可约减的那部分损失（L − E）就缩小为原来的 10<sup>−α</sup>。E 是“不可约损失”，数据本身的不确定性，再大的模型也降不下去。切换坐标轴看看：在普通坐标下像是“越来越没用”，在双对数坐标下是稳定的直线。</span>
+      <span lang="en">L(x) = E + A·x<sup>−α</sup>. Every 10× in scale x shrinks the reducible part of the loss (L − E) by a factor of 10<sup>−α</sup>. E is the “irreducible loss”, the uncertainty in the data itself that no model can remove. Switch the axes: on linear axes it looks like “diminishing returns”, on log-log axes it is a steady straight line.</span>
+    </p>
+    <div class="controls">
+      <label>α <input id="pl-a" type="range" min="0.05" max="0.8" step="0.01" value="0.34"><span id="pl-a-v" class="mono"></span></label>
+      <label>E <input id="pl-e" type="range" min="0" max="2" step="0.05" value="0"><span id="pl-e-v" class="mono"></span></label>
+      <button id="pl-log" class="on"><span lang="zh">双对数坐标</span><span lang="en">log-log axes</span></button>
+    </div>
+    <svg class="chart" id="pl-chart" viewBox="0 0 640 230"></svg>
+    <div class="callout" id="pl-note"></div>
+  </section>
+
+  <!-- 2. Chinchilla calculator -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">Chinchilla：给定算力，模型和数据怎么分？</span><span lang="en">Chinchilla: how to split a compute budget between model and data</span></h2>
+    <p class="hint">
+      <span lang="zh">训练算力 C ≈ 6ND。同样的 C，可以训练大模型、少数据，也可以训练小模型、多数据。曲线是沿着这条“等算力线”预测的损失，最低点就是算力最优。默认用 Besiroglu 等人 2024 年重新拟合的参数；也可以切换回原论文发表的参数，结果差别很大。</span>
+      <span lang="en">Training compute is C ≈ 6ND. The same C can train a big model on little data or a small model on lots of data. The curve shows predicted loss along this iso-compute line; its minimum is the compute-optimal point. The default uses Besiroglu et al.'s 2024 refit; you can switch to the parameters published in the original paper, and the answer changes a lot.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">算力</span><span lang="en">compute</span> C <input id="ch-c" type="range" min="19" max="26" step="0.1" value="23.77"><span id="ch-c-v" class="mono"></span></label>
+      <label><span lang="zh">参数来源</span><span lang="en">fit</span> <select id="ch-fit"><option value="besiroglu2024">Besiroglu et al. 2024</option><option value="hoffmann2022">Hoffmann et al. 2022</option></select></label>
+    </div>
+    <div class="controls" id="ch-models"></div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="ch-chart" viewBox="0 0 420 240"></svg></div>
+      <div class="col"><div class="kv" id="ch-stats"></div><div class="callout" id="ch-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. our isoFLOP -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">我们自己的 isoFLOP 实验</span><span lang="en">Our own isoFLOP experiment</span></h2>
+    <p class="hint">
+      <span lang="zh">在 Python 标准库的源代码上做字符级训练。每个算力预算下训练 5 个不同宽度的模型（都恰好花掉同样的算力），共 20 次。每条曲线都是 U 形：模型太小学不动，太大则看的数据太少。★ 是抛物线拟合出的最低点。</span>
+      <span lang="en">Character-level training on the Python standard library's source code. For each compute budget, 5 models of different widths are trained, each spending exactly that budget: 20 runs in total. Every curve is U-shaped: too small a model cannot learn enough, too large a model sees too little data. ★ marks the minimum of a fitted parabola.</span>
+    </p>
+    <svg class="chart" id="iso-chart" viewBox="0 0 640 260"></svg>
+    <div class="legend" id="iso-legend"></div>
+    <div class="scroll" style="margin-top:10px"><table class="t" id="iso-table"></table></div>
+    <div class="callout" id="iso-note"></div>
+  </section>
+
+  <!-- 4. extrapolation -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">用小实验预测大实验，准吗？</span><span lang="en">Can small runs predict a bigger one?</span></h2>
+    <p class="hint">
+      <span lang="zh">Scaling Laws 最大的用处，是先用小模型拟合规律，再预测昂贵的大模型。这里只用前 3 个算力预算的 15 次实验拟合 L(N, D)，然后预测最大预算（3e12）的 5 次实验。</span>
+      <span lang="en">The main use of scaling laws is to fit the trend on small models and then predict an expensive big one. Here L(N, D) is fitted only on the 15 runs from the three smaller budgets, then used to predict the 5 runs at the largest budget (3e12).</span>
+    </p>
+    <div class="scroll"><table class="t" id="ex-table"></table></div>
+    <div class="callout" id="ex-note"></div>
+  </section>
+
+  <!-- 5. inference -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">把推理成本也算进来</span><span lang="en">Counting the cost of serving too</span></h2>
+    <p class="hint">
+      <span lang="zh">Chinchilla 只最小化训练成本。但模型上线后每生成一个词元要花约 2N 次运算。如果要达到同样的损失、又要服务很多用户，更划算的做法是：用更小的模型、更多的数据多训练一会儿。设定目标损失和预计的推理总量，看总成本最低的模型有多大。</span>
+      <span lang="en">Chinchilla minimizes training cost only. Once deployed, each generated token costs about 2N operations. To reach the same loss while serving many users, it pays to train a smaller model on more data. Set a target loss and the expected inference volume and see which model size minimizes the total cost.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">目标损失</span><span lang="en">target loss</span> <input id="inf-l" type="range" min="1.95" max="2.4" step="0.005" value="2.05"><span id="inf-l-v" class="mono"></span></label>
+      <label><span lang="zh">推理总词元数</span><span lang="en">tokens served</span> <input id="inf-i" type="range" min="0" max="16" step="0.1" value="13"><span id="inf-i-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="inf-chart" viewBox="0 0 420 240"></svg></div>
+      <div class="col"><div class="kv" id="inf-stats"></div><div class="callout" id="inf-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 6. emergence -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">“涌现”可能是指标造成的</span><span lang="en">“Emergence” can come from the metric</span></h2>
+    <p class="hint">
+      <span lang="zh">假设模型每个词元的正确率随规模平滑提升（灰线）。如果任务要求连续 k 个词元全对才算对，正确率就是 p<sup>k</sup>，曲线会长时间贴着 0，然后突然跃升，看起来像能力“涌现”。拖动 k 看看。</span>
+      <span lang="en">Suppose per-token accuracy improves smoothly with scale (grey). If a task only counts as correct when all k tokens are right, accuracy is p<sup>k</sup>: the curve hugs 0 for a long time and then shoots up, looking like an ability “emerging”. Drag k to see.</span>
+    </p>
+    <div class="controls"><label>k <input id="em-k" type="range" min="1" max="40" step="1" value="10"><span id="em-k-v" class="mono"></span></label></div>
+    <svg class="chart" id="em-chart" viewBox="0 0 640 220"></svg>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">07 · Scaling Laws</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Results of the isoFLOP sweep, generated by figures/scaling_figures.py -->
+<script src="scaling_data.js"></script>
+<script>
+(() => {
+  const S = window.SCALING_DATA;
+  const $ = id => document.getElementById(id);
+  if (!S) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>scaling_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const sci = v => { const e = Math.floor(Math.log10(v)); const m = v / 10 ** e; return `${m.toFixed(m < 9.95 ? 1 : 0).replace(/\.0$/, "")}e${e}`; };
+  const human = v => v >= 1e12 ? (v / 1e12).toFixed(2) + "T" : v >= 1e9 ? (v / 1e9).toFixed(1) + "B" : v >= 1e6 ? (v / 1e6).toFixed(1) + "M" : v >= 1e3 ? (v / 1e3).toFixed(1) + "K" : v.toFixed(0);
+
+  // generic chart: x/y may be log / 通用图表，坐标可取对数
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 50, R = 12, T = 12, B = 40;
+    const tx = v => o.xlog ? Math.log10(v) : v, ty = v => o.ylog ? Math.log10(v) : v;
+    const fx = v => L + (W - L - R) * (tx(v) - tx(o.x0)) / (tx(o.x1) - tx(o.x0));
+    const fy = v => T + (H - T - B) * (1 - (ty(Math.min(o.y1, Math.max(o.y0, v))) - ty(o.y0)) / (ty(o.y1) - ty(o.y0)));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    series.forEach(se => {
+      if (se.line) s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" ${se.dash ? 'stroke-dasharray="5 4"' : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="${se.r || 4.5}" fill="${se.color}"/>`; });
+      if (se.star) se.x.forEach((v, i) => { s += `<text x="${fx(v)}" y="${fy(se.y[i]) + 6}" text-anchor="middle" style="fill:${se.color};font-size:18px">★</text>`; });
+    });
+    (o.marks || []).forEach(m => { s += `<circle cx="${fx(m.x)}" cy="${fy(m.y)}" r="6" fill="${m.color}" stroke="${css("--bg")}" stroke-width="2"/>${m.label ? `<text x="${fx(m.x) + 8}" y="${fy(m.y) - 6}" style="fill:${m.color}">${m.label}</text>` : ""}`; });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const logTicks = (a, b) => { const out = []; for (let e = Math.ceil(Math.log10(a)); e <= Math.floor(Math.log10(b)); e++) out.push(10 ** e); return out; };
+
+  // ================= 1. power law =================
+  let plLog = true;
+  function renderPL() {
+    const a = +$("pl-a").value, E = +$("pl-e").value;
+    $("pl-a-v").textContent = a.toFixed(2); $("pl-e-v").textContent = E.toFixed(2);
+    const xs = [], ys = [];
+    for (let i = 0; i <= 120; i++) { const x = 10 ** (i / 20); xs.push(x); ys.push(E + 5 * x ** -a); }
+    const ymin = plLog ? Math.max(0.05, Math.min(...ys) * 0.8) : 0, ymax = 5 + E;
+    chart($("pl-chart"), [{ x: xs, y: ys, color: css("--primary"), line: true }], {
+      x0: plLog ? 1 : 0, x1: 1e6, xlog: plLog, y0: ymin, y1: ymax, ylog: plLog,
+      xticks: plLog ? logTicks(1, 1e6) : [0, 2e5, 4e5, 6e5, 8e5, 1e6], xfmt: v => v >= 1000 ? sci(v) : v,
+      yticks: plLog ? logTicks(ymin, ymax).concat([ymax]) : [0, 1, 2, 3, 4, 5, 6, 7].filter(v => v <= ymax), yfmt: v => +v.toFixed(2),
+      xlabel: tr("规模 x（参数、数据或算力）", "scale x (parameters, data or compute)"),
+    });
+    $("pl-note").innerHTML = tr(
+      `规模每扩大 10 倍，可约减的损失变为原来的 <b>${(10 ** -a).toFixed(2)}</b> 倍（减少 ${((1 - 10 ** -a) * 100).toFixed(0)}%）。${E > 0 ? `有了不可约损失 E = ${E.toFixed(2)}，双对数坐标下的曲线会逐渐变平，再大的规模也降不到 E 以下。` : "E = 0 时，双对数坐标下是一条完美的直线，斜率就是 −α。"}`,
+      `Every 10× in scale multiplies the reducible loss by <b>${(10 ** -a).toFixed(2)}</b> (a ${((1 - 10 ** -a) * 100).toFixed(0)}% cut). ${E > 0 ? `With an irreducible loss E = ${E.toFixed(2)}, the log-log curve gradually flattens and never goes below E.` : "With E = 0 it is a perfect straight line on log-log axes, with slope −α."}`);
+  }
+
+  // ================= 2. Chinchilla =================
+  const fitOf = () => S.fits[$("ch-fit").value];
+  const loss = (f, n, d) => f.E + f.A / n ** f.alpha + f.B / d ** f.beta;
+  function optimal(f, C) {
+    const g = (f.alpha * f.A / (f.beta * f.B)) ** (1 / (f.alpha + f.beta));
+    const n = g * (C / 6) ** (f.beta / (f.alpha + f.beta));
+    return { n, d: C / (6 * n) };
+  }
+  let chModel = "Chinchilla";
+  function renderCh() {
+    const f = fitOf();
+    $("ch-models").innerHTML = S.models.map(m => `<button class="${m.name === chModel ? "on" : ""}" data-n="${m.name}">${m.name}</button>`).join("");
+    $("ch-models").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+      chModel = b.dataset.n; const m = S.models.find(x => x.name === chModel);
+      $("ch-c").value = Math.log10(6 * m.N * m.D).toFixed(2); renderCh();
+    }));
+    const C = 10 ** +$("ch-c").value;
+    $("ch-c-v").textContent = sci(C) + " FLOPs";
+    const opt = optimal(f, C), Lopt = loss(f, opt.n, opt.d);
+    const ns = [], ls = [];
+    for (let i = 0; i <= 160; i++) { const n = opt.n * 10 ** ((i - 80) / 40); ns.push(n); ls.push(loss(f, n, C / (6 * n))); }
+    const m = S.models.find(x => x.name === chModel), onLine = !!m && Math.abs(Math.log10(6 * m.N * m.D / C)) < 0.02;
+    const marks = [{ x: opt.n, y: Lopt, color: css("--accent"), label: tr("最优", "optimal") }];
+    if (onLine) marks.push({ x: m.N, y: loss(f, m.N, m.D), color: css("--primary"), label: m.name });
+    chart($("ch-chart"), [{ x: ns, y: ls, color: css("--primary"), line: true }], {
+      x0: ns[0], x1: ns.at(-1), xlog: true, y0: Lopt - 0.02, y1: Lopt + 0.4, xticks: logTicks(ns[0], ns.at(-1)), xfmt: sci,
+      yticks: [Lopt, Lopt + 0.1, Lopt + 0.2, Lopt + 0.3, Lopt + 0.4].map(v => +v.toFixed(2)), marks,
+      xlabel: tr("参数量 N（沿等算力线，D = C / 6N）", "parameters N (along the iso-compute line, D = C / 6N)"),
+    });
+    $("ch-stats").innerHTML = `
+      <span>${tr("最优参数量", "optimal N")}</span><b>${human(opt.n)}</b>
+      <span>${tr("最优词元数", "optimal D")}</span><b>${human(opt.d)}</b>
+      <span>${tr("每个参数的词元数", "tokens per parameter")}</span><b>${(opt.d / opt.n).toFixed(1)}</b>
+      <span>${tr("预测损失", "predicted loss")}</span><b>${Lopt.toFixed(3)}</b>` +
+      (onLine ? `<span>${m.name}</span><b>${human(m.N)} × ${human(m.D)} → ${loss(f, m.N, m.D).toFixed(3)}</b>` : "");
+    const ref = optimal(S.fits.besiroglu2024, C), orig = optimal(S.fits.hoffmann2022, C);
+    $("ch-note").innerHTML = (onLine ? tr(`${m.name} 用了 ${human(m.N)} 参数、${human(m.D)} 词元（每个参数 ${(m.D / m.N).toFixed(0)} 个词元）。`, `${m.name} used ${human(m.N)} parameters and ${human(m.D)} tokens (${(m.D / m.N).toFixed(0)} tokens per parameter). `) : "") + tr(
+      `同样的算力下，重新拟合的公式建议 ${human(ref.n)} 参数（约 ${(ref.d / ref.n).toFixed(0)} 词元/参数），原论文发表的参数却建议 ${human(orig.n)}（约 ${(orig.d / orig.n).toFixed(0)} 词元/参数）。原论文的 Chinchilla 本身（70B、1.4T）与前者一致：拟合出来的公式也需要独立核验。`,
+      `At the same compute the refit suggests ${human(ref.n)} parameters (about ${(ref.d / ref.n).toFixed(0)} tokens/param), while the originally published parameters suggest ${human(orig.n)} (about ${(orig.d / orig.n).toFixed(0)} tokens/param). Chinchilla itself (70B, 1.4T) agrees with the former: fitted formulas need independent checking too.`);
+  }
+
+  // ================= 3. isoFLOP =================
+  const BUD_COLORS = () => ["--b1", "--b2", "--b3", "--b4"].map(css);
+  const hiddenB = new Set();
+  function renderIso() {
+    const cols = BUD_COLORS(), A = S.analysis, budgets = A.budgets.map(b => b.C);
+    const series = [];
+    budgets.forEach((C, k) => {
+      if (hiddenB.has(C)) return;
+      const rs = S.runs.filter(r => r.C === C), [pa, pb, pc] = A.budgets[k].parabola;
+      const ns = rs.map(r => r.N), grid = [];
+      for (let i = 0; i <= 50; i++) grid.push(Math.exp(Math.log(Math.min(...ns)) + (Math.log(Math.max(...ns)) - Math.log(Math.min(...ns))) * i / 50));
+      series.push({ x: grid, y: grid.map(n => pa * Math.log(n) ** 2 + pb * Math.log(n) + pc), color: cols[k], line: true, width: 1.4 });
+      series.push({ x: ns, y: rs.map(r => r.loss), color: cols[k], dots: true });
+      series.push({ x: [A.budgets[k].N_opt], y: [A.budgets[k].loss_opt], color: cols[k], star: true });
+    });
+    chart($("iso-chart"), series, { x0: 1500, x1: 250000, xlog: true, y0: 1.65, y1: 2.75, xticks: [2000, 5000, 10000, 20000, 50000, 100000, 200000], xfmt: v => v >= 1000 ? v / 1000 + "K" : v,
+      yticks: [1.7, 1.9, 2.1, 2.3, 2.5, 2.7], xlabel: tr("非嵌入参数量 N（对数）", "non-embedding parameters N (log)") });
+    $("iso-legend").innerHTML = budgets.map((C, k) => `<button data-c="${C}" class="${hiddenB.has(C) ? "off" : ""}"><span class="dot" style="background:${cols[k]}"></span>C = ${sci(C)}</button>`).join("");
+    $("iso-legend").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const c = +b.dataset.c; hiddenB.has(c) ? hiddenB.delete(c) : hiddenB.add(c); renderIso(); }));
+    $("iso-table").innerHTML = `<tr><th>C</th><th>${tr("最优 N（抛物线最低点）", "optimal N (parabola minimum)")}</th><th>${tr("最低损失", "best loss")}</th></tr>` +
+      A.budgets.map(b => `<tr><td>${sci(b.C)}</td><td>${human(b.N_opt)}</td><td>${b.loss_opt.toFixed(3)}</td></tr>`).join("");
+    $("iso-note").innerHTML = tr(
+      `算力每增加约 10 倍，最优模型变大约 ${(10 ** A.n_fit[1]).toFixed(1)} 倍。两种估计方法给出的指数不同：用每条曲线的最低点拟合得 N<sub>opt</sub> ∝ C<sup>${A.n_fit[1].toFixed(2)}</sup>，对全部 20 次实验拟合 L(N, D) 得 C<sup>${A.a_parametric.toFixed(2)}</sup>（Chinchilla 约为 0.5，更早的 Kaplan 等人约为 0.73）。小规模实验噪声大，这正是需要多种方法相互印证的原因。注意：最大的预算下，较小的模型要把数据重复约 2 轮。`,
+      `For roughly every 10× more compute, the optimal model grows about ${(10 ** A.n_fit[1]).toFixed(1)}×. Two estimation methods disagree: fitting the curve minima gives N<sub>opt</sub> ∝ C<sup>${A.n_fit[1].toFixed(2)}</sup>, while fitting L(N, D) to all 20 runs gives C<sup>${A.a_parametric.toFixed(2)}</sup> (Chinchilla found about 0.5, the earlier Kaplan et al. about 0.73). Small experiments are noisy, which is why several methods are used to cross-check. Note: at the largest budget the smaller models repeat the data about twice.`);
+  }
+
+  // ================= 4. extrapolation =================
+  function renderEx() {
+    const f = S.analysis.fit_small, C = Math.max(...S.runs.map(r => r.C));
+    const rows = S.runs.filter(r => r.C === C);
+    let errSum = 0;
+    $("ex-table").innerHTML = `<tr><th>${tr("宽度", "width")} d</th><th>N</th><th>${tr("词元数", "tokens")} D</th><th>${tr("预测", "predicted")}</th><th>${tr("实测", "measured")}</th><th>${tr("误差", "error")}</th></tr>` +
+      rows.map(r => { const p = loss(f, r.N, r.D), e = p - r.loss; errSum += Math.abs(e);
+        return `<tr><td>${r.d}</td><td>${human(r.N)}</td><td>${human(r.D)}</td><td>${p.toFixed(3)}</td><td>${r.loss.toFixed(3)}</td><td class="${Math.abs(e) > 0.1 ? "bad" : "good"}">${e > 0 ? "+" : ""}${e.toFixed(3)}</td></tr>`; }).join("");
+    const allOver = rows.every(r => loss(f, r.N, r.D) > r.loss);
+    const inErr = S.runs.filter(r => r.C < C).reduce((s, r) => s + Math.abs(loss(f, r.N, r.D) - r.loss), 0) / S.runs.filter(r => r.C < C).length;
+    $("ex-note").innerHTML = tr(
+      `在用来拟合的 15 次实验上，平均误差只有 ${inErr.toFixed(3)}；但外推到 3 倍算力时，平均误差达到 ${(errSum / rows.length).toFixed(3)}${allOver ? "，而且<b>全都高估了损失</b>：实际进步比公式预测的更大" : ""}。原因之一是这些实验太小了：小预算的模型只训练了几百步，结果受优化过程的影响很大。真实的大模型团队会用更大、调参更充分、跨越更多数量级的实验来拟合，GPT-4 技术报告称用算力小得多的模型准确预测了最终损失。这里的教训是：Scaling Laws 只在它被验证过的范围内可靠。`,
+      `On the 15 runs used for fitting, the mean error is only ${inErr.toFixed(3)}; extrapolated to 3× more compute, the mean error grows to ${(errSum / rows.length).toFixed(3)}${allOver ? ", and <b>every prediction overestimates the loss</b>: the real improvement is bigger than the formula expects" : ""}. One reason is that these runs are tiny: the small-budget models train for only a few hundred steps, so optimization effects dominate. Large-model teams fit on bigger, better-tuned runs spanning more orders of magnitude; the GPT-4 technical report says the final loss was predicted accurately from much smaller models. The lesson: scaling laws are reliable only within the range where they have been validated.`);
+  }
+
+  // ================= 5. inference cost =================
+  function renderInf() {
+    const f = S.fits.besiroglu2024, target = +$("inf-l").value, I = $("inf-i").value === "0" ? 0 : 10 ** +$("inf-i").value;
+    $("inf-l-v").textContent = target.toFixed(3);
+    $("inf-i-v").textContent = I ? sci(I) : "0";
+    const ns = [], costs = [], train = [];
+    for (let i = 0; i <= 200; i++) {
+      const n = 10 ** (8.5 + i * 4 / 200), rest = target - f.E - f.A / n ** f.alpha;
+      if (rest <= 0) continue;
+      const d = (f.B / rest) ** (1 / f.beta);
+      ns.push(n); train.push(6 * n * d); costs.push(6 * n * d + 2 * n * I);
+    }
+    if (!ns.length) { $("inf-stats").textContent = tr("目标损失太低，无法达到。", "Target loss is unreachable."); $("inf-chart").innerHTML = ""; return; }
+    const kT = train.indexOf(Math.min(...train)), kA = costs.indexOf(Math.min(...costs));
+    const dOf = k => train[k] / (6 * ns[k]);
+    const y0 = Math.min(...costs) * 0.8, y1 = Math.min(...costs) * 30;
+    chart($("inf-chart"), [
+      { x: ns, y: train, color: css("--muted"), line: true, dash: true },
+      { x: ns, y: costs, color: css("--primary"), line: true },
+    ], { x0: ns[0], x1: ns.at(-1), xlog: true, y0, y1, ylog: true, xticks: logTicks(ns[0], ns.at(-1)), xfmt: sci, yticks: logTicks(y0, y1), yfmt: sci,
+      marks: [{ x: ns[kT], y: train[kT], color: css("--muted") }, { x: ns[kA], y: costs[kA], color: css("--accent"), label: tr("总成本最低", "cheapest overall") }],
+      xlabel: tr("参数量 N（虚线：仅训练；实线：训练 + 推理）", "parameters N (dashed: training only; solid: training + serving)") });
+    $("inf-stats").innerHTML = `
+      <span>${tr("只看训练的最优", "training-optimal")}</span><b>${human(ns[kT])}, ${human(dOf(kT))} ${tr("词元", "tokens")} (${(dOf(kT) / ns[kT]).toFixed(0)} D/N)</b>
+      <span>${tr("算上推理的最优", "overall optimal")}</span><b>${human(ns[kA])}, ${human(dOf(kA))} ${tr("词元", "tokens")} (${(dOf(kA) / ns[kA]).toFixed(0)} D/N)</b>
+      <span>${tr("总成本节省", "total saving")}</span><b>${((1 - costs[kA] / costs[kT]) * 100).toFixed(0)}%</b>`;
+    $("inf-note").innerHTML = tr(
+      `推理量越大，最优模型越小、训练数据越多（每个参数的词元数远超 20）。这就是 Llama 3 8B 训练了超过 15 万亿词元（约 1,900 词元/参数）的原因：它要被大量部署，小一点更省钱。`,
+      `The more inference you expect, the smaller the optimal model and the more data it should see (far more than 20 tokens per parameter). That is why Llama 3 8B was trained on over 15 trillion tokens (about 1,900 per parameter): it is deployed at scale, so smaller is cheaper.`);
+  }
+
+  // ================= 6. emergence =================
+  function renderEm() {
+    const k = +$("em-k").value; $("em-k-v").textContent = k;
+    const xs = [], p = [], ex = [];
+    for (let i = 0; i <= 200; i++) { const s = 10 ** (i / 50); xs.push(s); const v = 0.98 / (1 + Math.exp(-(Math.log10(s) - 2) * 2.2)); p.push(v * 100); ex.push(v ** k * 100); }
+    chart($("em-chart"), [{ x: xs, y: p, color: css("--muted"), line: true }, { x: xs, y: ex, color: css("--accent"), line: true, width: 2.5 }],
+      { x0: 1, x1: 1e4, xlog: true, y0: 0, y1: 100, xticks: [1, 10, 100, 1000, 10000], yticks: [0, 25, 50, 75, 100],
+        xlabel: tr(`模型规模（任意单位）。灰：逐词元正确率；橙：连续 ${k} 个词元全对`, `scale (a.u.). grey: per-token accuracy; orange: all ${k} tokens right`) });
+  }
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["按 Chinchilla 的结论，算力最优时每个参数大约对应多少训练词元？", "By Chinchilla's result, about how many training tokens per parameter are compute-optimal?"],
+      opts: [["约 1 个", "About 1"], ["约 20 个", "About 20"], ["约 2000 个", "About 2,000"]],
+      a: 1, ex: ["Chinchilla 用 70B 参数训练了 1.4T 词元，约 20 词元/参数。Llama 3 8B 的约 1,900 是为了降低推理成本而有意“过度训练”。", "Chinchilla trained 70B parameters on 1.4T tokens, about 20 per parameter. Llama 3 8B's roughly 1,900 is deliberate over-training to cut serving costs."] },
+    { q: ["算力增加 100 倍，按 N_opt ∝ C^0.5，最优模型大约变大几倍？", "With 100× more compute and N_opt ∝ C^0.5, the optimal model grows by about:"],
+      opts: [["10 倍", "10×"], ["50 倍", "50×"], ["100 倍", "100×"]],
+      a: 0, ex: ["100^0.5 = 10，数据也同样增加约 10 倍，两者乘积正好是 100 倍的算力。", "100^0.5 = 10, and data grows about 10× too; their product is the 100× compute."] },
+    { q: ["“能力涌现”曲线在某个规模突然跃升，一个可能的解释是？", "An ability curve that jumps suddenly at some scale may be explained by:"],
+      opts: [["模型在那个规模突然有了意识", "The model suddenly becomes conscious at that scale"], ["评估指标要求整题全对，把平滑的进步变成了跳变", "An all-or-nothing metric turns smooth progress into a jump"], ["训练数据在那个规模突然变好了", "The training data suddenly gets better at that scale"]],
+      a: 1, ex: ["见第 6 节：逐词元正确率平滑提升时，p^k 会看起来像突然出现。这不代表所有涌现都是假象，但提醒我们注意指标的选择。", "See part 6: with smoothly improving per-token accuracy, p^k looks sudden. Not every emergence is an artefact, but the choice of metric matters."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderPL(); renderCh(); renderIso(); renderEx(); renderInf(); renderEm(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["pl-a", "pl-e"].forEach(id => $(id).addEventListener("input", renderPL));
+  $("pl-log").addEventListener("click", () => { plLog = !plLog; $("pl-log").classList.toggle("on", plLog); renderPL(); });
+  $("ch-c").addEventListener("input", () => { chModel = null; renderCh(); });
+  $("ch-fit").addEventListener("change", renderCh);
+  ["inf-l", "inf-i"].forEach(id => $(id).addEventListener("input", renderInf));
+  $("em-k").addEventListener("input", renderEm);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
