@@ -31,6 +31,7 @@
 | 13 推理服务系统 Serving Systems | [中文](docs/13-serving/README.md) · [EN](docs/13-serving/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/13-serving/interactive/serving.html) | [serving.py](docs/13-serving/code/serving.py) |
 | 14 长上下文 Long Context | [中文](docs/14-long-context/README.md) · [EN](docs/14-long-context/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/14-long-context/interactive/long_context.html) | [long_context.py](docs/14-long-context/code/long_context.py) |
 | 15 混合专家 Mixture of Experts | [中文](docs/15-moe/README.md) · [EN](docs/15-moe/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/15-moe/interactive/moe.html) | [moe.py](docs/15-moe/code/moe.py) |
+| 16 多模态模型 Multimodal Models | [中文](docs/16-multimodal/README.md) · [EN](docs/16-multimodal/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/16-multimodal/interactive/multimodal.html) | [multimodal.py](docs/16-multimodal/code/multimodal.py) |
 
 ## 前沿问答
 

@@ -31,7 +31,8 @@ Each chapter follows the same rhythm:
 | 13 | [Serving systems](13-serving/README.md) | [Scheduling and memory playground](13-serving/interactive/serving.html?lang=en) | ✅ done |
 | 14 | [Long context](14-long-context/README.md) | [RoPE extrapolation and attention patterns](14-long-context/interactive/long_context.html?lang=en) | ✅ done |
 | 15 | [Mixture of experts](15-moe/README.md) | [Routing and load-balancing playground](15-moe/interactive/moe.html?lang=en) | ✅ done |
-| 16–24 | Applications and frontiers: multimodal, code models, prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
+| 16 | [Multimodal models](16-multimodal/README.md) | [Patches, CLIP and zero-shot, VLM captions playground](16-multimodal/interactive/multimodal.html?lang=en) | ✅ done |
+| 17–24 | Applications and frontiers: code models, prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 
