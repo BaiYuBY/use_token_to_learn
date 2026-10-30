@@ -24,7 +24,8 @@ Each chapter follows the same rhythm:
 | 06 | [Pre-training](06-pretraining/README.md) | [Pre-training playground](06-pretraining/interactive/pretraining.html?lang=en) | ✅ done |
 | 07 | [Scaling laws](07-scaling-laws/README.md) | [Scaling laws playground](07-scaling-laws/interactive/scaling.html?lang=en) | ✅ done |
 | 08 | [Fine-tuning](08-finetuning/README.md) | [Fine-tuning playground](08-finetuning/interactive/finetune.html?lang=en) | ✅ done |
-| 09–10 | Training: alignment, reasoning models and test-time compute | | 🚧 planned |
+| 09 | [Alignment](09-alignment/README.md) | [Alignment playground](09-alignment/interactive/alignment.html?lang=en) | ✅ done |
+| 10 | Training: reasoning models and test-time compute | | 🚧 planned |
 | 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
 | 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
 
@@ -35,6 +36,7 @@ Specific, often very recent questions, one per page, with sources and a check da
 - [How are reasoning effort levels (low / medium / high / xhigh) set?](qa/reasoning-effort.en.md)
 - [What is DeepSeek's open-source DeepInfer, and why does it matter?](qa/deepinfer.en.md)
 - [How is LLM compute measured, where does it go, and how does it compare with RNNs, CNNs and KNN?](qa/compute.en.md) (with a [compute calculator](qa/interactive/compute.html?lang=en))
+- [How do CNNs, RNNs and KNN work, and how are they different from LLMs?](qa/classic-models.en.md) (with a [playground](qa/interactive/classic-models.html?lang=en))
 - [All Q&A](qa/index.en.md) · [Glossary](glossary.en.md)
 
 See [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md) in the repository for the full roadmap.

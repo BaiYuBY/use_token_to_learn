@@ -61,11 +61,13 @@ plugins:
             预训练: Pre-training
             规模定律: Scaling Laws
             微调: Fine-tuning
+            对齐: Alignment
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
             DeepInfer 是什么: What is DeepInfer
             大模型的算力怎么算: How LLM compute is counted
+            CNN、RNN、KNN 与大模型: CNNs, RNNs, KNN and LLMs
             术语表: Glossary
 
 markdown_extensions:
@@ -105,9 +107,11 @@ nav:
       - 预训练: 06-pretraining/README.md
       - 规模定律: 07-scaling-laws/README.md
       - 微调: 08-finetuning/README.md
+      - 对齐: 09-alignment/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md
       - DeepInfer 是什么: qa/deepinfer.md
       - 大模型的算力怎么算: qa/compute.md
+      - CNN、RNN、KNN 与大模型: qa/classic-models.md
   - 术语表: glossary.md

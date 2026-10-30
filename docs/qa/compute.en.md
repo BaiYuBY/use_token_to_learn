@@ -109,7 +109,7 @@ Over a model's lifetime, inference can add up to more than training: if a model 
 | Typical scale | $10^9$–$10^{12}$ parameters, $10^{12}$–$10^{13}$ training tokens | Historically $10^7$–$10^8$ parameters | ResNet-50: 25.6M parameters, about 3.8 billion multiply-adds per image | Depends on the dataset |
 | What is expensive | Scale, long contexts, KV cache, sequential decoding | Training is hard to parallelize, GPUs sit idle | Large at high resolution | More data means slower queries and more memory |
 
-What to take from this:
+How each of these models works is explained in [How do CNNs, RNNs and KNN work?](classic-models.en.md). What to take from this:
 
 - **Compute per parameter is not higher.** This page's code confirms that an LSTM also costs $2N$ per token. CNNs actually do more work per parameter: one $3 \times 3$ kernel is reused 3,136 times on a $56 \times 56$ feature map.
 - **Transformers are expensive because they scale.** An RNN must go step by step and struggles to keep a GPU busy. A Transformer processes a whole sequence in parallel during training, so it can make good use of tens of thousands of GPUs. Scaling laws then show that more compute gives better results (see [07 Scaling laws](../07-scaling-laws/README.en.md)), so people make both models and datasets bigger.

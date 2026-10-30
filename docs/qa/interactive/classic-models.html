@@ -1,0 +1,463 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CNN、RNN、KNN 交互演示 · CNN, RNN and KNN Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .grid-wrap { display: flex; gap: 14px; flex-wrap: wrap; align-items: flex-start; }
+  .pix { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; touch-action: manipulation; }
+  .pix div { width: 22px; height: 22px; display: flex; align-items: center; justify-content: center; font-size: 9px; font-family: ui-monospace, monospace; cursor: pointer; }
+  .pix div.win { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .pix.small div { width: 26px; height: 26px; font-size: 10px; cursor: default; }
+  .cap { font-size: .85rem; color: var(--muted); margin: 4px 0 0; }
+  canvas.knn { width: 100%; max-width: 440px; aspect-ratio: 4 / 3; border: 1px solid var(--line); border-radius: 8px; cursor: crosshair; display: block; touch-action: manipulation; }
+  .lanes { display: grid; gap: 6px; margin-top: 8px; }
+  .lane { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+  .lane .name { width: 7.5em; font-size: .9rem; }
+  .lane span.c { width: 26px; height: 26px; border-radius: 5px; border: 1px solid var(--line); background: var(--bg); display: inline-flex; align-items: center; justify-content: center; font-size: 10px; }
+  .lane span.c.on { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .lane span.c.done { background: var(--b1); color: var(--bg); border-color: var(--b1); }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">CNN、RNN、KNN 交互演示</span><span lang="en">CNN, RNN and KNN Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">动手看三种经典模型怎么计算：卷积核如何在图像上滑动，RNN 的梯度为什么会消失，KNN 如何靠“找邻居”做预测，以及它们和 Transformer 的根本区别。</span>
+        <span lang="en">See how three classic models compute: how a kernel slides over an image, why an RNN's gradient vanishes, how KNN predicts by finding neighbours, and how they differ from the Transformer at the root.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. CNN -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">CNN：卷积核在图像上滑动</span><span lang="en">CNN: a kernel slides over the image</span></h2>
+    <p class="hint">
+      <span lang="zh">点击左边的格子画图（1 = 亮，0 = 暗）。选一个卷积核，拖动“位置”滑块：橙框是卷积核当前覆盖的窗口，右边是窗口与卷积核逐个相乘再相加的结果。所有位置用的是<b>同一组</b> 9 个权重。</span>
+      <span lang="en">Click cells on the left to draw (1 = bright, 0 = dark). Pick a kernel and drag the position slider: the orange box is the window the kernel covers, and on the right is the window multiplied by the kernel element by element and summed. Every position uses the <b>same</b> 9 weights.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">卷积核</span><span lang="en">kernel</span> <select id="cv-k"></select></label>
+      <label><span lang="zh">步长</span><span lang="en">stride</span> <select id="cv-s"><option>1</option><option>2</option></select></label>
+      <label><span lang="zh">填充</span><span lang="en">padding</span> <select id="cv-p"><option>0</option><option selected>1</option></select></label>
+      <label><span lang="zh">位置</span><span lang="en">position</span> <input id="cv-pos" type="range" min="0" max="0" step="1" value="0"><span id="cv-pos-v" class="mono"></span></label>
+      <button id="cv-clear"><span lang="zh">清空</span><span lang="en">clear</span></button>
+    </div>
+    <div class="grid-wrap">
+      <div><div class="pix" id="cv-in"></div><p class="cap"><span lang="zh">输入（点击修改）</span><span lang="en">input (click to edit)</span></p></div>
+      <div><div class="pix small" id="cv-ker"></div><p class="cap"><span lang="zh">卷积核</span><span lang="en">kernel</span></p></div>
+      <div><div class="pix" id="cv-out"></div><p class="cap"><span lang="zh">输出特征图</span><span lang="en">output feature map</span></p></div>
+      <div class="col" style="min-width:220px"><div class="kv" id="cv-stats"></div><div class="callout mono" id="cv-calc" style="font-size:.8rem;white-space:pre-wrap"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. RNN -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">RNN：梯度为什么会消失</span><span lang="en">RNN: why the gradient vanishes</span></h2>
+    <p class="hint">
+      <span lang="zh">一个最简单的 RNN：h<sub>t</sub> = tanh(w·h<sub>t−1</sub> + x<sub>t</sub>)。第一个输入对第 t 步的影响，等于每一步的导数 w·(1 − h²) 连乘。|w| 小于 1 时，乘积按指数缩小；大于 1 时可能爆炸。LSTM 的记忆用加法更新，影响约等于遗忘门 f 的连乘：f 接近 1，信息就能传很远。</span>
+      <span lang="en">The simplest RNN: h<sub>t</sub> = tanh(w·h<sub>t−1</sub> + x<sub>t</sub>). The effect of the first input on step t is the product of every step's derivative w·(1 − h²). With |w| below 1 the product shrinks exponentially; above 1 it can explode. An LSTM updates its memory by addition, so the effect is roughly a product of forget gates f: with f near 1, information travels far.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">RNN 权重</span><span lang="en">RNN weight</span> w <input id="rn-w" type="range" min="0.1" max="2" step="0.05" value="0.8"><span id="rn-w-v" class="mono"></span></label>
+      <label><span lang="zh">LSTM 遗忘门</span><span lang="en">LSTM forget gate</span> f <input id="rn-f" type="range" min="0.5" max="1" step="0.01" value="0.95"><span id="rn-f-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="rn-chart" viewBox="0 0 420 240"></svg>
+        <div class="legend"><span><span class="dot" style="background:var(--muted)"></span>RNN</span><span><span class="dot" style="background:var(--accent)"></span>LSTM</span></div></div>
+      <div class="col"><div class="kv" id="rn-stats"></div><div class="callout" id="rn-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. KNN -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">KNN：找最近的 k 个邻居投票</span><span lang="en">KNN: let the k nearest neighbours vote</span></h2>
+    <p class="hint">
+      <span lang="zh">点击图中任意位置放一个查询点，连线的是它最近的 k 个邻居，按多数票决定类别。背景色是整张图的预测结果（决策边界）。k 太小，边界会把噪声也“记住”；k 太大，边界又太平滑。</span>
+      <span lang="en">Click anywhere to place a query point; lines connect it to its k nearest neighbours, and the majority decides its class. The background shows the prediction everywhere (the decision boundary). Too small a k memorizes the noise; too large a k smooths everything away.</span>
+    </p>
+    <div class="controls">
+      <label>k <input id="kn-k" type="range" min="1" max="101" step="2" value="5"><span id="kn-k-v" class="mono"></span></label>
+      <label><span lang="zh">噪声</span><span lang="en">noise</span> <input id="kn-noise" type="range" min="0.05" max="0.5" step="0.05" value="0.3"><span id="kn-noise-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><canvas class="knn" id="kn-canvas" width="440" height="330"></canvas></div>
+      <div class="col"><div class="kv" id="kn-stats"></div><div class="callout" id="kn-note"></div></div>
+    </div>
+    <h3><span lang="zh">维度灾难</span><span lang="en">The curse of dimensionality</span></h3>
+    <p class="hint">
+      <span lang="zh">在 d 维单位立方体里随机撒 500 个点，看一个随机查询点到最近点和最远点的距离。维度越高，两者越接近，“最近邻”就越没有意义。</span>
+      <span lang="en">Scatter 500 random points in a d-dimensional unit cube and measure a random query's distance to the nearest and farthest point. The higher the dimension, the closer the two get, and the less “nearest” means.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">维度</span><span lang="en">dimension</span> d <input id="cd-d" type="range" min="0" max="10" step="1" value="1"><span id="cd-d-v" class="mono"></span></label>
+    </div>
+    <div class="kv" id="cd-stats"></div>
+  </section>
+
+  <!-- 4. parallel -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">和 Transformer 的根本区别：串行还是并行</span><span lang="en">The root difference from Transformers: sequential or parallel</span></h2>
+    <p class="hint">
+      <span lang="zh">按“播放”看训练时处理一段 12 个词元的序列：RNN 必须一个接一个地算（第 t 步要等第 t−1 步的隐藏状态）；Transformer 的注意力让每个位置直接看到前面所有位置，整段一次算完。生成时两者都只能逐个词元进行，但 RNN 只带一个固定大小的状态，Transformer 要保存不断增长的 KV 缓存。</span>
+      <span lang="en">Press play to process a 12-token sequence during training. The RNN must compute one step after another (step t waits for step t−1's hidden state); the Transformer's attention lets every position see all earlier ones directly, so the whole sequence is computed at once. When generating, both go one token at a time, but the RNN carries a fixed-size state while the Transformer keeps a growing KV cache.</span>
+    </p>
+    <div class="controls"><button id="pl-play">▶ <span lang="zh">播放</span><span lang="en">play</span></button></div>
+    <div class="lanes" id="pl-lanes"></div>
+    <div class="scroll" style="margin-top:12px"><table class="t" id="cmp-table"></table></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../classic-models.html">前沿问答 · Q&amp;A</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+  const fmt = v => Math.abs(v) < 1e-3 && v !== 0 ? v.toExponential(1) : +v.toFixed(3) + "";
+
+  // ================= 1. convolution =================
+  const N = 10;
+  const img = Array.from({ length: N }, (_, i) => Array.from({ length: N }, (_, j) => (i >= 2 && i <= 7 && j >= 3 && j <= 6 && !(i >= 4 && i <= 5 && j === 5)) ? 1 : 0));
+  const KERNELS = {
+    vedge: { zh: "竖直边缘", en: "vertical edges", k: [[1, 0, -1], [2, 0, -2], [1, 0, -1]] },
+    hedge: { zh: "水平边缘", en: "horizontal edges", k: [[1, 2, 1], [0, 0, 0], [-1, -2, -1]] },
+    blur: { zh: "模糊（平均）", en: "blur (average)", k: [[1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9], [1 / 9, 1 / 9, 1 / 9]] },
+    sharpen: { zh: "锐化", en: "sharpen", k: [[0, -1, 0], [-1, 5, -1], [0, -1, 0]] },
+    identity: { zh: "原样输出", en: "identity", k: [[0, 0, 0], [0, 1, 0], [0, 0, 0]] },
+  };
+  function conv() {
+    const K = KERNELS[$("cv-k").value].k, s = +$("cv-s").value, p = +$("cv-p").value;
+    const H = Math.floor((N + 2 * p - 3) / s) + 1;
+    const at = (i, j) => (i < 0 || j < 0 || i >= N || j >= N) ? 0 : img[i][j];
+    const out = Array.from({ length: H }, (_, a) => Array.from({ length: H }, (_, b) => {
+      let v = 0; for (let u = 0; u < 3; u++) for (let w = 0; w < 3; w++) v += K[u][w] * at(a * s + u - p, b * s + w - p); return v;
+    }));
+    return { K, s, p, H, out, at };
+  }
+  function shade(v, max) {
+    const t = Math.max(-1, Math.min(1, v / (max || 1)));
+    const c = t >= 0 ? [232, 113, 10] : [63, 81, 181], a = Math.abs(t);
+    return `rgba(${c[0]},${c[1]},${c[2]},${a.toFixed(2)})`;
+  }
+  let cvFirst = true;
+  function renderCv() {
+    const { K, s, p, H, out, at } = conv();
+    $("cv-pos").max = H * H - 1;
+    if (cvFirst) { $("cv-pos").value = Math.min(34, H * H - 1); cvFirst = false; }
+    const pos = Math.min(+$("cv-pos").value, H * H - 1), a = Math.floor(pos / H), b = pos % H;
+    $("cv-pos-v").textContent = `(${a}, ${b})`;
+    const win = (i, j) => i >= a * s - p && i < a * s - p + 3 && j >= b * s - p && j < b * s - p + 3;
+    $("cv-in").style.gridTemplateColumns = `repeat(${N}, 22px)`;
+    $("cv-in").innerHTML = img.map((row, i) => row.map((v, j) =>
+      `<div data-i="${i}" data-j="${j}" class="${win(i, j) ? "win" : ""}" style="background:${v ? css("--ink") : css("--bg")};color:${v ? css("--bg") : css("--muted")}">${v}</div>`).join("")).join("");
+    $("cv-in").querySelectorAll("div").forEach(d => d.addEventListener("click", () => { img[+d.dataset.i][+d.dataset.j] ^= 1; renderCv(); }));
+    $("cv-ker").style.gridTemplateColumns = "repeat(3, 26px)";
+    const kmax = Math.max(...K.flat().map(Math.abs));
+    $("cv-ker").innerHTML = K.flat().map(v => `<div style="background:${shade(v, kmax)}">${Math.abs(v - 1 / 9) < 1e-9 ? "1/9" : v}</div>`).join("");
+    const omax = Math.max(...out.flat().map(Math.abs));
+    $("cv-out").style.gridTemplateColumns = `repeat(${H}, 22px)`;
+    $("cv-out").innerHTML = out.map((row, i) => row.map((v, j) =>
+      `<div class="${i === a && j === b ? "win" : ""}" style="background:${shade(v, omax)}">${Math.round(v * 10) / 10}</div>`).join("")).join("");
+    const terms = [];
+    for (let u = 0; u < 3; u++) for (let w = 0; w < 3; w++) { const x = at(a * s + u - p, b * s + w - p), k = K[u][w]; if (k !== 0 && x !== 0) terms.push(`${Math.abs(k - 1 / 9) < 1e-9 ? "1/9" : k}×${x}`); }
+    $("cv-calc").textContent = `y[${a},${b}] = ${terms.length ? terms.join(" + ").replace(/\+ -/g, "− ") : "0"} = ${Math.round(out[a][b] * 1000) / 1000}`;
+    $("cv-stats").innerHTML = kv([
+      [tr("输出大小", "output size"), `${H}×${H} = ⌊(${N}+2·${p}−3)/${s}⌋+1`],
+      [tr("参数（权重）", "parameters"), 9],
+      [tr("乘加次数", "multiply-adds"), `${H * H}×9 = ${H * H * 9}`],
+      [tr("每个权重用了几次", "uses of each weight"), H * H],
+    ]);
+  }
+  $("cv-k").innerHTML = Object.entries(KERNELS).map(([k, v]) => `<option value="${k}">${v.zh} / ${v.en}</option>`).join("");
+
+  // ================= 2. RNN gradients =================
+  function renderRn() {
+    const w = +$("rn-w").value, f = +$("rn-f").value, T = 50;
+    $("rn-w-v").textContent = w.toFixed(2); $("rn-f-v").textContent = f.toFixed(2);
+    let h = 0, g = 1; const rnn = [], lstm = [];
+    for (let t = 1; t <= T; t++) {
+      const x = t === 1 ? 1 : 0.3 * Math.sin(t);  // a small input every step / 每步一个小输入
+      h = Math.tanh(w * h + x);
+      if (t > 1) g *= w * (1 - h * h);
+      rnn.push(Math.max(Math.abs(g), 1e-30)); lstm.push(Math.max(f ** (t - 1), 1e-30));
+    }
+    const xs = rnn.map((_, i) => i + 1);
+    const ymax = Math.max(1, ...rnn, ...lstm) * 3;
+    chart($("rn-chart"), [{ x: xs, y: rnn, color: css("--muted") }, { x: xs, y: lstm, color: css("--accent") }],
+      { ylog: true, x0: 1, x1: T, y0: 1e-20, y1: ymax, xticks: [1, 10, 20, 30, 40, 50], yticks: [1e-20, 1e-15, 1e-10, 1e-5, 1, ...(ymax > 1e5 ? [1e5] : [])], yfmt: v => v === 1 ? "1" : `1e${Math.round(Math.log10(v))}`, xlabel: tr("距离（步）", "distance (steps)") });
+    $("rn-stats").innerHTML = kv([
+      [tr("RNN：20 步后", "RNN after 20 steps"), fmt(rnn[19])], [tr("RNN：50 步后", "RNN after 50 steps"), fmt(rnn[49])],
+      [tr("LSTM：20 步后", "LSTM after 20 steps"), fmt(lstm[19])], [tr("LSTM：50 步后", "LSTM after 50 steps"), fmt(lstm[49])],
+    ]);
+    $("rn-note").innerHTML = rnn[49] > 1e3
+      ? tr("梯度<b>爆炸</b>了：每一步的导数大于 1，连乘后越来越大。实践中用梯度裁剪（见 06 章）来防止。", "The gradient <b>explodes</b>: each step's derivative is above 1 and the product keeps growing. In practice gradient clipping (chapter 06) prevents this.")
+      : tr(`第 1 个输入对第 50 步几乎没有影响（RNN 只剩 ${fmt(rnn[49])}），模型很难学到长距离的依赖。LSTM 的遗忘门 f = ${f.toFixed(2)} 时还剩 ${fmt(lstm[49])}。Transformer 用注意力让任意两个位置直接相连，彻底绕开了这条长链。`,
+           `The first input barely affects step 50 (the RNN keeps only ${fmt(rnn[49])}), so long-range dependencies are hard to learn. An LSTM with forget gate f = ${f.toFixed(2)} keeps ${fmt(lstm[49])}. A Transformer's attention connects any two positions directly and avoids this long chain altogether.`);
+  }
+
+  // ================= 3. KNN =================
+  let seed = 1;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 0.5) / 2147483646; };
+  const gauss = () => Math.sqrt(-2 * Math.log(rand())) * Math.cos(2 * Math.PI * rand());
+  function moons(n, noise, s) {
+    seed = s; const pts = [];
+    for (let i = 0; i < n; i++) {
+      const t = rand() * Math.PI, c = rand() < 0.5 ? 0 : 1;
+      const x = c ? 1 - Math.cos(t) : Math.cos(t), y = c ? 0.5 - Math.sin(t) : Math.sin(t);
+      pts.push({ x: x + noise * gauss(), y: y + noise * gauss(), c });
+    }
+    return pts;
+  }
+  let train = [], test = [], query = { x: 0.5, y: 0.25 };
+  const X0 = -1.6, X1 = 2.6, Y0 = -1.3, Y1 = 1.85;
+  function knn(q, k) {
+    const d = train.map((p, i) => [(p.x - q.x) ** 2 + (p.y - q.y) ** 2, i]).sort((a, b) => a[0] - b[0]).slice(0, k);
+    const votes = d.reduce((s, [, i]) => s + train[i].c, 0);
+    return { cls: votes * 2 > k ? 1 : 0, idx: d.map(([, i]) => i), votes };
+  }
+  function renderKn() {
+    const k = +$("kn-k").value, noise = +$("kn-noise").value;
+    $("kn-k-v").textContent = k; $("kn-noise-v").textContent = noise.toFixed(2);
+    train = moons(200, noise, 11); test = moons(200, noise, 23);
+    const cv = $("kn-canvas"), ctx = cv.getContext("2d"), W = cv.width, H = cv.height;
+    const px = x => (x - X0) / (X1 - X0) * W, py = y => H - (y - Y0) / (Y1 - Y0) * H;
+    const step = 10, c0 = css("--b1"), c1 = css("--b4");
+    ctx.clearRect(0, 0, W, H);
+    for (let gx = 0; gx < W; gx += step) for (let gy = 0; gy < H; gy += step) {
+      const q = { x: X0 + (gx + step / 2) / W * (X1 - X0), y: Y0 + (H - gy - step / 2) / H * (Y1 - Y0) };
+      ctx.fillStyle = knn(q, k).cls ? c1 : c0; ctx.globalAlpha = 0.18; ctx.fillRect(gx, gy, step, step);
+    }
+    ctx.globalAlpha = 1;
+    const res = knn(query, k);
+    ctx.strokeStyle = css("--ink"); ctx.lineWidth = 0.8;
+    res.idx.forEach(i => { ctx.beginPath(); ctx.moveTo(px(query.x), py(query.y)); ctx.lineTo(px(train[i].x), py(train[i].y)); ctx.stroke(); });
+    train.forEach(p => { ctx.fillStyle = p.c ? css("--accent") : css("--primary"); ctx.beginPath(); ctx.arc(px(p.x), py(p.y), 3, 0, 7); ctx.fill(); });
+    ctx.fillStyle = res.cls ? css("--accent") : css("--primary"); ctx.strokeStyle = css("--ink"); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(px(query.x), py(query.y), 7, 0, 7); ctx.fill(); ctx.stroke();
+    const acc = test.filter(p => knn(p, k).cls === p.c).length / test.length;
+    const trainAcc = train.filter(p => knn(p, k).cls === p.c).length / train.length;
+    $("kn-stats").innerHTML = kv([
+      [tr("查询点的邻居投票", "neighbour votes"), `<span style="color:var(--primary)">${k - res.votes}</span> : <span style="color:var(--accent)">${res.votes}</span>`],
+      [tr("训练集正确率", "training accuracy"), (trainAcc * 100).toFixed(1) + "%"],
+      [tr("测试集正确率", "test accuracy"), (acc * 100).toFixed(1) + "%"],
+      [tr("每次查询的距离计算", "distances per query"), `${train.length} × 2 ${tr("维", "dims")}`],
+    ]);
+    $("kn-note").innerHTML = k === 1
+      ? tr("k = 1 时训练集正确率是 100%：每个训练点的最近邻就是它自己。这正是“背答案”，测试集上反而不一定好。", "With k = 1, training accuracy is 100%: each training point's nearest neighbour is itself. That is memorizing, and it does not guarantee good test accuracy.")
+      : tr("KNN 没有训练过程，所有“知识”都在存下来的数据里。数据越多，查询越慢；实际系统用 HNSW 等近似索引来加速。", "KNN has no training step; all its “knowledge” is the stored data. More data means slower queries; real systems speed them up with approximate indexes such as HNSW.");
+  }
+  $("kn-canvas").addEventListener("click", e => {
+    const r = e.target.getBoundingClientRect();
+    query = { x: X0 + (e.clientX - r.left) / r.width * (X1 - X0), y: Y1 - (e.clientY - r.top) / r.height * (Y1 - Y0) };
+    renderKn();
+  });
+  function renderCd() {
+    const d = [1, 2, 3, 5, 10, 20, 50, 100, 300, 1000, 3000][+$("cd-d").value];
+    $("cd-d-v").textContent = d;
+    seed = 5;
+    const q = Array.from({ length: d }, rand);
+    let lo = Infinity, hi = 0;
+    for (let n = 0; n < 500; n++) { let s = 0; for (let j = 0; j < d; j++) { const v = rand() - q[j]; s += v * v; } s = Math.sqrt(s); lo = Math.min(lo, s); hi = Math.max(hi, s); }
+    $("cd-stats").innerHTML = kv([[tr("最近距离", "nearest"), lo.toFixed(3)], [tr("最远距离", "farthest"), hi.toFixed(3)],
+      [tr("(最远 − 最近) / 最近", "(farthest − nearest) / nearest"), `<span class="${(hi - lo) / lo < 0.5 ? "bad" : ""}">${((hi - lo) / lo).toFixed(2)}</span>`]]);
+  }
+
+  // ================= 4. sequential vs parallel =================
+  let timer = null;
+  function lanes(tick) {
+    const T = 12, cell = (cls, i) => `<span class="c ${cls}">${i + 1}</span>`;
+    const rnn = Array.from({ length: T }, (_, i) => cell(i < tick ? "done" : i === tick ? "on" : "", i)).join("");
+    const tf = Array.from({ length: T }, (_, i) => cell(tick >= 0 ? (tick === 0 ? "on" : "done") : "", i)).join("");
+    $("pl-lanes").innerHTML = `<div class="lane"><span class="name">RNN</span>${rnn}<span class="hint">&nbsp;${tr("步数", "steps")}: ${Math.max(0, Math.min(tick + 1, T))}/${T}</span></div>` +
+      `<div class="lane"><span class="name">Transformer</span>${tf}<span class="hint">&nbsp;${tr("步数", "steps")}: ${tick >= 0 ? 1 : 0}/1</span></div>`;
+  }
+  $("pl-play").addEventListener("click", () => {
+    clearInterval(timer); let tick = 0; lanes(0);
+    timer = setInterval(() => { tick++; lanes(tick); if (tick >= 12) clearInterval(timer); }, 280);
+  });
+  function renderTable() {
+    const rows = [
+      [tr("核心操作", "core operation"), tr("局部窗口卷积", "local-window convolution"), tr("隐藏状态逐步更新", "step-by-step state update"), tr("算距离、投票", "distances and a vote"), tr("注意力 + 前馈网络", "attention + FFN")],
+      [tr("学到什么", "what is learned"), tr("卷积核", "kernels"), tr("状态更新规则", "update rule"), tr("不学习，存数据", "nothing; stores data"), tr("全部权重", "all weights")],
+      [tr("看多远", "how far it sees"), tr("随层数增长", "grows with depth"), tr("理论无限，实际受梯度消失限制", "unbounded in theory, limited by vanishing gradients"), tr("整个数据集", "whole dataset"), tr("整个上下文，一步可达", "whole context, one hop")],
+      [tr("训练能否并行", "parallel training"), "✅", "❌", tr("无需训练", "no training"), "✅"],
+      [tr("推理时的内存", "memory at inference"), tr("固定", "fixed"), tr("固定大小的状态", "fixed-size state"), tr("整个数据集", "whole dataset"), tr("随上下文增长的 KV 缓存", "KV cache grows with context")],
+    ];
+    $("cmp-table").innerHTML = `<tr><th></th><th>CNN</th><th>RNN / LSTM</th><th>KNN</th><th>Transformer</th></tr>` +
+      rows.map(r => `<tr>${r.map(c => `<td style="white-space:normal;text-align:left">${c}</td>`).join("")}</tr>`).join("");
+  }
+
+  // ================= chart helper =================
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 50, R = 12, T = 12, B = 40;
+    const ty = v => o.ylog ? Math.log10(v) : v;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0);
+    const fy = v => T + (H - T - B) * (1 - (ty(Math.min(o.y1, Math.max(o.y0, v))) - ty(o.y0)) / (ty(o.y1) - ty(o.y0)));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    series.forEach(se => { s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`; });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["一个 3×3 卷积核、64 个输入通道、128 个输出通道（不含偏置），有多少参数？", "A 3×3 convolution with 64 input and 128 output channels (no bias) has how many parameters?"],
+      opts: [["3 × 3 = 9", "3 × 3 = 9"], ["3 × 3 × 64 × 128 = 73,728", "3 × 3 × 64 × 128 = 73,728"], ["取决于图像大小", "It depends on the image size"]],
+      a: 1, ex: ["每个输出通道有一个 3×3×64 的卷积核，共 128 个。参数量与图像大小无关，这就是权重共享。", "Each output channel has a 3×3×64 kernel, and there are 128 of them. The count does not depend on the image size: that is weight sharing."] },
+    { q: ["RNN 训练慢的主要原因是？", "What mainly makes RNN training slow?"],
+      opts: [["每个词元的计算量比 Transformer 大很多", "Much more compute per token than a Transformer"], ["第 t 步必须等第 t−1 步算完，无法沿时间并行", "Step t must wait for step t−1, so time steps cannot run in parallel"], ["参数太多", "Too many parameters"]],
+      a: 1, ex: ["每个词元的计算量都约为 2N，差别在于能否并行。", "Both cost about 2N per token; the difference is parallelism."] },
+    { q: ["LSTM 为什么比普通 RNN 更能记住远处的信息？", "Why does an LSTM remember distant information better than a plain RNN?"],
+      opts: [["它的参数更多", "It has more parameters"], ["记忆单元用加法更新，遗忘门接近 1 时梯度几乎不衰减", "Its memory cell is updated by addition; with the forget gate near 1 the gradient barely decays"], ["它用了注意力", "It uses attention"]],
+      a: 1, ex: ["这和 Transformer 的残差连接是同一个思路：给梯度一条“直通”的路径。", "It is the same idea as the Transformer's residual connection: give the gradient a direct path."] },
+    { q: ["KNN 的“训练”需要做什么？", "What does KNN's “training” involve?"],
+      opts: [["用梯度下降学习权重", "Learning weights by gradient descent"], ["什么都不学，只把数据存下来", "Nothing; it just stores the data"], ["对数据做聚类", "Clustering the data"]],
+      a: 1, ex: ["所有工作都推迟到预测时：每次查询都要和全部样本比较。", "All the work is deferred to prediction time: every query is compared with every stored example."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderCv(); renderRn(); renderKn(); renderCd(); lanes(-1); renderTable(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["cv-k", "cv-s", "cv-p", "cv-pos"].forEach(id => $(id).addEventListener("input", renderCv));
+  $("cv-clear").addEventListener("click", () => { img.forEach(r => r.fill(0)); renderCv(); });
+  ["rn-w", "rn-f"].forEach(id => $(id).addEventListener("input", renderRn));
+  ["kn-k", "kn-noise"].forEach(id => $(id).addEventListener("input", renderKn));
+  $("cd-d").addEventListener("input", renderCd);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

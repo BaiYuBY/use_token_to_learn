@@ -24,7 +24,8 @@
 | 06 | [预训练 Pre-training](06-pretraining/README.md) | [预训练演示](06-pretraining/interactive/pretraining.html) | ✅ 已完成 |
 | 07 | [规模定律 Scaling Laws](07-scaling-laws/README.md) | [Scaling Laws 演示](07-scaling-laws/interactive/scaling.html) | ✅ 已完成 |
 | 08 | [微调 Fine-tuning](08-finetuning/README.md) | [微调演示](08-finetuning/interactive/finetune.html) | ✅ 已完成 |
-| 09–10 | 训练：对齐、推理模型与测试时计算 | | 🚧 计划中 |
+| 09 | [对齐 Alignment](09-alignment/README.md) | [对齐演示](09-alignment/interactive/alignment.html) | ✅ 已完成 |
+| 10 | 训练：推理模型与测试时计算 | | 🚧 计划中 |
 | 11–15 | 推理与部署：解码采样、推理优化、推理服务系统、长上下文、MoE | | 🚧 计划中 |
 | 16–20 | 应用与前沿：多模态、RAG、Agent、评测、安全与可解释性 | | 🚧 计划中 |
 
@@ -35,6 +36,7 @@
 - [推理强度（low / medium / high / xhigh）是怎么设置的？](qa/reasoning-effort.md)
 - [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](qa/deepinfer.md)
 - [大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？](qa/compute.md)（附[算力计算器](qa/interactive/compute.html)）
+- [CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？](qa/classic-models.md)（附[交互演示](qa/interactive/classic-models.html)）
 - [全部问答](qa/index.md) · [术语表](glossary.md)（含“推理 inference / reasoning”的区分）
 
 完整路线图见仓库中的 [PLAN.md](https://github.com/BaiYuBY/use_token_to_learn/blob/main/PLAN.md)。
