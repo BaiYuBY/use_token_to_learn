@@ -203,7 +203,7 @@
 
   <!-- 5. quotes -->
   <section>
-    <h2><span class="step">5</span><span lang="zh">防编造：先引用，再用程序核对引用</span><span lang="en">Against fabrication: quote first, then check the quotes in code</span></h2>
+    <h2><span class="step">5</span><span lang="zh">防编造与说错事实：先引用、程序核对、关键值由程序填</span><span lang="en">Against fabrication and wrong facts: quote, check in code, fill critical values in code</span></h2>
     <p class="hint">
       <span lang="zh">让模型只根据资料回答，并给每条结论附上逐字引用（写在「」里）。下面的检查器就是一个十几行的程序：引用在资料中能找到 → 有依据；找不到 → 编造的引用；没有引用 → 无法核实；明确说“资料中没有提到” → 可以接受的拒答。改改右边的回答试试。</span>
       <span lang="en">Ask the model to answer only from the source and to attach a verbatim quote (in “”) to every claim. The checker below is a dozen lines of code: quote found in the source → supported; not found → fabricated quote; no quote → cannot verify; an explicit “the source does not mention” → an acceptable refusal. Edit the answer on the right and see.</span>
@@ -214,6 +214,16 @@
     </div>
     <div class="controls"><button id="qt-reset"><span lang="zh">恢复示例</span><span lang="en">reset example</span></button></div>
     <div class="lines" id="qt-out"></div>
+    <h3><span lang="zh">更进一步：关键值根本不让模型写</span><span lang="en">Going further: don't let the model write critical values at all</span></h3>
+    <p class="hint">
+      <span lang="zh">即使事实就在提示词里，模型也可能写成它“记得”的旧值。让模型只输出带占位符的句子，由程序从事实表填入真实值。改一下事实表，输出会随之变化，模型无法把它写错。</span>
+      <span lang="en">Even with the fact in the prompt, a model may write the old value it “remembers”. Have it output sentences with placeholders and let your code fill in the real values from the fact table. Change the table and the output follows; the model cannot get these wrong.</span>
+    </p>
+    <div class="row">
+      <div class="col"><b><span lang="zh">事实表（键 = 值）</span><span lang="en">fact table (key = value)</span></b><textarea id="sf-facts" rows="4"></textarea></div>
+      <div class="col"><b><span lang="zh">模型输出（带占位符）</span><span lang="en">model output (with placeholders)</span></b><textarea id="sf-tpl" rows="4"></textarea></div>
+    </div>
+    <pre class="out" id="sf-out"></pre>
   </section>
 
   <!-- 6. prompt builder -->
@@ -435,6 +445,17 @@
     }).join("");
   }
   function resetQt() { $("qt-src").value = QT[lang].src; $("qt-ans").value = QT[lang].ans; renderQt(); }
+  const SF = {
+    zh: { facts: "product = 星河咖啡机 X2\nprice = 1299\nstock = 37\nwarranty = 12 个月", tpl: "{product} 现在的价格是 {price} 元，库存还有 {stock} 台，保修 {warranty}。需要帮你下单吗？{discount}" },
+    en: { facts: "product = Galaxy coffee maker X2\nprice = 1299\nstock = 37\nwarranty = 12 months", tpl: "The {product} is now {price} yuan, with {stock} left in stock and a {warranty} warranty. Shall I place an order? {discount}" },
+  };
+  function renderSf() {
+    const facts = Object.fromEntries($("sf-facts").value.split("\n").map(l => l.split("=")).filter(a => a.length >= 2).map(([k, ...v]) => [k.trim(), v.join("=").trim()]));
+    const missing = [];
+    const out = $("sf-tpl").value.replace(/\{(\w+)\}/g, (m, k) => k in facts ? facts[k] : (missing.push(k), m));
+    $("sf-out").textContent = out + (missing.length ? "\n\n" + tr(`⚠️ 事实表里没有：${missing.join("、")}。程序应拦下这条回复（模型用了不存在的占位符），而不是原样发出。`, `⚠️ not in the fact table: ${missing.join(", ")}. Your code should reject this reply (the model used a placeholder that does not exist) rather than send it.`) : "");
+  }
+  function resetSf() { $("sf-facts").value = SF[lang].facts; $("sf-tpl").value = SF[lang].tpl; renderSf(); }
 
   // ================= 6. prompt builder =================
   const PB = [
@@ -453,6 +474,12 @@
     { id: "docs", on: true, name: ["只根据资料", "Answer from documents"], why: ["事实交给资料，而不是模型的记忆", "facts come from documents, not the model's memory"],
       zh: "# 资料\n<documents>\n{菜单、政策、FAQ……}\n</documents>\n回答事实性问题时，只能使用 <documents> 中的内容。",
       en: "# Documents\n<documents>\n{menu, policies, FAQ, ...}\n</documents>\nFor factual questions, use only what is in <documents>." },
+    { id: "facts", on: true, name: ["权威事实块", "Authoritative facts"], why: ["与模型记忆冲突时以此为准，并说明原因", "these win over the model's memory, and say why"],
+      zh: "<facts>\n以下是当前（{日期}）有效的权威信息，优先级高于你训练时学到的知识。它们可能是你训练截止之后的更新，也可能是本场景的设定。与你的记忆冲突时，一律以这里为准，不要质疑或纠正它们。\n- {事实 1，例如：拿铁的价格是 28 元（2026-09 起调整）}\n- {事实 2}\n</facts>\n回答涉及这些内容的问题时，按“根据 <facts>”来回答。",
+      en: "<facts>\nThe following is authoritative and valid as of {date}; it takes priority over what you learned in training. It may postdate your training or belong to this scenario. When it conflicts with your memory, it wins; do not question or correct it.\n- {fact 1, e.g. a latte costs 28 yuan (since 2026-09)}\n- {fact 2}\n</facts>\nAnswer questions about these points according to <facts>." },
+    { id: "slots", on: false, name: ["关键值用占位符", "Placeholders for critical values"], why: ["价格、库存等由程序填入，模型没机会写错", "your code fills in prices and stock, so the model cannot get them wrong"],
+      zh: "提到价格、库存、订单号、日期时，不要写具体数值，而是写占位符：{price}、{stock}、{order_id}、{date}。程序会在发送前填入真实值。",
+      en: "When mentioning prices, stock, order numbers or dates, do not write the values; write placeholders instead: {price}, {stock}, {order_id}, {date}. Your code fills in the real values before sending." },
     { id: "quote", on: false, name: ["先引用再回答", "Quote first"], why: ["引用可以用程序核对（第 5 节）", "quotes can be checked in code (section 5)"],
       zh: "回答事实性问题前，先在 <quotes> 中逐字摘出支持答案的原文；找不到可引用的原文，就不要回答这一点。",
       en: "Before answering a factual question, copy the supporting sentences verbatim into <quotes>; if there is nothing to quote, do not answer that point." },
@@ -502,6 +529,9 @@
     { q: ["下面哪种做法最能减少“编造不存在的内容”？", "Which practice best reduces fabricated content?"],
       opts: [["在提示词里写“不要编造”", "Writing “do not make things up” in the prompt"], ["提供资料、要求逐字引用，并用程序核对引用是否存在", "Provide documents, require verbatim quotes, and check in code that they exist"], ["把温度调到 2", "Raising the temperature to 2"]],
       a: 1, ex: ["只靠一句禁令效果有限；把事实交给资料，再用程序验证引用，错误才能被发现和拦下。", "A ban alone does little; ground the facts in documents and verify quotes in code so errors are caught."] },
+    { q: ["提示词里写明了“拿铁 28 元”，模型却回答 25 元（旧价格）。最先该做什么？", "The prompt says “a latte costs 28 yuan”, yet the model answers 25 (the old price). What should you do first?"],
+      opts: [["在提示词里加粗强调三遍", "Bold it and repeat it three times in the prompt"], ["打印模型实际收到的完整提示词，确认事实在里面、没有矛盾的旧版本", "Log the full prompt the model actually received; check the fact is there and no old version contradicts it"], ["换一个更大的模型", "Switch to a bigger model"]],
+      a: 1, ex: ["很多“不听话”其实是事实没送进去（截断、检索遗漏）或上下文里有旧值。确认之后，再声明事实为权威，或用占位符由程序填值。", "Much “disobedience” is a fact that never arrived (truncation, a retrieval miss) or an old value elsewhere in the context. After checking, declare the facts authoritative, or fill values in code."] },
     { q: ["让模型“再检查一遍自己的答案”（没有任何外部信息），通常效果如何？", "Asking the model to “check its own answer again”, with no outside information, usually…"],
       opts: [["稳定提升准确率", "reliably improves accuracy"], ["效果有限，甚至可能把对的改错", "helps little, and can turn right answers wrong"], ["一定能发现所有错误", "finds every error"]],
       a: 1, ex: ["研究发现，没有外部反馈的自我纠错常常无效（Huang et al., 2023）。有效的是程序校验、工具结果、资料核对这类外部信号。", "Studies find self-correction without outside feedback often fails (Huang et al., 2023). What works is an external signal: a validator, a tool result, a source check."] },
@@ -520,8 +550,8 @@
   }
 
   // ================= wiring =================
-  function renderAll() { renderCh(); renderRt(); renderReal(); renderVt(); renderQt(); renderPb(); renderQuiz(); }
-  let qtTouched = false;
+  function renderAll() { renderCh(); renderRt(); renderReal(); renderVt(); renderQt(); renderSf(); renderPb(); renderQuiz(); }
+  let qtTouched = false, sfTouched = false;
   function setLang(l) {
     lang = l;
     document.documentElement.dataset.lang = l;
@@ -530,6 +560,7 @@
     $("lang-en").classList.toggle("on", l === "en");
     try { localStorage.setItem("lang", l); } catch (e) {}
     if (!qtTouched) { $("qt-src").value = QT[l].src; $("qt-ans").value = QT[l].ans; }
+    if (!sfTouched) { $("sf-facts").value = SF[l].facts; $("sf-tpl").value = SF[l].tpl; }
     renderAll();
   }
   ["ch-n", "ch-p", "ch-m"].forEach(id => $(id).addEventListener("input", renderCh));
@@ -540,6 +571,7 @@
   $("ab-t").addEventListener("input", renderAb);
   ["qt-src", "qt-ans"].forEach(id => $(id).addEventListener("input", () => { qtTouched = true; renderQt(); }));
   $("qt-reset").addEventListener("click", () => { qtTouched = false; resetQt(); });
+  ["sf-facts", "sf-tpl"].forEach(id => $(id).addEventListener("input", () => { sfTouched = true; renderSf(); }));
   $("lang-zh").addEventListener("click", () => setLang("zh"));
   $("lang-en").addEventListener("click", () => setLang("en"));
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);

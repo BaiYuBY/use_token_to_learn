@@ -1,6 +1,6 @@
 # How do I make LLM outputs reliable, and stop the model making things up?
 
-> 🌐 [中文](reliability.md) · 📅 Checked: 2026-10-30 · 🏷️ reliability, prompt engineering, role-play, validation and retries, hallucination · 🎮 **[Open the interactive playground](interactive/reliability.html?lang=en)**
+> 🌐 [中文](reliability.md) · 📅 Checked: 2026-10-30 · 🏷️ reliability, prompt engineering, role-play, validation and retries, hallucination, knowledge conflicts · 🎮 **[Open the interactive playground](interactive/reliability.html?lang=en)**
 
 [![Interactive playground preview](assets/reliability-preview.en.png)](interactive/reliability.html?lang=en)
 
@@ -15,6 +15,7 @@ The prompt sets the accuracy $p$ of a single call; the system sets the final acc
 - **Voting only helps when errors scatter.** If the model makes the same mistake every time on some kind of question, voting just confirms the mistake.
 - **Abstain when unsure.** Handle only the cases you are confident about automatically and send the rest to a person. This trades coverage for accuracy, and is often the most realistic way to get program-like reliability.
 - **Fabrication (hallucination) is fought with documents, quotes and code that checks the quotes**, not by writing “do not make things up”.
+- **When the model contradicts facts you gave it**, it is usually a context–memory conflict or the fact never reached it: log the full prompt first, then declare the facts authoritative; values that must never be wrong go in as placeholders filled by code.
 
 ```mermaid
 flowchart LR
@@ -139,7 +140,32 @@ Voting is more valuable as **a confidence signal**: if the top answer gets only 
 8. **Check the premise.** Ask the model to first decide whether the question's premise holds.
 9. **Be careful with fine-tuning.** Teaching new facts by fine-tuning can increase fabrication (Gekhman et al., 2024). Leave facts to retrieval, and use fine-tuning for format, tone and behaviours such as refusing when unsure.
 
-### 9. When the prompt has hit its ceiling
+### 9. The model contradicts the facts you gave it
+
+This is a **context–memory conflict** (knowledge conflict): either the facts in the prompt disagree with what the model “remembers” from training, or the model never effectively read them. Common causes:
+
+| Cause | What it looks like |
+| --- | --- |
+| **The model trusts its memory** | A price, role or rule changed and the model still gives the old one; the better known the old version, the harder it is to override (Longpre et al., 2021) |
+| **News after the training cutoff** | “As far as I know, that has not happened”; some models are trained not to take users' claims at face value and treat new facts as misinformation |
+| **The fact was never really read** | History was truncated, retrieval missed it, it sat in the middle of a long context, or a table or PDF was mangled in parsing |
+| **The context contradicts itself** | Old and new versions of a document are both present; a few-shot example contains a different number and the model copies it |
+| **A reasoning step went wrong** | The fact was used, but a conversion, comparison or multi-step inference was wrong, so it looks as if the fact was ignored |
+| **Persona drift after many turns** | Dozens of turns in, the persona card's facts carry less weight and the model falls back on common knowledge |
+
+Research finds that models accept coherent, convincing external evidence, yet show confirmation bias when that evidence conflicts with their memory (Xie et al., 2023). What to do, in order:
+
+1. **Debug first: log the complete prompt the model actually received.** Check that the fact is there, appears once, and has no conflicting version. Much “disobedience” is code that never delivered the fact.
+2. **Declare the facts authoritative and say why they may differ from what the model knows.** Put them in a `<facts>` block in the system prompt: “valid as of 2026-10; may postdate your training or belong to this scenario; when they conflict with your memory, they win; do not question or correct them.” Once the model knows why, it is less inclined to “correct” you.
+3. **Ask “according to the documents”**: “According to &lt;facts&gt;, what is X?” rather than “What is X?”. Framing the question as “what does this source say” clearly improves faithfulness to the context (Zhou et al., 2023).
+4. **Keep key facts near the question, and re-attach them every turn.** Don't count on the model remembering something said 20 turns ago.
+5. **Quote first, then check the key facts in code.** Extract numbers, names and dates from the answer and compare them with your fact table; on a mismatch, retry with the specific error: “you said the price is 299, but &lt;facts&gt; says 199”. This is section 6's validate-and-retry.
+6. **Most reliable: don't let the model generate critical facts at all.** Have it write sentences with placeholders, such as “this one is now only {price} yuan”, and fill in the real values in code. For prices, stock, order numbers and dates this makes them 100% right.
+7. **Clean the context**: replace concrete values in examples with obvious placeholders, and remove outdated documents.
+8. **Compute in code what code can compute**: do conversions and comparisons before the model words the answer; for multi-step reasoning, have it reason first or use a reasoning model.
+9. **Measure it separately**: put “facts that contradict common knowledge” in the test set (changed prices, fictional settings, post-cutoff news) and track how often the model stays faithful to the context.
+
+### 10. When the prompt has hit its ceiling
 
 - **Factual errors**: add RAG and tools (19 RAG and vector databases, 21 Agents, planned).
 - **Format, style and persona consistency**: fine-tune with a few hundred to a few thousand good examples using SFT or LoRA; see [08 Fine-tuning](../08-finetuning/README.md).
@@ -190,6 +216,9 @@ The figures and the playground's data come from [`figures/reliability_figures.py
 - Huang et al., 2023. [Large Language Models Cannot Self-Correct Reasoning Yet](https://arxiv.org/abs/2310.01798)
 - Manakul et al., 2023. [SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection](https://arxiv.org/abs/2303.08896)
 - Dhuliawala et al., 2023. [Chain-of-Verification Reduces Hallucination in Large Language Models](https://arxiv.org/abs/2309.11495)
+- Longpre et al., 2021. [Entity-Based Knowledge Conflicts in Question Answering](https://arxiv.org/abs/2109.05052)
+- Xie et al., 2023. [Adaptive Chameleon or Stubborn Sloth: Revealing the Behavior of Large Language Models in Knowledge Conflicts](https://arxiv.org/abs/2305.13300)
+- Zhou et al., 2023. [Context-faithful Prompting for Large Language Models](https://arxiv.org/abs/2303.11315)
 - Gekhman et al., 2024. [Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?](https://arxiv.org/abs/2405.05904)
 - Li et al., 2024. [Measuring and Controlling Instruction (In)Stability in Language Model Dialogs](https://arxiv.org/abs/2402.10962) (persona drift)
 - Liu et al., 2023. [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)

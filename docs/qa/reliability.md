@@ -1,6 +1,6 @@
 # 怎么让大模型的输出更可靠？怎么减少编造？
 
-> 🌐 [English](reliability.en.md) · 📅 核实日期：2026-10-30 · 🏷️ 可靠性、提示工程、角色扮演、校验与重试、幻觉 · 🎮 **[打开交互演示](interactive/reliability.html?lang=zh)**
+> 🌐 [English](reliability.en.md) · 📅 核实日期：2026-10-30 · 🏷️ 可靠性、提示工程、角色扮演、校验与重试、幻觉、知识冲突 · 🎮 **[打开交互演示](interactive/reliability.html?lang=zh)**
 
 [![交互演示预览](assets/reliability-preview.png)](interactive/reliability.html?lang=zh)
 
@@ -15,6 +15,7 @@
 - **投票只对分散的错误有效**：模型在某类题上一贯犯同一个错时，多次采样投票只会把错误确认下来。
 - **没把握就拒答**：只自动处理有把握的部分，其余转人工，用覆盖率换准确率。这往往是做到“像程序一样可靠”最现实的路。
 - **编造（幻觉）要靠“给资料 + 要引用 + 程序核对引用”来防**。一句“不要编造”作用有限。
+- **给了事实模型还说错**，多半是上下文与记忆冲突，或事实根本没送进去：先打印完整提示词排查，再把事实声明为权威；绝对不能错的值用占位符由程序填入。
 
 ```mermaid
 flowchart LR
@@ -139,7 +140,32 @@ $$
 8. **检查问题的前提**：要求模型先判断前提是否成立。
 9. **微调要谨慎**：用微调教新知识反而可能增加编造（Gekhman et al., 2024）。事实靠检索，微调用来教格式、语气和“不知道时拒答”这类行为。
 
-### 9. 提示词到顶以后
+### 9. 给了正确的事实，模型还是否认或说错
+
+这类问题叫**上下文与记忆冲突**（knowledge conflict）：提示词里的事实和模型训练时“记住”的说法不一致，或者事实其实没被模型有效读到。常见原因有：
+
+| 原因 | 典型表现 |
+| --- | --- |
+| **模型更相信自己的记忆** | 价格、职位、规则改了，模型仍输出旧版本；越“众所周知”的旧说法越难覆盖（Longpre et al., 2021） |
+| **训练截止日期之后的新信息** | “据我所知这件事并没有发生”；有些模型被训练成不轻信用户的说法，会把新事实当成误导 |
+| **事实其实没被读到** | 历史消息被截断、检索没取到、埋在长上下文中间、表格或 PDF 解析后格式混乱 |
+| **上下文里有矛盾的信息** | 新旧两版资料同时出现；few-shot 示例里写着别的数字，模型照抄示例 |
+| **推理步骤出错** | 事实用对了，但换算、比较、多步推理算错，看起来像“没用你给的事实” |
+| **多轮之后人设漂移** | 几十轮后设定卡里的事实影响变弱，模型开始按常识回答 |
+
+研究也发现，外部证据连贯、有说服力时，模型会接受它；但证据和模型的记忆冲突时，模型会表现出“确认偏误”（Xie et al., 2023）。对策按优先级：
+
+1. **先排查：打印模型实际收到的完整提示词。** 确认事实真的在里面、只出现一次、没有矛盾的版本。很多“模型不听话”其实是程序没把事实送进去。
+2. **把事实声明为权威，并说明为什么它可能和模型的认知不同。** 放在系统提示的 `<facts>` 块里，写明“这是 2026-10 有效的信息，可能是你训练截止之后的更新或本场景的设定，与你的记忆冲突时以此为准，不要质疑或纠正”。模型知道原因后，就不太会去“纠正”你。
+3. **用“根据资料”的问法**：问“根据 &lt;facts&gt;，X 是多少？”，而不是“X 是多少？”。把问题表述成“按这份资料的说法”，能明显提高对上下文的忠实度（Zhou et al., 2023）。
+4. **关键事实靠近问题，多轮时每轮重新附上。** 不要指望模型记住 20 轮之前的话。
+5. **先引用再回答，并用程序核对关键事实。** 从回答中抽出数字、名字、日期，与事实表比对；不一致就把具体错误告诉模型再重试：“你说价格是 299，但 &lt;facts&gt; 中是 199”。这就是第 6 节的“校验 + 重试”。
+6. **最可靠：关键事实不让模型生成。** 让模型只写带占位符的句子，如“这款现在只要 {price} 元”，再由程序填入真实值。价格、库存、订单号、日期这类绝对不能错的内容，这样可以做到 100% 正确。
+7. **清理上下文**：示例中的具体数字用明显的占位符代替；旧版本资料从上下文里删掉。
+8. **能用代码算的就用代码算**：换算、比较算好后再交给模型表述；需要多步推理时让它先写出推理过程，或换用推理模型。
+9. **单独测量**：评测集里专门放“事实与常识冲突”的题（改过的价格、虚构设定、训练截止之后的新闻），统计模型忠实于上下文的比例。
+
+### 10. 提示词到顶以后
 
 - **事实类错误**：用 RAG 和工具（19 RAG 与向量数据库、21 Agent，计划中）。
 - **格式、风格、人设一致性**：用几百到几千条高质量样例做 SFT 或 LoRA，见 [08 微调](../08-finetuning/README.md)。
@@ -190,6 +216,9 @@ python docs/qa/code/reliability.py
 - Huang et al., 2023. [Large Language Models Cannot Self-Correct Reasoning Yet](https://arxiv.org/abs/2310.01798)
 - Manakul et al., 2023. [SelfCheckGPT: Zero-Resource Black-Box Hallucination Detection](https://arxiv.org/abs/2303.08896)
 - Dhuliawala et al., 2023. [Chain-of-Verification Reduces Hallucination in Large Language Models](https://arxiv.org/abs/2309.11495)
+- Longpre et al., 2021. [Entity-Based Knowledge Conflicts in Question Answering](https://arxiv.org/abs/2109.05052)
+- Xie et al., 2023. [Adaptive Chameleon or Stubborn Sloth: Revealing the Behavior of Large Language Models in Knowledge Conflicts](https://arxiv.org/abs/2305.13300)
+- Zhou et al., 2023. [Context-faithful Prompting for Large Language Models](https://arxiv.org/abs/2303.11315)
 - Gekhman et al., 2024. [Does Fine-Tuning LLMs on New Knowledge Encourage Hallucinations?](https://arxiv.org/abs/2405.05904)
 - Li et al., 2024. [Measuring and Controlling Instruction (In)Stability in Language Model Dialogs](https://arxiv.org/abs/2402.10962)（人设漂移）
 - Liu et al., 2023. [Lost in the Middle: How Language Models Use Long Contexts](https://arxiv.org/abs/2307.03172)
