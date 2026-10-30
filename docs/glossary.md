@@ -66,6 +66,15 @@
 | 直接偏好优化 | DPO (direct preference optimization) | 不用奖励模型，直接从偏好对学习 | [09](09-alignment/README.md) |
 | 奖励黑客 | reward hacking | 模型钻奖励模型的空子：分数高，人却不满意 | [09](09-alignment/README.md) |
 | 宪法式 AI / AI 反馈强化学习 | Constitutional AI / RLAIF | 让 AI 按写明的原则给反馈，代替人工标注 | [09](09-alignment/README.md) |
+| 思维链 | chain of thought (CoT) | 先写出中间推理步骤再给答案 | [10](10-reasoning/README.md) |
+| 推理模型 | reasoning model | 经过训练、会先思考再回答的模型，如 o1、DeepSeek-R1 | [10](10-reasoning/README.md) |
+| 自洽性 / 多数投票 | self-consistency / majority vote | 多次采样，选出现最多的答案 | [10](10-reasoning/README.md) |
+| 过程奖励模型 / 结果奖励模型 | PRM / ORM | 逐步检查推理过程 / 只看最终答案的验证器 | [10](10-reasoning/README.md) |
+| 可验证奖励的强化学习 | RLVR | 用能自动判对错的题目做强化学习 | [10](10-reasoning/README.md) |
+| 组相对策略优化 | GRPO | 用同一题一组回答的组内比较代替价值网络的 PPO 变体 | [10](10-reasoning/README.md) |
+| 思考预算 / 预算强制 | thinking budget / budget forcing | 限制思考长度，到预算就强制作答 | [10](10-reasoning/README.md) |
+| 蒸馏 | distillation | 用大模型生成的数据训练小模型 | [10](10-reasoning/README.md) |
+| pass@k | pass@k | 采样 k 次至少有一次正确的概率 | [10](10-reasoning/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

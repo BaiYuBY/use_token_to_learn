@@ -109,7 +109,7 @@ $$
 \mathcal{L}_{\text{PPO}} = -\mathbb{E}\Big[\min\big(\rho_t A,\ \mathrm{clip}(\rho_t, 1-\epsilon, 1+\epsilon)\, A\big)\Big], \qquad \rho_t = \frac{\pi_\theta(y_t \mid \cdot)}{\pi_{\text{old}}(y_t \mid \cdot)}
 $$
 
-Full PPO also trains a value network to estimate the advantage. This chapter uses the batch's mean reward as the baseline instead, the simplification used by RLOO and GRPO. GRPO powers DeepSeek's reasoning models (see 10 Reasoning models, planned).
+Full PPO also trains a value network to estimate the advantage. This chapter uses the batch's mean reward as the baseline instead, the simplification used by RLOO and GRPO. GRPO powers DeepSeek's reasoning models (see [10 Reasoning models and test-time compute](../10-reasoning/README.en.md)).
 
 ### 3.3 Reward hacking: Goodhart's law
 

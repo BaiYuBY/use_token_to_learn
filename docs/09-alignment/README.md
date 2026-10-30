@@ -109,7 +109,7 @@ $$
 \mathcal{L}_{\text{PPO}} = -\mathbb{E}\Big[\min\big(\rho_t A,\ \mathrm{clip}(\rho_t, 1-\epsilon, 1+\epsilon)\, A\big)\Big], \qquad \rho_t = \frac{\pi_\theta(y_t \mid \cdot)}{\pi_{\text{old}}(y_t \mid \cdot)}
 $$
 
-完整的 PPO 还要训练一个价值网络来估计优势。本章用“这一批的平均奖励”作为基线来代替价值网络，这是 RLOO、GRPO 等方法采用的简化。GRPO 用在了 DeepSeek 的推理模型中（见 10 推理模型，计划中）。
+完整的 PPO 还要训练一个价值网络来估计优势。本章用“这一批的平均奖励”作为基线来代替价值网络，这是 RLOO、GRPO 等方法采用的简化。GRPO 用在了 DeepSeek 的推理模型中（见 [10 推理模型与测试时计算](../10-reasoning/README.md)）。
 
 ### 3.3 奖励黑客：Goodhart 定律
 
