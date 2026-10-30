@@ -75,6 +75,16 @@
 | 思考预算 / 预算强制 | thinking budget / budget forcing | 限制思考长度，到预算就强制作答 | [10](10-reasoning/README.md) |
 | 蒸馏 | distillation | 用大模型生成的数据训练小模型 | [10](10-reasoning/README.md) |
 | pass@k | pass@k | 采样 k 次至少有一次正确的概率 | [10](10-reasoning/README.md) |
+| 解码 | decoding | 把模型给出的下一个词元概率变成实际输出的规则 | [11](11-decoding/README.md) |
+| 贪心解码 | greedy decoding | 每一步都选概率最高的词元；确定，但容易陷入重复 | [11](11-decoding/README.md) |
+| 束搜索 | beam search | 同时保留得分最高的 B 条候选，找整句概率更高的输出 | [11](11-decoding/README.md) |
+| 长度惩罚 | length penalty | 按长度归一化束搜索得分，避免偏爱过短的输出 | [11](11-decoding/README.md) |
+| 温度 | temperature | 把 logits 除以 T 再 softmax；T 小更保守，T 大更随机 | [11](11-decoding/README.md) |
+| top-k 采样 | top-k sampling | 只在概率最高的 k 个词元中采样 | [11](11-decoding/README.md) |
+| top-p / 核采样 | top-p / nucleus sampling | 只在累计概率达到 p 的最小词元集合中采样 | [11](11-decoding/README.md) |
+| min-p 采样 | min-p sampling | 丢掉概率低于“最高概率 × min_p”的词元 | [11](11-decoding/README.md) |
+| 重复 / 频率 / 存在惩罚 | repetition / frequency / presence penalty | 降低已出现过的词元的分数，减少复读 | [11](11-decoding/README.md) |
+| 约束解码 / 结构化输出 | constrained decoding / structured output | 把不符合语法或 JSON 格式的词元概率置零，保证输出合法 | [11](11-decoding/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

@@ -63,6 +63,8 @@ plugins:
             微调: Fine-tuning
             对齐: Alignment
             推理模型与测试时计算: Reasoning Models & Test-time Compute
+            推理与部署: Inference & Deployment
+            解码与采样: Decoding & Sampling
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -110,6 +112,8 @@ nav:
       - 微调: 08-finetuning/README.md
       - 对齐: 09-alignment/README.md
       - 推理模型与测试时计算: 10-reasoning/README.md
+  - 推理与部署:
+      - 解码与采样: 11-decoding/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

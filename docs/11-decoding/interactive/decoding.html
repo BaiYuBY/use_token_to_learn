@@ -1,0 +1,617 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>解码与采样交互演示 · Decoding and Sampling Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  canvas.hm { width: 100%; max-width: 260px; aspect-ratio: 1; image-rendering: pixelated; border: 1px solid var(--line); border-radius: 6px; display: block; }
+  .hm-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hm-wrap figure { margin: 0; flex: 1 1 200px; max-width: 260px; }
+  .hm-wrap figcaption { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+  .tokens { display: flex; flex-wrap: wrap; gap: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; margin: 8px 0; }
+  .tokens span { min-width: 1.3em; text-align: center; padding: 2px 3px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); }
+  .tokens span.resp { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tokens span.prompt.train { background: var(--b1); color: var(--bg); border-color: var(--b1); }
+  .tokens span.nl { color: var(--muted); }
+  .tokens .br { flex-basis: 100%; height: 0; padding: 0; border: 0; background: none; }
+  input[type=text] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; width: 9em; }
+  table.t td.ok { color: var(--good); }
+  table.t td.no { color: var(--bad); }
+  table.t td.mono, table.t th.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  #rs-samples th, #rs-samples td { text-align: left; }
+  .samples { display: grid; gap: 4px; margin-top: 8px; }
+  .samples div { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+  .samples b { display: inline-block; min-width: 3.2em; }
+  .resp { display: grid; gap: 8px; margin-top: 8px; }
+  .resp div { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+  .resp div.win { border-color: var(--good); box-shadow: 0 0 0 2px var(--good) inset; }
+  .prob { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.05rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 8px 0; white-space: pre-wrap; word-break: break-all; }
+  .prob .think { color: var(--accent); }
+  .prob .cut { color: var(--muted); text-decoration: line-through; }
+  .grp { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .grp button { min-width: 64px; }
+  .grp button.ok { border-color: var(--good); color: var(--good); }
+  .grp button.no { border-color: var(--bad); color: var(--bad); }
+  .chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+  .chips button { padding: 2px 8px; font-size: .85rem; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  .chips button.dis { opacity: .35; }
+  .sent { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; padding: 3px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); margin: 3px 0; }
+  .sent.bad { border-color: var(--bad); color: var(--bad); }
+  .sent.good { border-color: var(--good); }
+  .longtext { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88rem; line-height: 1.8; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .longtext .rep { background: var(--accent); color: var(--bg); border-radius: 3px; padding: 0 2px; }
+  .status { font-size: .85rem; color: var(--muted); }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">解码与采样 · 交互演示</span><span lang="en">Decoding and Sampling · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">模型每一步只给出“下一个词”的概率分布，怎么从中选词由解码策略决定。本页在你的浏览器里直接运行 06 章训练的小 GPT（10.7 万参数）：每次拖动滑块、点击生成，看到的都是模型当场算出来的结果。</span>
+        <span lang="en">At each step a model only gives a probability distribution over the next word; the decoding strategy decides which word to pick. This page runs chapter 06's small GPT (107K parameters) right in your browser: every slider move and every click shows what the model computes on the spot.</span>
+      </p>
+      <p class="status" id="model-status"></p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. distribution -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">下一个词的概率分布，以及怎么“截断”它</span><span lang="en">The next-word distribution, and how to truncate it</span></h2>
+    <p class="hint">
+      <span lang="zh">点击下面的词拼出一个句子开头，看模型给出的下一个词的概率。温度 T 把 logits 除以 T：T 小分布更尖，T 大更平。top-k 只留概率最高的 k 个词；top-p 留下累计概率刚到 p 的最少几个词；min-p 只留概率不低于“最高概率 × min-p”的词。灰色的词被截掉了。</span>
+      <span lang="en">Click words below to build the start of a sentence and see the model's probabilities for the next word. Temperature T divides the logits by T: small T sharpens, large T flattens. top-k keeps the k most likely words; top-p keeps the fewest words whose probabilities add up to p; min-p keeps words at least min-p times as likely as the top one. Grey words are cut.</span>
+    </p>
+    <div class="prob" id="ds-prefix"></div>
+    <div class="controls"><button id="ds-back">⌫ <span lang="zh">删除一个词</span><span lang="en">remove a word</span></button><button id="ds-clear"><span lang="zh">清空</span><span lang="en">clear</span></button></div>
+    <div class="controls">
+      <label>T <input id="ds-t" type="range" min="0.05" max="3" step="0.05" value="1"><span id="ds-t-v" class="mono"></span></label>
+      <label>top-k <input id="ds-k" type="range" min="0" max="20" step="1" value="0"><span id="ds-k-v" class="mono"></span></label>
+      <label>top-p <input id="ds-p" type="range" min="0.05" max="1" step="0.05" value="1"><span id="ds-p-v" class="mono"></span></label>
+      <label>min-p <input id="ds-m" type="range" min="0" max="0.5" step="0.01" value="0"><span id="ds-m-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="ds-chart" viewBox="0 0 640 230"></svg>
+    <div class="callout" id="ds-note"></div>
+    <p class="hint"><span lang="zh">点击下一个词：</span><span lang="en">Click a next word:</span></p>
+    <div class="chips" id="ds-chips"></div>
+  </section>
+
+  <!-- 2. sampling -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">用这些设置生成句子</span><span lang="en">Generate sentences with these settings</span></h2>
+    <p class="hint">
+      <span lang="zh">按第 1 节的设置（温度、top-k、top-p、min-p）从头生成 12 个句子。绿框合乎语法，红框有语法错误（用和 09 章同样的语法规则检查）。T = 0 就是贪心解码：每次都选概率最高的词，所以每次都生成同一句话。</span>
+      <span lang="en">Generate 12 sentences from scratch with part 1's settings (temperature, top-k, top-p, min-p). Green boxes are grammatical, red ones are not (checked with the same grammar rules as chapter 09). T = 0 is greedy decoding: always the most likely word, so the same sentence every time.</span>
+    </p>
+    <div class="controls">
+      <button id="sm-go">▶ <span lang="zh">生成 12 句</span><span lang="en">generate 12</span></button>
+      <button id="sm-greedy"><span lang="zh">贪心解码（T = 0）</span><span lang="en">greedy (T = 0)</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><div id="sm-out"></div></div>
+      <div class="col"><div class="kv" id="sm-stats"></div><div class="callout" id="sm-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. frontier -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">质量与多样性的取舍</span><span lang="en">Quality versus diversity</span></h2>
+    <p class="hint" id="fr-intro"></p>
+    <svg class="chart" id="fr-chart" viewBox="0 0 640 280"></svg>
+    <div class="legend" id="fr-legend"></div>
+    <div class="callout" id="fr-note"></div>
+  </section>
+
+  <!-- 4. beam -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">束搜索：同时保留几条候选</span><span lang="en">Beam search: keep several candidates at once</span></h2>
+    <p class="hint">
+      <span lang="zh">贪心解码每步只看眼前最好的词，可能错过整体概率更高的句子。束搜索每步保留得分最高的 B 条候选（得分 = 累计的对数概率）。拖动束宽，看找到的句子和它的对数概率。</span>
+      <span lang="en">Greedy decoding only looks at the best word right now and can miss a sentence that is more likely overall. Beam search keeps the B best candidates at every step (score = summed log-probability). Drag the beam width and see the sentence found and its log-probability.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">束宽</span><span lang="en">beam width</span> B <input id="bm-b" type="range" min="1" max="16" step="1" value="4"><span id="bm-b-v" class="mono"></span></label>
+      <label><span lang="zh">长度惩罚</span><span lang="en">length penalty</span> α <input id="bm-a" type="range" min="0" max="1.5" step="0.1" value="0"><span id="bm-a-v" class="mono"></span></label>
+    </div>
+    <div class="scroll"><table class="t" id="bm-steps"></table></div>
+    <div class="callout" id="bm-note"></div>
+  </section>
+
+  <!-- 5. repetition -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">长文本的重复与惩罚</span><span lang="en">Repetition in long text, and penalties</span></h2>
+    <p class="hint">
+      <span lang="zh">让模型连续写 60 个词。贪心解码很容易陷入循环，一遍遍写同一句话。橙色标出的是前面出现过的四个词的组合。试试加大重复惩罚（把已出现词的 logit 除以 r）、频率惩罚（减去 出现次数 × f）或存在惩罚（出现过就减去 p），或者改用采样。</span>
+      <span lang="en">Let the model write 60 words in a row. Greedy decoding easily falls into a loop, writing the same sentence over and over. Orange marks 4-word sequences that already appeared. Try a repetition penalty (divide the logits of seen words by r), a frequency penalty (subtract count × f), a presence penalty (subtract p once a word has appeared), or switch to sampling.</span>
+    </p>
+    <div class="controls">
+      <label>T <input id="rp-t" type="range" min="0" max="1.5" step="0.1" value="0"><span id="rp-t-v" class="mono"></span></label>
+      <label><span lang="zh">重复惩罚</span><span lang="en">repetition</span> r <input id="rp-r" type="range" min="1" max="2" step="0.05" value="1"><span id="rp-r-v" class="mono"></span></label>
+      <label><span lang="zh">频率惩罚</span><span lang="en">frequency</span> f <input id="rp-f" type="range" min="0" max="1.5" step="0.1" value="0"><span id="rp-f-v" class="mono"></span></label>
+      <label><span lang="zh">存在惩罚</span><span lang="en">presence</span> p <input id="rp-p" type="range" min="0" max="1.5" step="0.1" value="0"><span id="rp-p-v" class="mono"></span></label>
+      <button id="rp-go">↻ <span lang="zh">重新生成</span><span lang="en">regenerate</span></button>
+    </div>
+    <div class="longtext" id="rp-out"></div>
+    <div class="kv" id="rp-stats" style="margin-top:8px"></div>
+    <div class="callout" id="rp-note"></div>
+  </section>
+
+  <!-- 6. constrained -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">约束解码：保证输出合乎格式</span><span lang="en">Constrained decoding: guarantee the format</span></h2>
+    <p class="hint">
+      <span lang="zh">把格式规则（这里是小英语的语法；实际中常是 JSON Schema 或正则表达式）编译成一个状态机。每一步只允许状态机接受的词，把其他词的 logit 设为 −∞，再照常采样。打开约束、把温度调得很高，句子依然全部合乎语法。</span>
+      <span lang="en">Compile the format rules (here the tiny English grammar; in practice often a JSON Schema or a regular expression) into a state machine. At each step only words the machine accepts are allowed: the other logits are set to −∞, then sampling proceeds as usual. With the constraint on, even a very high temperature produces only grammatical sentences.</span>
+    </p>
+    <div class="controls">
+      <label>T <input id="cs-t" type="range" min="0.5" max="4" step="0.1" value="3"><span id="cs-t-v" class="mono"></span></label>
+      <button id="cs-on" class="on"><span lang="zh">语法约束：开</span><span lang="en">grammar constraint: on</span></button>
+      <button id="cs-go">▶ <span lang="zh">生成 8 句</span><span lang="en">generate 8</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><div id="cs-out"></div></div>
+      <div class="col"><div class="kv" id="cs-stats"></div><div class="callout" id="cs-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">11 · Decoding</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Weights and results, generated by figures/decoding_figures.py -->
+<script src="decoding_data.js"></script>
+<script>
+(() => {
+  const D = window.DECODING_DATA;
+  const $ = id => document.getElementById(id);
+  if (!D) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>decoding_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+  const pct = v => (v * 100).toFixed(0) + "%";
+  const V = D.vocab, VN = V.length, STOI = Object.fromEntries(V.map((w, i) => [w, i])), END = STOI["."];
+
+  // ================= the model, in JavaScript =================
+  // The same computation as chapter 06's GPT: nn.TransformerEncoderLayer with norm_first=True and GELU.
+  // 与 06 章的 GPT 完全相同的计算：先归一化的 Transformer 层 + GELU。
+  const W = (() => {
+    const bin = atob(D.weights.data), buf = new ArrayBuffer(bin.length), u8 = new Uint8Array(buf);
+    for (let i = 0; i < bin.length; i++) u8[i] = bin.charCodeAt(i);
+    const all = new Float32Array(buf), out = {};
+    let off = 0;
+    D.weights.names.forEach((n, i) => { const size = D.weights.shapes[i].reduce((a, b) => a * b, 1); out[n] = all.subarray(off, off + size); off += size; });
+    return out;
+  })();
+  const { d, layers: NL, heads: NH, ctx: CTX } = D.config, DH = d / NH;
+  function erf(x) { // Abramowitz & Stegun 7.1.26
+    const s = Math.sign(x); x = Math.abs(x);
+    const t = 1 / (1 + 0.3275911 * x);
+    return s * (1 - (((((1.061405429 * t - 1.453152027) * t) + 1.421413741) * t - 0.284496736) * t + 0.254829592) * t * Math.exp(-x * x));
+  }
+  const gelu = x => 0.5 * x * (1 + erf(x / Math.SQRT2));
+  function layerNorm(x, g, b) {
+    let m = 0; for (let i = 0; i < d; i++) m += x[i]; m /= d;
+    let v = 0; for (let i = 0; i < d; i++) v += (x[i] - m) ** 2; v /= d;
+    const s = 1 / Math.sqrt(v + 1e-5), o = new Float32Array(d);
+    for (let i = 0; i < d; i++) o[i] = (x[i] - m) * s * g[i] + b[i];
+    return o;
+  }
+  function linear(x, w, b, nOut, nIn) {  // y = W x + b, W is (nOut, nIn) / 与 nn.Linear 相同
+    const y = new Float32Array(nOut);
+    for (let o = 0; o < nOut; o++) { let s = b ? b[o] : 0; const r = o * nIn; for (let i = 0; i < nIn; i++) s += w[r + i] * x[i]; y[o] = s; }
+    return y;
+  }
+  function logitsFor(ids) {
+    ids = ids.slice(-CTX);
+    const T = ids.length;
+    let xs = ids.map((id, t) => { const v = new Float32Array(d); for (let i = 0; i < d; i++) v[i] = W["embed.weight"][id * d + i] + W["pos.weight"][t * d + i]; return v; });
+    for (let l = 0; l < NL; l++) {
+      const p = `blocks.layers.${l}.`;
+      const qkv = xs.map(x => linear(layerNorm(x, W[p + "norm1.weight"], W[p + "norm1.bias"]), W[p + "self_attn.in_proj_weight"], W[p + "self_attn.in_proj_bias"], 3 * d, d));
+      xs = xs.map((x, t) => {
+        const att = new Float32Array(d);
+        for (let h = 0; h < NH; h++) {
+          const sc = [];
+          for (let u = 0; u <= t; u++) { let s = 0; for (let i = 0; i < DH; i++) s += qkv[t][h * DH + i] * qkv[u][d + h * DH + i]; sc.push(s / Math.sqrt(DH)); }
+          const mx = Math.max(...sc), ex = sc.map(s => Math.exp(s - mx)), z = ex.reduce((a, b) => a + b, 0);
+          for (let u = 0; u <= t; u++) for (let i = 0; i < DH; i++) att[h * DH + i] += ex[u] / z * qkv[u][2 * d + h * DH + i];
+        }
+        const o = linear(att, W[p + "self_attn.out_proj.weight"], W[p + "self_attn.out_proj.bias"], d, d);
+        const y = new Float32Array(d); for (let i = 0; i < d; i++) y[i] = x[i] + o[i];
+        const hdn = linear(layerNorm(y, W[p + "norm2.weight"], W[p + "norm2.bias"]), W[p + "linear1.weight"], W[p + "linear1.bias"], 4 * d, d).map(gelu);
+        const f = linear(hdn, W[p + "linear2.weight"], W[p + "linear2.bias"], d, 4 * d);
+        for (let i = 0; i < d; i++) y[i] += f[i];
+        return y;
+      });
+    }
+    const last = layerNorm(xs[T - 1], W["norm.weight"], W["norm.bias"]);
+    return linear(last, W["embed.weight"], null, VN, d);  // tied output layer / 输出层与嵌入共享权重
+  }
+  const softmax = l => { const m = Math.max(...l.filter(Number.isFinite)); const e = l.map(v => Number.isFinite(v) ? Math.exp(v - m) : 0); const z = e.reduce((a, b) => a + b, 0); return e.map(v => v / z); };
+  const logSoftmax = l => { const m = Math.max(...l); const z = Math.log(l.reduce((a, v) => a + Math.exp(v - m), 0)) + m; return l.map(v => v - z); };
+
+  // ================= filters (same as code/decoding.py) =================
+  function filterLogits(logits, { t = 1, k = 0, p = 1, m = 0 }) {
+    let l = Array.from(logits, v => v / Math.max(t, 1e-6));
+    if (k > 0 && k < VN) { const kth = [...l].sort((a, b) => b - a)[k - 1]; l = l.map(v => v < kth ? -Infinity : v); }
+    if (p < 1) {
+      const pr = softmax(l), order = pr.map((v, i) => i).sort((a, b) => pr[b] - pr[a]);
+      let cum = 0; const drop = new Set();
+      order.forEach(i => { if (cum >= p) drop.add(i); cum += pr[i]; });
+      l = l.map((v, i) => drop.has(i) ? -Infinity : v);
+    }
+    if (m > 0) { const pr = softmax(l), top = Math.max(...pr); l = l.map((v, i) => pr[i] < m * top ? -Infinity : v); }
+    return l;
+  }
+  let seed = 12345;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  function sampleFrom(l) { const pr = softmax(l); let r = rand(), c = 0; for (let i = 0; i < pr.length; i++) { c += pr[i]; if (r < c) return i; } return pr.length - 1; }
+  const argmax = l => l.reduce((bi, v, i, a) => v > a[bi] ? i : bi, 0);
+
+  // ================= the grammar state machine (same as code/decoding.py) =================
+  const G = D.grammar, SING = new Set(G.sing_det), PLUR = new Set(G.plur_det), ADJ = new Set(G.adjectives);
+  const vowel = w => "aeiou".includes(w[0]);
+  const aOk = (det, w) => (det !== "a" && det !== "an") || det === (vowel(w) ? "an" : "a");
+  const tv = pl => new Set(pl ? Object.values(G.transitive) : Object.keys(G.transitive));
+  const iv = pl => new Set(pl ? Object.values(G.intransitive) : Object.keys(G.intransitive));
+  function options(s) {
+    if (s.kind === "np") {
+      const nouns = s.role === "subj" ? G.subjects : G.objects;
+      if (!s.det) return new Set([...SING, ...PLUR]);
+      const out = new Set();
+      Object.entries(nouns).forEach(([sg, pl]) => { [[sg, false], [pl, true]].forEach(([w, plural]) => { if ((plural ? PLUR : SING).has(s.det) && (s.adj || aOk(s.det, w))) out.add(w); }); });
+      if (!s.adj) ADJ.forEach(a => { if (aOk(s.det, a)) out.add(a); });
+      return out;
+    }
+    if (s.kind === "after_subj") return new Set([...(s.rel ? [] : ["that"]), ...iv(s.plural), ...tv(s.plural)]);
+    if (s.kind === "rel_verb") return tv(s.plural);
+    if (s.kind === "tail") return new Set([...(s.stage === 0 ? G.prepositions : []), ...(s.stage < 2 ? G.adverbs : []), "."]);
+    if (s.kind === "the") return new Set(["the"]);
+    if (s.kind === "place") return new Set(G.places);
+    return new Set();
+  }
+  function step(s, w) {
+    if (!options(s).has(w)) return null;
+    if (s.kind === "np") {
+      if (!s.det) return { ...s, det: w };
+      if (ADJ.has(w) && !s.adj) return { ...s, adj: w };
+      const nouns = s.role === "subj" ? G.subjects : G.objects, plural = Object.values(nouns).includes(w);
+      if (s.role === "subj") return { kind: "after_subj", plural, rel: false };
+      if (s.role === "rel_obj") return { kind: "after_subj", plural: s.subjPlural, rel: true };
+      return { kind: "tail", stage: 0 };
+    }
+    if (s.kind === "after_subj") return w === "that" ? { kind: "rel_verb", plural: s.plural } : iv(s.plural).has(w) ? { kind: "tail", stage: 0 } : { kind: "np", role: "obj" };
+    if (s.kind === "rel_verb") return { kind: "np", role: "rel_obj", subjPlural: s.plural };
+    if (s.kind === "tail") return w === "." ? { kind: "done" } : G.prepositions.includes(w) ? { kind: "the" } : { kind: "tail", stage: 2 };
+    if (s.kind === "the") return { kind: "place" };
+    if (s.kind === "place") return { kind: "tail", stage: 1 };
+    return null;
+  }
+  const START = { kind: "np", role: "subj" };
+  function stateOf(words) { let s = START; for (const w of words) { s = step(s, w); if (!s) return null; } return s; }
+  const grammatical = words => { const s = stateOf(words); return !!s && s.kind === "done"; };
+
+  function generate(opts, constrained = false, maxLen = 16) {
+    const words = [];
+    for (let i = 0; i < maxLen; i++) {
+      let l = Array.from(logitsFor([END, ...words.map(w => STOI[w])]));
+      if (constrained) { const ok = options(stateOf(words) || START); l = l.map((v, j) => ok.has(V[j]) ? v : -Infinity); }
+      const tok = opts.t === 0 ? argmax(l) : sampleFrom(filterLogits(l, opts));
+      words.push(V[tok]);
+      if (tok === END) break;
+    }
+    return words;
+  }
+
+  // check the JavaScript model against PyTorch / 校验 JS 模型与 PyTorch 的结果一致
+  const checkLogits = logitsFor(D.check.ids), maxErr = Math.max(...D.check.logits.map((v, i) => Math.abs(v - checkLogits[i])));
+  window.DECODING_CHECK = maxErr;
+
+  // ================= chart helper =================
+  function chart(svg, series, o) {
+    const W2 = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 44, R = 12, T = 12, B = 36;
+    const fx = v => L + (W2 - L - R) * (v - o.x0) / (o.x1 - o.x0), fy = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W2 - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    series.forEach(se => {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="${se.r || 3.5}" fill="${se.color}"><title>${se.labels ? se.labels[i] : ""}</title></circle>`; });
+      if (se.labels) se.x.forEach((v, i) => { if (se.show && se.show(i)) s += `<text x="${fx(v) + 6}" y="${fy(se.y[i]) - 6}" style="font-size:10px">${se.labels[i]}</text>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W2 - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 1. distribution =================
+  let prefix = ["the", "happy"];
+  const opts = () => ({ t: +$("ds-t").value, k: +$("ds-k").value, p: +$("ds-p").value, m: +$("ds-m").value });
+  function renderDs() {
+    const o = opts();
+    $("ds-t-v").textContent = o.t.toFixed(2); $("ds-k-v").textContent = o.k || tr("关", "off"); $("ds-p-v").textContent = o.p.toFixed(2); $("ds-m-v").textContent = o.m.toFixed(2);
+    $("ds-prefix").textContent = ". " + prefix.join(" ") + " ▌";
+    const raw = Array.from(logitsFor([END, ...prefix.map(w => STOI[w])]));
+    const base = softmax(raw.map(v => v / Math.max(o.t, 1e-6))), filt = softmax(filterLogits(raw, o));
+    const top = base.map((v, i) => i).sort((a, b) => base[b] - base[a]).slice(0, 15);
+    const svg = $("ds-chart"), W2 = 640, H = 230, L = 10, Bm = 52, bw = (W2 - 2 * L) / top.length, mx = Math.max(...top.map(i => Math.max(base[i], filt[i])));
+    let s = "";
+    top.forEach((i, j) => {
+      const kept = filt[i] > 0, h = (H - 20 - Bm) * (kept ? filt[i] : base[i]) / mx, x = L + j * bw;
+      s += `<rect x="${x + 4}" y="${H - Bm - h}" width="${bw - 8}" height="${h}" fill="${kept ? css("--primary") : css("--line")}"/>`;
+      s += `<text x="${x + bw / 2}" y="${H - Bm - h - 4}" text-anchor="middle" style="font-size:10px">${pct(kept ? filt[i] : base[i])}</text>`;
+      s += `<text x="${x + bw / 2}" y="${H - Bm + 14}" text-anchor="end" transform="rotate(-40 ${x + bw / 2} ${H - Bm + 14})" style="font-size:11px">${V[i]}</text>`;
+    });
+    svg.innerHTML = s;
+    const keptN = filt.filter(v => v > 0).length;
+    const entropy = -filt.reduce((a, v) => a + (v > 0 ? v * Math.log2(v) : 0), 0);
+    const ok = options(stateOf(prefix) || START);
+    const badMass = filt.reduce((a, v, i) => a + (ok.has(V[i]) ? 0 : v), 0);
+    $("ds-note").innerHTML = tr(`保留了 ${keptN} 个候选词，分布的熵为 ${entropy.toFixed(2)} 比特。按这个分布采样，有 ${pct(badMass)} 的概率选到让句子不合语法的词。`,
+      `${keptN} candidates kept; the entropy of the distribution is ${entropy.toFixed(2)} bits. Sampling from it picks a word that breaks the grammar with probability ${pct(badMass)}.`);
+    $("ds-chips").innerHTML = top.slice(0, 15).map(i => `<button data-w="${V[i]}" class="${filt[i] > 0 ? "" : "dis"}">${V[i]}</button>`).join("");
+    $("ds-chips").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { if (b.dataset.w === ".") prefix = []; else if (prefix.length < 14) prefix.push(b.dataset.w); renderDs(); }));
+  }
+
+  // ================= 2. sampling =================
+  function showSentences(el, list) {
+    el.innerHTML = list.map(ws => `<div class="sent ${grammatical(ws) ? "good" : "bad"}">${ws.join(" ")}</div>`).join("");
+  }
+  function runSampling(greedy) {
+    const o = greedy ? { t: 0 } : opts();
+    const list = Array.from({ length: 12 }, () => generate(o));
+    showSentences($("sm-out"), list);
+    const good = list.filter(grammatical).length, distinct = new Set(list.map(w => w.join(" "))).size;
+    $("sm-stats").innerHTML = kv([[tr("设置", "settings"), greedy ? tr("贪心", "greedy") : `T=${o.t} k=${o.k || "-"} p=${o.p} min-p=${o.m}`], [tr("合乎语法", "grammatical"), `${good} / 12`], [tr("不同的句子", "distinct sentences"), `${distinct} / 12`]]);
+    $("sm-note").innerHTML = greedy ? tr("贪心解码是确定性的：12 次都是同一句话。它安全，但没有任何多样性；写长文本时还容易陷入循环（第 5 节）。", "Greedy decoding is deterministic: the same sentence all 12 times. Safe, but with no diversity at all, and prone to loops in long text (part 5).")
+      : tr("温度越高，句子越多样，但语法错误也越多。试试 T = 2 时加上 top-p = 0.8 或 min-p = 0.1：截掉低概率的“长尾”，大部分错误就消失了。", "Higher temperature brings more variety but more grammar mistakes. Try T = 2 with top-p = 0.8 or min-p = 0.1: cutting the low-probability tail removes most mistakes.");
+  }
+
+  // ================= 3. frontier =================
+  const SERIES = [["temperature", "T", "--ink"], ["top_k", "top-k", "--b1"], ["top_p", "top-p", "--primary"], ["min_p", "min-p", "--accent"], ["constrained", tr("约束", "constrained"), "--good"]];
+  function renderFr() {
+    $("fr-intro").innerHTML = tr(`每个点是用一种设置采样 ${D.n_samples} 个句子的结果。横轴是多样性（所有样本中不重复的二元组占比），纵轴是合乎语法的比例。温度曲线单独调 T；其余三条在 T = ${D.hot} 时改变截断参数；绿色是加了语法约束。越靠右上越好。`,
+      `Each point samples ${D.n_samples} sentences with one setting. x is diversity (distinct bigrams across all samples), y is the share of grammatical sentences. The temperature curve varies T alone; the other three vary their truncation parameter at T = ${D.hot}; green adds the grammar constraint. Up and to the right is better.`);
+    const ser = SERIES.map(([k, label, c]) => ({ x: D.sweeps[k].map(r => r.distinct2), y: D.sweeps[k].map(r => r.grammatical), color: css(c), labels: D.sweeps[k].map(r => `${r.param}=${r.value}`), show: i => k === "temperature" && [0, 4, 7, 8].includes(i) }));
+    const xs = ser.flatMap(s => s.x);
+    chart($("fr-chart"), ser, { x0: Math.floor(Math.min(...xs) * 20) / 20, x1: Math.ceil(Math.max(...xs) * 20) / 20 + 0.02, y0: 0, y1: 1.02, yticks: [0, 0.25, 0.5, 0.75, 1], yfmt: pct, xticks: [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.35, 0.4].filter(v => v >= Math.min(...xs) - 0.03 && v <= Math.max(...xs) + 0.03), xlabel: tr("多样性 distinct-2", "diversity (distinct-2)") });
+    $("fr-legend").innerHTML = SERIES.map(([k, label, c]) => `<span><span class="dot" style="background:var(${c})"></span>${k === "constrained" ? tr("语法约束", "grammar-constrained") : label}</span>`).join("");
+    const t = D.sweeps.temperature, pTop = D.sweeps.top_p.find(r => r.value === 0.8), hotRow = t.find(r => r.value === D.hot);
+    $("fr-note").innerHTML = tr(`只调温度时，质量和多样性此消彼长：T = ${D.hot} 时只有 ${pct(hotRow.grammatical)} 合乎语法。同样是 T = ${D.hot}，加上 top-p = 0.8 后升到 ${pct(pTop.grammatical)}，多样性仍高于低温采样。截断方法的作用就是砍掉“长尾”里那些单个概率很小、加起来却不小的错误选项。`,
+      `Varying temperature alone trades quality for diversity: at T = ${D.hot} only ${pct(hotRow.grammatical)} are grammatical. At the same T = ${D.hot}, adding top-p = 0.8 lifts it to ${pct(pTop.grammatical)} while keeping more diversity than low-temperature sampling. Truncation cuts the long tail of wrong options that are each unlikely but add up.`);
+  }
+
+  // ================= 4. beam =================
+  function beamSearch(B, alpha) {
+    let beams = [{ w: [], s: 0 }], done = [], steps = [];
+    for (let i = 0; i < 16 && beams.length; i++) {
+      const cand = [];
+      beams.forEach(b => {
+        const lp = logSoftmax(Array.from(logitsFor([END, ...b.w.map(w => STOI[w])])));
+        lp.map((v, j) => [v, j]).sort((a, c) => c[0] - a[0]).slice(0, B).forEach(([v, j]) => cand.push({ w: [...b.w, V[j]], s: b.s + v }));
+      });
+      cand.sort((a, c) => c.s - a.s);
+      beams = [];
+      cand.slice(0, B).forEach(c => (c.w[c.w.length - 1] === "." ? done : beams).push(c));
+      steps.push(cand.slice(0, B));
+    }
+    done = done.length ? done : beams;
+    const score = c => c.s / Math.pow(c.w.length, alpha);
+    return { best: done.reduce((a, c) => score(c) > score(a) ? c : a), steps, done };
+  }
+  function renderBm() {
+    const B = +$("bm-b").value, a = +$("bm-a").value;
+    $("bm-b-v").textContent = B; $("bm-a-v").textContent = a.toFixed(1);
+    const r = beamSearch(B, a), g = beamSearch(1, 0).best;
+    $("bm-steps").innerHTML = `<tr><th>${tr("步", "step")}</th><th style="text-align:left">${tr(`保留的 ${B} 条候选（对数概率）`, `the ${B} candidates kept (log-probability)`)}</th></tr>` +
+      r.steps.map((row, i) => `<tr><td>${i + 1}</td><td style="text-align:left;white-space:normal" class="mono">${row.map(c => `${c.w.join(" ")} <span class="hint">(${c.s.toFixed(1)})</span>`).join(" ｜ ")}</td></tr>`).join("");
+    const head = tr(`束宽 ${B}：<b>${r.best.w.join(" ")}</b>，对数概率 ${r.best.s.toFixed(2)}（${r.best.w.length} 个词）。贪心解码：${g.w.join(" ")}，对数概率 ${g.s.toFixed(2)}。`,
+      `Beam width ${B}: <b>${r.best.w.join(" ")}</b>, log-probability ${r.best.s.toFixed(2)} (${r.best.w.length} words). Greedy: ${g.w.join(" ")}, log-probability ${g.s.toFixed(2)}. `);
+    $("bm-note").innerHTML = head + (r.best.w.length === 1
+      ? tr("束搜索找到的“最可能的句子”竟然是<b>空句</b>：一开始就输出句号。它的概率比任何完整的句子都高，因为每多写一个词，对数概率就再减一点。这是束搜索在机器翻译中的著名问题（Stahlberg & Byrne，2019）：搜索越充分，越容易找到这种“概率最高但没用”的输出。把长度惩罚 α 调到 1 左右试试：得分除以 长度<sup>α</sup>，短句的优势就没了。",
+           "The “most likely sentence” beam search finds is <b>empty</b>: a full stop right away. It is more likely than any complete sentence, because every extra word lowers the log-probability. This is a well-known problem of beam search in machine translation (Stahlberg & Byrne, 2019): the more thorough the search, the more likely it finds this most-probable but useless output. Try a length penalty α around 1: dividing the score by length<sup>α</sup> removes the advantage of short outputs.")
+      : tr("束搜索比贪心解码多看了几条路，找到的句子概率更高（或一样）。但它天生偏爱短句：每多一个词，对数概率就再减一点。把束宽调大到 8 以上看看会发生什么。",
+           "Beam search explores a few more paths than greedy decoding and finds a sentence at least as likely. But it is biased towards short outputs: every extra word lowers the log-probability. Raise the beam width to 8 or more and see what happens."));
+  }
+
+  // ================= 5. repetition =================
+  let rpSeed = 7;
+  function renderRp() {
+    const t = +$("rp-t").value, r = +$("rp-r").value, f = +$("rp-f").value, p = +$("rp-p").value;
+    $("rp-t-v").textContent = t.toFixed(1); $("rp-r-v").textContent = r.toFixed(2); $("rp-f-v").textContent = f.toFixed(1); $("rp-p-v").textContent = p.toFixed(1);
+    seed = rpSeed;
+    const ids = [END], out = [];
+    for (let i = 0; i < 60; i++) {
+      let l = Array.from(logitsFor(ids));
+      const counts = {}; out.forEach(id => { counts[id] = (counts[id] || 0) + 1; });
+      l = l.map((v, j) => { const c = counts[j] || 0; if (!c) return v; let x = r !== 1 ? (v > 0 ? v / r : v * r) : v; return x - p - f * c; });
+      const tok = t === 0 ? argmax(l) : sampleFrom(l.map(v => v / t));
+      ids.push(tok); out.push(tok);
+    }
+    const words = out.map(i => V[i]), seen = new Set(), rep = new Array(words.length).fill(false);
+    let repeats = 0;
+    for (let i = 0; i + 4 <= words.length; i++) { const g = words.slice(i, i + 4).join(" "); if (seen.has(g)) { repeats++; for (let j = i; j < i + 4; j++) rep[j] = true; } seen.add(g); }
+    $("rp-out").innerHTML = words.map((w, i) => rep[i] ? `<span class="rep">${w}</span>` : w).join(" ");
+    const sents = words.join(" ").split(".").map(s => s.trim()).filter(Boolean).map(s => [...s.split(" "), "."]);
+    const good = sents.filter(grammatical).length;
+    $("rp-stats").innerHTML = kv([[tr("重复的四元组", "repeated 4-grams"), pct(repeats / (words.length - 3))], [tr("合乎语法的句子", "grammatical sentences"), `${good} / ${sents.length}`]]);
+    $("rp-note").innerHTML = tr("惩罚能打破循环，但下手太重也会出问题：句号、“the”这类本来就该反复出现的词也被惩罚，句子就开始出错。实际中惩罚值通常很小（例如重复惩罚 1.1–1.2），或者只用采样就够了。",
+      "Penalties break loops, but too much hurts: words that should repeat, such as the full stop or “the”, get penalised too and sentences start to break. In practice penalties are kept small (a repetition penalty of 1.1–1.2, say), or sampling alone is enough.");
+  }
+
+  // ================= 6. constrained =================
+  let csOn = true;
+  function runCs() {
+    const t = +$("cs-t").value;
+    $("cs-t-v").textContent = t.toFixed(1);
+    const list = Array.from({ length: 8 }, () => generate({ t }, csOn));
+    showSentences($("cs-out"), list);
+    $("cs-stats").innerHTML = kv([[tr("合乎语法", "grammatical"), `${list.filter(grammatical).length} / 8`], [tr("不同的句子", "distinct sentences"), `${new Set(list.map(w => w.join(" "))).size} / 8`]]);
+    $("cs-note").innerHTML = csOn ? tr("每一步都把不合法的词屏蔽掉，所以无论温度多高，输出都合乎语法。注意它只保证<b>格式</b>，不保证内容合理：温度很高时，句子合法但可能很奇怪。这正是 OpenAI 的 Structured Outputs、Outlines、llama.cpp 的 GBNF 语法等功能的原理。", "Illegal words are masked at every step, so the output is grammatical at any temperature. It guarantees the <b>format</b>, not sensible content: at high temperature sentences are legal but may be odd. This is how features such as OpenAI's Structured Outputs, Outlines, and llama.cpp's GBNF grammars work.")
+      : tr("关掉约束、温度又高时，大部分句子都有语法错误。", "With the constraint off and a high temperature, most sentences are ungrammatical.");
+  }
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["温度 T 从 1 降到 0.1，采样会怎样？", "Lowering the temperature T from 1 to 0.1 makes sampling:"],
+      opts: [["更随机", "more random"], ["几乎总选概率最高的词，接近贪心解码", "almost always pick the most likely word, close to greedy decoding"], ["只选 10% 的词", "pick from only 10% of words"]],
+      a: 1, ex: ["logits 除以很小的 T，差距被放大，softmax 后几乎全部概率集中在最高的那个词上。", "Dividing the logits by a small T magnifies the gaps; after softmax almost all probability sits on the top word."] },
+    { q: ["top-p = 0.9 的意思是？", "What does top-p = 0.9 mean?"],
+      opts: [["保留概率最高的 90% 个词", "keep the top 90% of words"], ["保留累计概率刚到 90% 的最少几个词", "keep the fewest words whose probabilities add up to 90%"], ["每个词的概率乘以 0.9", "multiply every probability by 0.9"]],
+      a: 1, ex: ["分布很尖时只保留一两个词，很平时保留很多词，会根据分布自动调整。", "It keeps one or two words when the distribution is sharp and many when it is flat, adapting automatically."] },
+    { q: ["为什么写长文时一般不用束搜索？", "Why is beam search rarely used for long free text?"],
+      opts: [["太慢", "It is too slow"], ["它追求最高概率，结果往往短、平淡、重复", "It chases the highest probability, giving short, bland, repetitive text"], ["它不能处理标点", "It cannot handle punctuation"]],
+      a: 1, ex: ["最可能的文本并不是人觉得最好的文本（Holtzman 等，2019）。翻译等有标准答案的任务里，束搜索仍然常用。", "The most likely text is not the text people find best (Holtzman et al., 2019). Beam search remains common in tasks with a right answer, such as translation."] },
+    { q: ["约束解码能保证什么？", "What does constrained decoding guarantee?"],
+      opts: [["回答内容正确", "the content is correct"], ["输出符合给定的格式，如合法的 JSON", "the output follows the given format, such as valid JSON"], ["生成速度更快", "faster generation"]],
+      a: 1, ex: ["它只屏蔽不合格式的词元，内容是否正确仍取决于模型。", "It only masks tokens that break the format; whether the content is right still depends on the model."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() {
+    $("model-status").textContent = tr(`模型已在浏览器中加载：与 PyTorch 的输出相差 ${maxErr.toExponential(1)}（逐个 logit 的最大误差）。`, `Model loaded in your browser; it matches PyTorch to within ${maxErr.toExponential(1)} (largest per-logit difference).`);
+    renderDs(); renderFr(); renderBm(); renderRp(); renderQuiz();
+    if (!$("sm-out").innerHTML) runSampling(false);
+    if (!$("cs-out").innerHTML) runCs();
+  }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["ds-t", "ds-k", "ds-p", "ds-m"].forEach(id => $(id).addEventListener("input", renderDs));
+  $("ds-back").addEventListener("click", () => { prefix.pop(); renderDs(); });
+  $("ds-clear").addEventListener("click", () => { prefix = []; renderDs(); });
+  $("sm-go").addEventListener("click", () => runSampling(false));
+  $("sm-greedy").addEventListener("click", () => runSampling(true));
+  ["bm-b", "bm-a"].forEach(id => $(id).addEventListener("input", renderBm));
+  ["rp-t", "rp-r", "rp-f", "rp-p"].forEach(id => $(id).addEventListener("input", renderRp));
+  $("rp-go").addEventListener("click", () => { rpSeed = Math.floor(Math.random() * 1e6) + 1; renderRp(); });
+  $("cs-t").addEventListener("input", () => { $("cs-t-v").textContent = (+$("cs-t").value).toFixed(1); });
+  $("cs-on").addEventListener("click", () => { csOn = !csOn; $("cs-on").classList.toggle("on", csOn); $("cs-on").innerHTML = csOn ? `<span lang="zh">语法约束：开</span><span lang="en">grammar constraint: on</span>` : `<span lang="zh">语法约束：关</span><span lang="en">grammar constraint: off</span>`; runCs(); });
+  $("cs-go").addEventListener("click", runCs);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
