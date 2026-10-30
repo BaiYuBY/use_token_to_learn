@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>混合专家交互演示 · Mixture of Experts Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">混合专家 MoE · 交互演示</span><span lang="en">Mixture of Experts · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">MoE 把一个大的前馈层换成很多个小“专家”，每个词元只交给其中几个。参数多（存得多），计算少（每个词元只算几个专家）。难点在于让路由器把词元分得均匀。第 1 节的路由来自一个在 06 章语言上训练的小 MoE 模型。</span>
+        <span lang="en">MoE replaces one big feed-forward layer with many small “experts” and sends each token to only a few. Many parameters (lots stored), little compute (each token runs only a few experts). The hard part is making the router spread tokens evenly. Section 1's routes come from a small MoE model trained on chapter 06's language.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. routing -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">路由：每个词元交给哪两个专家</span><span lang="en">Routing: which two experts get each token</span></h2>
+    <p class="hint">
+      <span lang="zh">每层 8 个专家，每个词元选 2 个（top-2）。按钮颜色是第一选择，下面的小字是两个专家及其门控权重。点一个词元，看路由器给 8 个专家的概率。右边是专家分工：每类词有多大比例把第一选择交给某个专家。没有人告诉模型什么是“动词”，分工是训练中自己形成的。</span>
+      <span lang="en">8 experts per layer, 2 chosen per token (top-2). A button's colour is the first choice; the small text gives both experts and their gate weights. Click a token to see the router's probabilities over the 8 experts. On the right is the division of labour: for each word type, the share of tokens whose first choice is each expert. Nobody told the model what a “verb” is; the specialization emerged in training.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">例句</span><span lang="en">sentence</span> <select id="rt-s"></select></label>
+      <label><span lang="zh">层</span><span lang="en">layer</span> <select id="rt-l"><option value="0">1</option><option value="1" selected>2</option></select></label>
+    </div>
+    <div class="sent" id="rt-sent"></div>
+    <div class="row">
+      <div class="col"><div class="bars" id="rt-bars"></div><p class="hint" id="rt-cap"></p></div>
+      <div class="col"><div class="heat" id="rt-heat"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. balancing -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">负载均衡模拟器</span><span lang="en">Load-balancing simulator</span></h2>
+    <p class="hint">
+      <span lang="zh">路由器天生偏心：一开始稍微好一点的专家拿到更多词元、学得更快、又拿到更多……专家分布在不同 GPU 上时，最忙的那张卡决定每一步的耗时；设了容量上限时，超出的词元会被丢掉（只走残差连接）。<b>辅助损失</b>（Switch Transformer）在训练目标里惩罚不均衡；<b>偏置调整</b>（DeepSeek-V3）只在“选专家”时给每个专家加一个偏置，负载高就调低，不改变训练目标。下面的模拟里，每一步有 512 个词元，路由器对专家有固定的偏好（偏好越不均，倾斜越大）。</span>
+      <span lang="en">Routers are naturally biased: an expert that starts slightly better gets more tokens, learns faster and gets even more. With experts on different GPUs, the busiest GPU sets the pace of every step; with a capacity limit, overflow tokens are dropped (they only pass through the residual). The <b>auxiliary loss</b> (Switch Transformer) penalizes imbalance in the training objective; <b>bias adjustment</b> (DeepSeek-V3) adds a per-expert bias only when choosing experts and lowers it for busy ones, leaving the objective untouched. In the simulation, each step routes 512 tokens and the router has fixed preferences (more skew, more tilt).</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">专家数</span><span lang="en">experts</span> <select id="lb-n"><option>8</option><option selected>16</option><option>64</option></select></label>
+      <label>top-k <select id="lb-k"><option>1</option><option selected>2</option><option>4</option><option>8</option></select></label>
+      <label><span lang="zh">偏好倾斜</span><span lang="en">skew</span> <input id="lb-skew" type="range" min="0" max="3" step="0.1" value="1.5"><span id="lb-skew-v" class="mono"></span></label>
+      <label><span lang="zh">容量系数</span><span lang="en">capacity factor</span> <input id="lb-cap" type="range" min="1" max="2" step="0.05" value="1.25"><span id="lb-cap-v" class="mono"></span></label>
+      <label><span lang="zh">均衡方法</span><span lang="en">balancing</span> <select id="lb-m"></select></label>
+      <button id="lb-run">▶ <span lang="zh">训练 200 步</span><span lang="en">train 200 steps</span></button>
+      <button id="lb-reset"><span lang="zh">重来</span><span lang="en">reset</span></button>
+    </div>
+    <div class="stats" id="lb-stats"></div>
+    <div class="bars" id="lb-bars"></div>
+    <svg class="chart" id="lb-chart" viewBox="0 0 640 200" style="margin-top:10px"></svg>
+  </section>
+
+  <!-- 3. measured -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">实测：参数多、计算不变，以及均衡的效果</span><span lang="en">Measured: more parameters at the same compute, and balancing</span></h2>
+    <p class="hint">
+      <span lang="zh">左：背一张 8,192 条的随机查找表（键用固定随机向量，只能靠前馈层或专家来记）。16 个专家选 1 个的 MoE，每个词元的计算量与小前馈层相同，却和 16 倍大的前馈层记得一样多。右：在 06 章语言上训练的 MoE 语言模型，三种均衡方式下的负载不均衡程度（验证损失几乎一样）。</span>
+      <span lang="en">Left: memorizing a random 8,192-entry table (keys are fixed random vectors, so only the FFN or experts can store it). The MoE with 16 experts, top-1, computes like the small FFN per token yet remembers as much as an FFN 16× larger. Right: an MoE language model on chapter 06's language, load imbalance under three balancing methods (validation loss is almost identical).</span>
+    </p>
+    <div class="row">
+      <div class="col"><div class="legend" id="ms-l1"></div><svg class="chart" id="ms-cap" viewBox="0 0 640 240"></svg></div>
+      <div class="col"><div class="legend" id="ms-l2"></div><svg class="chart" id="ms-bal" viewBox="0 0 640 240"></svg></div>
+    </div>
+  </section>
+
+  <!-- 4. calculator -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">总参数、激活参数与专家并行</span><span lang="en">Total parameters, active parameters and expert parallelism</span></h2>
+    <p class="hint">
+      <span lang="zh">总参数 = 其余部分（注意力、嵌入、稠密层）+ MoE 层数 ×（路由专家 + 共享专家）× 每个专家的参数；激活参数只算被选中的 k 个专家和共享专家。显存要装下总参数，计算只按激活参数。专家并行（EP）把专家分到多张卡上，每个词元在每个 MoE 层都要被发给它选中的专家所在的卡，算完再收回来（两次 all-to-all）。</span>
+      <span lang="en">Total = everything else (attention, embeddings, dense layers) + MoE layers × (routed + shared experts) × parameters per expert; active counts only the k chosen experts and the shared ones. Memory must hold the total; compute follows the active count. Expert parallelism (EP) spreads experts over GPUs, so in every MoE layer each token is sent to the GPUs of its chosen experts and the results come back (two all-to-alls).</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">预设</span><span lang="en">preset</span> <select id="cc-p"></select></label>
+      <label><span lang="zh">路由专家</span><span lang="en">routed experts</span> <input id="cc-n" type="number" min="1" max="512" style="width:5em"></label>
+      <label>top-k <input id="cc-k" type="number" min="1" max="64" style="width:4em"></label>
+      <label><span lang="zh">共享专家</span><span lang="en">shared</span> <input id="cc-s" type="number" min="0" max="8" style="width:4em"></label>
+      <label><span lang="zh">权重精度</span><span lang="en">weights</span> <select id="cc-b"><option value="2">BF16</option><option value="1" selected>FP8</option><option value="0.5">INT4</option></select></label>
+      <label>EP <select id="cc-ep"><option>1</option><option>8</option><option selected>32</option><option>64</option><option>256</option></select></label>
+    </div>
+    <div class="stats" id="cc-stats"></div>
+    <div class="callout" id="cc-note"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../README.html">15 混合专家 · MoE</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="moe_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.MOE_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const EXPERT_COLORS = ["#3f51b5", "#e8710a", "#188038", "#c5221f", "#8e24aa", "#00838f", "#6d4c41", "#ad1457"];
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 50, R = 12, T = 10, B = 36;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0), fy = v => T + (H - T - B) * (1 - (Math.min(o.y1, Math.max(o.y0, v)) - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    (o.hlines || []).forEach(h => { s += `<line x1="${L}" x2="${W - R}" y1="${fy(h.y)}" y2="${fy(h.y)}" stroke="${h.color}" stroke-dasharray="4 4"/>`; });
+    series.forEach(se => { s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`; });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+
+  // ================= 1. routing =================
+  const CAT_NAMES = { det: ["限定词", "determiner"], adj: ["形容词", "adjective"], noun: ["名词", "noun"], verb: ["动词", "verb"], that: ["that", "that"], prep: ["介词", "preposition"], place: ["地点", "place"], adverb: ["副词", "adverb"], ".": ["句号", "period"] };
+  let rtTok = 7;
+  function renderRt() {
+    const ex = D.lm.bias.examples[+$("rt-s").value], li = +$("rt-l").value, L = ex.layers[li];
+    rtTok = Math.min(rtTok, ex.words.length - 1);
+    $("rt-sent").innerHTML = ex.words.map((w, i) => {
+      const [e1, e2] = L.experts[i], [g1, g2] = L.gates[i];
+      return `<button data-i="${i}" class="${i === rtTok ? "sel" : ""}" style="border-color:${EXPERT_COLORS[e1]};color:${EXPERT_COLORS[e1]}">${w}<small>E${e1} ${g1.toFixed(2)} · E${e2} ${g2.toFixed(2)}</small></button>`;
+    }).join("");
+    $("rt-sent").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { rtTok = +b.dataset.i; renderRt(); }));
+    const probs = L.probs[rtTok], chosen = L.experts[rtTok], mx = Math.max(...probs);
+    $("rt-bars").innerHTML = probs.map((p, e) => `<div><span>${pct(p)}</span><span style="height:${120 * p / mx}px;background:${EXPERT_COLORS[e]};opacity:${chosen.includes(e) ? 1 : .3}"></span><i>E${e}</i></div>`).join("");
+    $("rt-cap").innerHTML = tr(`“${ex.words[rtTok]}”在第 ${li + 1} 层的路由概率。实色的两个被选中，门控权重是它们的概率重新归一化（${L.gates[rtTok].map(g => g.toFixed(2)).join(" + ")} = 1）。`,
+      `Routing probabilities for “${ex.words[rtTok]}” in layer ${li + 1}. The two solid bars are chosen; their gate weights are the probabilities renormalized (${L.gates[rtTok].map(g => g.toFixed(2)).join(" + ")} = 1).`);
+    const M = D.lm.bias.specialization[li];
+    let h = `<div></div>` + Array.from({ length: D.n_experts }, (_, e) => `<div style="color:${EXPERT_COLORS[e]};font-weight:700">E${e}</div>`).join("");
+    D.categories.forEach((c, ci) => {
+      h += `<div style="text-align:right">${tr(...CAT_NAMES[c])}</div>` + M[ci].map(v => `<div style="background:rgba(63,81,181,${v.toFixed(2)});color:${v > .55 ? "#fff" : "inherit"}">${v >= .2 ? pct(v) : ""}</div>`).join("");
+    });
+    $("rt-heat").style.gridTemplateColumns = `5.5em repeat(${D.n_experts}, minmax(0, 1fr))`;
+    $("rt-heat").innerHTML = h;
+  }
+
+  // ================= 2. load-balancing simulator =================
+  function rng(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+  let lb = null;
+  function lbInit() {
+    const n = +$("lb-n").value, r = rng(5);
+    // fixed preferences: some experts look better to the router from the start / 路由器天生偏好某些专家
+    lb = { n, pref: Array.from({ length: n }, () => (r() - 0.5) * 2), adjust: new Array(n).fill(0), hist: [], step: 0, rand: rng(9), load: new Array(n).fill(0), dropped: 0 };
+  }
+  function lbStep() {
+    const n = lb.n, k = Math.min(+$("lb-k").value, n), skew = +$("lb-skew").value, cf = +$("lb-cap").value, m = $("lb-m").value;
+    const T = 512, counts = new Array(n).fill(0), limit = Math.ceil(cf * T * k / n);
+    let dropped = 0;
+    for (let t = 0; t < T; t++) {
+      const s = lb.pref.map((p, e) => skew * p + (m === "aux" ? lb.adjust[e] : 0) + 1.2 * (lb.rand() - 0.5) * 2);  // affinity + noise / 亲和度 + 噪声
+      const sel = s.map((v, e) => v + (m === "bias" ? lb.adjust[e] : 0));
+      const top = sel.map((v, e) => [v, e]).sort((a, b) => b[0] - a[0]).slice(0, k).map(x => x[1]);
+      top.forEach(e => { if (counts[e] >= limit) dropped++; counts[e]++; });
+    }
+    const frac = counts.map(c => c / (T * k)), mean = 1 / n;
+    if (m === "bias") lb.adjust = lb.adjust.map((b, e) => b - 0.02 * Math.sign(frac[e] - mean));            // DeepSeek-V3
+    if (m === "aux") lb.adjust = lb.adjust.map((b, e) => b - 0.5 * n * (frac[e] - mean) * 0.5);            // gradient of N·Σ f·P pushes busy experts down / 辅助损失的梯度
+    lb.load = frac; lb.dropped = dropped / (T * k); lb.step++;
+    lb.hist.push([lb.step, Math.max(...frac) / mean, lb.dropped]);
+  }
+  function renderLb() {
+    $("lb-skew-v").textContent = (+$("lb-skew").value).toFixed(1); $("lb-cap-v").textContent = (+$("lb-cap").value).toFixed(2) + "×";
+    const n = lb.n, mean = 1 / n, frac = lb.step ? lb.load : new Array(n).fill(mean), cf = +$("lb-cap").value;
+    const mx = Math.max(...frac, mean * cf) * 1.1;
+    $("lb-bars").innerHTML = frac.map((f, e) => `<div><span style="height:${140 * f / mx}px;background:${f > mean * cf ? css("--bad") : css("--primary")}"></span>${n <= 16 ? `<i>E${e}</i>` : ""}</div>`).join("");
+    const imb = Math.max(...frac) / mean;
+    $("lb-stats").innerHTML = stat(tr("训练步", "step"), lb.step) + stat(tr("最忙专家 / 平均", "busiest / average"), imb.toFixed(2) + "×", imb > 1.5 ? css("--bad") : imb < 1.15 ? css("--good") : "") +
+      stat(tr("被丢弃的词元", "tokens dropped"), pct(lb.dropped, 1), lb.dropped > 0.02 ? css("--bad") : "") +
+      stat(tr("专家并行时 GPU 利用率", "GPU utilization under EP"), pct(1 / imb), 1 / imb < 0.7 ? css("--bad") : "");
+    const h = lb.hist;
+    chart($("lb-chart"), h.length ? [{ x: h.map(p => p[0]), y: h.map(p => p[1]), color: css("--primary") }] : [],
+      { x0: 0, x1: Math.max(200, lb.step), y0: 1, y1: Math.max(2, ...h.map(p => p[1])) * 1.05, yticks: [1, 1.5, 2, 3].filter(v => v <= Math.max(2, ...h.map(p => p[1])) * 1.05), yfmt: v => v + "×",
+        hlines: [{ y: cf, color: css("--bad") }], xticks: [0, .25, .5, .75, 1].map(f => Math.round(f * Math.max(200, lb.step))), xlabel: tr("训练步 → 最忙专家的负载 / 平均（红虚线 = 容量上限）", "step → busiest / average (red dashed = capacity limit)") });
+  }
+  let lbTimer = null;
+  function lbRun() {
+    if (lbTimer) return;
+    let left = 200;
+    lbTimer = setInterval(() => { for (let i = 0; i < 4 && left > 0; i++, left--) lbStep(); renderLb(); if (left <= 0) { clearInterval(lbTimer); lbTimer = null; } }, 30);
+  }
+
+  // ================= 3. measured =================
+  function renderMs() {
+    const cs = { dense64: ["#c5221f", "普通前馈层 64", "dense 64"], moe_top1: ["#3f51b5", "MoE 16 选 1", "MoE 16, top-1"], moe_top2: ["#e8710a", "MoE 16 选 2", "MoE 16, top-2"], dense1024: ["#9aa1ad", "普通前馈层 1024", "dense 1024"] };
+    chart($("ms-cap"), D.capacity.map(r => ({ x: r.steps, y: r.recall, color: cs[r.name][0] })),
+      { x0: 0, x1: 2000, y0: 0, y1: 1, yticks: [0, .25, .5, .75, 1], yfmt: v => pct(v), xticks: [0, 500, 1000, 1500, 2000], xlabel: tr("训练步 → 记住的条目", "steps → entries recalled") });
+    legend($("ms-l1"), D.capacity.map(r => [cs[r.name][0], tr(`${cs[r.name][1]}：参数 ${r.total.toLocaleString()}，每词元 ${r.active.toLocaleString()}`, `${cs[r.name][2]}: ${r.total.toLocaleString()} params, ${r.active.toLocaleString()} per token`)]));
+    const bs = { none: ["#c5221f", "不均衡", "none"], aux: ["#e8710a", "辅助损失", "aux loss"], bias: ["#3f51b5", "偏置调整", "bias"] };
+    chart($("ms-bal"), Object.keys(bs).map(k => ({ x: D.lm[k].history.map((_, i) => 25 * (i + 1)), y: D.lm[k].history.map(h => Math.max(...h)), color: bs[k][0] })),
+      { x0: 0, x1: 600, y0: 1, y1: 1.8, yticks: [1, 1.2, 1.4, 1.6, 1.8], yfmt: v => v.toFixed(1) + "×", xticks: [0, 200, 400, 600], xlabel: tr("训练步 → 最忙专家 / 平均", "steps → busiest / average") });
+    legend($("ms-l2"), Object.keys(bs).map(k => [bs[k][0], tr(`${bs[k][1]}：验证损失 ${D.lm[k].val_loss.toFixed(3)}`, `${bs[k][2]}: val loss ${D.lm[k].val_loss.toFixed(3)}`)]));
+  }
+
+  // ================= 4. calculator =================
+  // other = attention + embeddings + dense layers, derived from the published totals / other 由公开的总参数推得
+  const PRESETS = {
+    mixtral: { name: "Mixtral 8x7B", d: 4096, moeLayers: 32, expert: 3 * 4096 * 14336, n: 8, k: 2, s: 0, other: 1.60e9, pub: "46.7B / 12.9B" },
+    dsv3: { name: "DeepSeek-V3", d: 7168, moeLayers: 58, expert: 3 * 7168 * 2048, n: 256, k: 8, s: 1, other: 14.5e9, pub: "671B / 37B" },
+    qwen3: { name: "Qwen3-235B-A22B", d: 4096, moeLayers: 94, expert: 3 * 4096 * 1536, n: 128, k: 8, s: 0, other: 7.9e9, pub: "235B / 22B" },
+  };
+  function loadPreset() { const P = PRESETS[$("cc-p").value]; $("cc-n").value = P.n; $("cc-k").value = P.k; $("cc-s").value = P.s; renderCc(); }
+  function renderCc() {
+    const P = PRESETS[$("cc-p").value], n = Math.max(1, +$("cc-n").value), k = Math.min(n, Math.max(1, +$("cc-k").value)), s = Math.max(0, +$("cc-s").value);
+    const bytes = +$("cc-b").value, ep = +$("cc-ep").value;
+    const total = P.other + P.moeLayers * (n + s) * P.expert, active = P.other + P.moeLayers * (k + s) * P.expert;
+    const perGpuExperts = Math.max(1, n / ep), perGpuMem = (P.other + P.moeLayers * (perGpuExperts + s) * P.expert) * bytes / 1e9;
+    const a2a = 2 * P.moeLayers * k * P.d * 2;  // dispatch + combine, BF16 activations / 分发 + 收回
+    const B = v => v >= 1e12 ? (v / 1e12).toFixed(2) + "T" : (v / 1e9).toFixed(1) + "B";
+    $("cc-stats").innerHTML = stat(tr("总参数", "total"), B(total)) + stat(tr("每词元激活", "active per token"), B(active), css("--primary")) + stat(tr("激活比例", "active share"), pct(active / total, 1)) +
+      stat(tr("全部权重显存", "all weights"), (total * bytes / 1e9).toFixed(0) + " GB") + stat(tr(`EP=${ep} 时每卡（专家 + 其余）`, `per GPU at EP=${ep} (experts + rest)`), perGpuMem.toFixed(0) + " GB", perGpuMem > 80 ? css("--bad") : css("--good")) +
+      stat(tr("每词元 all-to-all 流量（所有 MoE 层）", "all-to-all per token (all MoE layers)"), (a2a / 2 ** 20).toFixed(1) + " MiB");
+    $("cc-note").innerHTML = tr(
+      `${P.name} 官方公布：${P.pub}（总参数 / 激活）。每个专家 ${(P.expert / 1e6).toFixed(1)}M 参数，${P.moeLayers} 个 MoE 层。计算量按激活参数算：每个词元约 ${(2 * active / 1e9).toFixed(0)} GFLOP，相当于一个 ${B(active)} 的稠密模型；但显存要装下全部 ${B(total)}。这里把“其余部分”（注意力、嵌入、稠密层）简化为一个常数，也简化了每卡显存（假设其余部分每卡一份）。`,
+      `${P.name} published: ${P.pub} (total / active). Each expert has ${(P.expert / 1e6).toFixed(1)}M parameters, in ${P.moeLayers} MoE layers. Compute follows the active count: about ${(2 * active / 1e9).toFixed(0)} GFLOP per token, like a ${B(active)} dense model; but memory must hold all ${B(total)}. “The rest” (attention, embeddings, dense layers) is simplified to a constant, and per-GPU memory assumes one copy of it per GPU.`);
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["MoE 模型 DeepSeek-V3 有 671B 参数，每个词元激活 37B。生成一个词元的计算量大约相当于？", "DeepSeek-V3 has 671B parameters with 37B active per token. Generating a token costs about as much compute as…"],
+      opts: [["671B 的稠密模型", "a 671B dense model"], ["37B 的稠密模型", "a 37B dense model"], ["8B 的稠密模型", "an 8B dense model"]],
+      a: 1, ex: ["计算只算被选中的专家；但显存仍要装下全部 671B，这是 MoE 部署的主要难点。", "Only the chosen experts compute; but memory must still hold all 671B, the main difficulty of deploying MoE."] },
+    { q: ["只选 1 个专家（top-1）时，如果把门控权重归一化成 1，会发生什么？", "With top-1 routing, what happens if the gate weight is renormalized to 1?"],
+      opts: [["没有影响", "Nothing"], ["路由器收不到梯度，学不会怎么分配", "The router gets no gradient and cannot learn to route"], ["训练更快", "Training speeds up"]],
+      a: 1, ex: ["门控恒为 1，输出与路由概率无关。Switch Transformer 用原始概率作为门控，这一章的代码也是这样做的。", "The gate is always 1, so the output doesn't depend on the router's probabilities. Switch Transformer uses the raw probability as the gate, as does this chapter's code."] },
+    { q: ["专家并行时，负载不均衡的主要代价是？", "Under expert parallelism, what does load imbalance mainly cost?"],
+      opts: [["模型准确率立刻下降", "Accuracy drops immediately"], ["最忙的卡决定每一步的耗时，其他卡空等；有容量上限时还会丢弃词元", "The busiest GPU sets each step's time while others wait, and with a capacity limit tokens are dropped"], ["显存翻倍", "Memory doubles"]],
+      a: 1, ex: ["本章的小实验里，不均衡时验证损失几乎不变，但最忙的专家负载是平均的 1.5–1.7 倍。", "In this chapter's small experiment, validation loss barely changed without balancing, but the busiest expert carried 1.5–1.7× the average."] },
+    { q: ["DeepSeek-V3 的“无辅助损失”负载均衡是怎么做的？", "How does DeepSeek-V3's auxiliary-loss-free balancing work?"],
+      opts: [["给每个专家加一个只用于选择的偏置，负载高就调低", "A per-expert bias used only for choosing experts, lowered when an expert is overloaded"], ["随机分配词元", "Random token assignment"], ["增加专家数量", "Adding more experts"]],
+      a: 0, ex: ["偏置不进入门控权重，也不改变训练目标，所以不会像辅助损失那样干扰语言建模本身。", "The bias doesn't enter the gate weights or the training objective, so it doesn't interfere with language modelling the way an auxiliary loss can."] },
+    { q: ["“共享专家”有什么作用？", "What is a “shared expert” for?"],
+      opts: [["处理所有词元，承担通用知识，让路由专家更专注于各自的方向", "It processes every token and holds common knowledge, letting routed experts specialize"], ["备份失效的专家", "A backup for failed experts"], ["只处理句号", "Only periods"]],
+      a: 0, ex: ["DeepSeekMoE 提出把专家切得更细，并保留少量共享专家，减少路由专家之间的重复。", "DeepSeekMoE proposed finer-grained experts plus a few shared ones, reducing redundancy among routed experts."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fillSelects() {
+    const sv = $("rt-s").value || "0";
+    $("rt-s").innerHTML = D.lm.bias.examples.map((e, i) => `<option value="${i}">${e.words.join(" ")}</option>`).join("");
+    $("rt-s").value = sv;
+    const mv = $("lb-m").value || "none";
+    $("lb-m").innerHTML = [["none", "不均衡", "none"], ["aux", "辅助损失", "auxiliary loss"], ["bias", "偏置调整（DeepSeek-V3）", "bias adjustment (DeepSeek-V3)"]].map(([v, zh, en]) => `<option value="${v}">${tr(zh, en)}</option>`).join("");
+    $("lb-m").value = mv;
+    const pv = $("cc-p").value || "dsv3";
+    $("cc-p").innerHTML = Object.entries(PRESETS).map(([k, P]) => `<option value="${k}">${P.name}</option>`).join("");
+    $("cc-p").value = pv;
+  }
+  function renderAll() { fillSelects(); renderRt(); renderLb(); renderMs(); renderCc(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["rt-s", "rt-l"].forEach(id => $(id).addEventListener("input", renderRt));
+  ["lb-n", "lb-k", "lb-m"].forEach(id => $(id).addEventListener("input", () => { lbInit(); renderLb(); }));
+  ["lb-skew", "lb-cap"].forEach(id => $(id).addEventListener("input", renderLb));
+  $("lb-run").addEventListener("click", lbRun);
+  $("lb-reset").addEventListener("click", () => { if (lbTimer) { clearInterval(lbTimer); lbTimer = null; } lbInit(); renderLb(); });
+  $("cc-p").addEventListener("input", loadPreset);
+  ["cc-n", "cc-k", "cc-s", "cc-b", "cc-ep"].forEach(id => $(id).addEventListener("input", renderCc));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  lbInit();
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+  loadPreset();
+  for (let i = 0; i < 60; i++) lbStep();
+  renderLb();
+})();
+</script>
+</body>
+</html>

@@ -90,6 +90,28 @@
 | FP8 | FP8 (E4M3 / E5M2) | 8 位浮点数格式，新 GPU 原生支持，用于推理甚至训练 | [12](12-inference-optimization/README.md) |
 | FlashAttention / 在线 softmax | FlashAttention / online softmax | 分块计算注意力、边算边合并 softmax，不存 T × T 矩阵，结果精确 | [12](12-inference-optimization/README.md) |
 | 受带宽限制 | memory-bound | 速度由读写显存的快慢决定，而不是算力；逐词元解码就是典型 | [12](12-inference-optimization/README.md) |
+| 连续批处理 | continuous batching | 以每一轮前向为单位调度：完成的请求立即离开，新请求随时加入 | [13](13-serving/README.md) |
+| 分页注意力 | PagedAttention | 把 KV 缓存切成固定大小的块，用块表管理，按需分配 | [13](13-serving/README.md) |
+| 前缀缓存 | prefix caching | 相同前缀（如系统提示词）的 KV 只算一次、多个请求共享 | [13](13-serving/README.md) |
+| 分块预填充 | chunked prefill | 把长提示词分成几轮处理，与解码混合，避免卡住其他用户 | [13](13-serving/README.md) |
+| 预填充/解码分离 | prefill/decode disaggregation | 预填充和解码放在不同的 GPU 上，互不干扰，KV 缓存在两者之间传输 | [13](13-serving/README.md) |
+| 首词元延迟 / 每词元延迟 | TTFT / TPOT | 从请求到达到第一个词元的时间 / 之后每个词元的平均间隔 | [13](13-serving/README.md) |
+| 有效吞吐 | goodput | 满足延迟要求的请求的吞吐 | [13](13-serving/README.md) |
+| 张量并行 / 流水线并行 | TP / PP (tensor / pipeline parallelism) | 把每层的矩阵切到多张卡上 / 把不同的层放到不同的卡上 | [13](13-serving/README.md) |
+| 位置插值 | position interpolation (PI) | 把 RoPE 的所有频率按比例调慢，让更长的位置落回训练范围；需要少量微调 | [14](14-long-context/README.md) |
+| NTK 缩放 / YaRN | NTK-aware scaling / YaRN | 主要拉伸转得慢的 RoPE 维度、保留快的维度的外推方法 | [14](14-long-context/README.md) |
+| 滑动窗口注意力 | sliding-window attention | 每个词元只看最近 w 个词元，成本与长度成线性 | [14](14-long-context/README.md) |
+| 注意力汇聚点 | attention sink | 模型把大量注意力放在开头几个词元上；流式生成时要保留它们 | [14](14-long-context/README.md) |
+| 稀疏注意力 | sparse attention | 只计算部分查询与 key 的分数，如块稀疏、Top-k 块选择（NSA、MoBA） | [14](14-long-context/README.md) |
+| 有效上下文 | effective context | 模型真正能用好的上下文长度，常短于标称长度 | [14](14-long-context/README.md) |
+| 大海捞针 | needle in a haystack | 在长文中插入一句事实再提问，测试长距离检索 | [14](14-long-context/README.md) |
+| 混合专家 | MoE (mixture of experts) | 把前馈层拆成多个专家，每个词元只由路由器选出的少数几个处理 | [15](15-moe/README.md) |
+| 路由器 / 门控 | router / gate | 给每个专家打分、选出 top-k，并给出它们输出的加权系数 | [15](15-moe/README.md) |
+| 总参数 / 激活参数 | total / active parameters | 模型存储的全部参数 / 每个词元实际用到的参数 | [15](15-moe/README.md) |
+| 负载均衡 | load balancing | 让各专家分到的词元大致相同；常用辅助损失或偏置调整 | [15](15-moe/README.md) |
+| 容量系数 | capacity factor | 每个专家最多接收“平均负载 × 系数”个词元，超出的被丢弃 | [15](15-moe/README.md) |
+| 共享专家 | shared expert | 每个词元都经过的专家，承担通用知识 | [15](15-moe/README.md) |
+| 全互换通信 | all-to-all | 专家并行时，把词元发往所选专家所在的卡、再收回结果的通信 | [15](15-moe/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>长上下文交互演示 · Long Context Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .att { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 4px; width: 100%; max-width: 520px; }
+  .att div { aspect-ratio: 1; background: var(--bg); }
+  .att div.on { background: var(--primary); }
+  .att div.sink { background: var(--accent); }
+  .att div.glob { background: #188038; }
+  .att div.rand { background: #8e24aa; }
+  .checks { display: flex; flex-wrap: wrap; gap: 6px 14px; }
+  .circle { width: 220px; max-width: 100%; height: auto; display: block; }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">长上下文 · 交互演示</span><span lang="en">Long Context · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">让模型读更长的文本，要过两关：位置编码在没见过的长度上会不会“失灵”，以及注意力的计算量和 KV 缓存会不会爆炸。实测部分来自一个在 64 个词元上训练、用 RoPE 编码位置的小 GPT。</span>
+        <span lang="en">Reading longer text means clearing two hurdles: does the position encoding break at lengths it never saw, and do attention compute and the KV cache explode? The measurements come from a small GPT with RoPE, trained on 64-token windows.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. RoPE -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">RoPE 为什么会“失灵”：每对维度转了几圈</span><span lang="en">Why RoPE breaks: how far each pair of dimensions turns</span></h2>
+    <p class="hint">
+      <span lang="zh">RoPE 把 q、k 的每两维看成一个平面上的点，按“位置 × 频率”旋转，注意力分数只取决于两个词元的相对距离。快的维度对在训练长度内转了很多圈，什么角度都见过；慢的维度对连一圈都没转完，训练时只见过一小段角度。测试时序列更长，这些慢维度就转到了从没见过的角度（红点）。位置插值（PI）把所有频率按比例调慢；NTK 调大底数，主要拉伸慢的维度；YaRN 只拉伸转不满一圈的维度。</span>
+      <span lang="en">RoPE treats every two dimensions of q and k as a point in a plane and rotates it by position × frequency, so attention scores depend only on the distance between tokens. Fast pairs turn many times within the training length and have seen every angle; slow pairs don't complete one turn, so training only showed them a narrow range of angles. At a longer test length those slow pairs reach angles never seen (red dots). Position interpolation (PI) slows every frequency by the same factor; NTK raises the base, stretching mostly the slow pairs; YaRN stretches only the pairs that don't complete a turn.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">配置</span><span lang="en">setting</span> <select id="rp-preset"></select></label>
+      <label><span lang="zh">方法</span><span lang="en">method</span> <select id="rp-m"><option value="none"></option><option value="pi">PI</option><option value="ntk">NTK</option><option value="yarn">YaRN</option></select></label>
+      <label><span lang="zh">测试长度 / 训练长度</span><span lang="en">test / train length</span> <input id="rp-f" type="range" min="1" max="5" step="1" value="3"><span id="rp-f-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col" style="flex:2 1 380px"><svg class="chart" id="rp-chart" viewBox="0 0 640 240"></svg></div>
+      <div class="col">
+        <div class="controls"><label><span lang="zh">看第几对</span><span lang="en">pair</span> <input id="rp-pair" type="range" min="0" max="7" step="1" value="3"><span id="rp-pair-v" class="mono"></span></label></div>
+        <svg class="circle" id="rp-circle" viewBox="-110 -110 220 220"></svg>
+        <p class="hint" id="rp-cap"></p>
+      </div>
+    </div>
+    <div class="stats" id="rp-stats"></div>
+  </section>
+
+  <!-- 2. measured -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">实测：在 64 个词元上训练，在 512 个词元上测试</span><span lang="en">Measured: trained on 64 tokens, tested on 512</span></h2>
+    <p class="hint">
+      <span lang="zh">左图是每个位置的下一个词元损失（越低越好）；右上是 06 章的主谓一致测试（“the cat that chases the dogs ___”），放在一段无关文字之后，看位置变远时模型还能不能用对动词；右下是滑动窗口大小对同一测试的影响。</span>
+      <span lang="en">Left: next-token loss at every position (lower is better). Top right: chapter 06's agreement test (“the cat that chases the dogs ___”) placed after unrelated text, to see whether the model still picks the right verb at far positions. Bottom right: how the sliding-window size affects the same test.</span>
+    </p>
+    <div class="checks" id="ms-checks"></div>
+    <div class="row">
+      <div class="col" style="flex:3 1 380px"><svg class="chart" id="ms-loss" viewBox="0 0 640 260"></svg></div>
+      <div class="col">
+        <svg class="chart" id="ms-agree" viewBox="0 0 640 260"></svg>
+        <svg class="chart" id="ms-win" viewBox="0 0 640 220" style="margin-top:8px"></svg>
+      </div>
+    </div>
+    <div class="callout" id="ms-note"></div>
+  </section>
+
+  <!-- 3. attention patterns -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">注意力模式：哪些位置要算</span><span lang="en">Attention patterns: which positions are computed</span></h2>
+    <p class="hint">
+      <span lang="zh">每一行是一个查询词元，每一列是它能看的 key（只看自己和之前的）。全注意力的计算量随长度平方增长；滑动窗口只看最近 w 个；“汇聚点”（attention sink，StreamingLLM）额外保留开头几个词元；空洞注意力隔几个看一个；块稀疏（BigBird / Longformer 式）组合局部、全局和随机；Top-k 块选择（MoBA、NSA 式）让每个查询按相关性挑几个块来看。</span>
+      <span lang="en">Each row is a query token and each column a key it may attend to (itself and earlier). Full attention grows with the square of the length; a sliding window sees the last w; attention sinks (StreamingLLM) also keep the first few tokens; dilated attention looks at every few positions; block-sparse (BigBird / Longformer style) mixes local, global and random; top-k block selection (MoBA, NSA style) lets each query pick the most relevant blocks.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模式</span><span lang="en">pattern</span> <select id="at-p"></select></label>
+      <label><span lang="zh">长度</span><span lang="en">length</span> T <input id="at-t" type="range" min="16" max="64" step="8" value="48"><span id="at-t-v" class="mono"></span></label>
+      <label><span lang="zh">窗口 / 块大小</span><span lang="en">window / block</span> <input id="at-w" type="range" min="2" max="16" step="1" value="8"><span id="at-w-v" class="mono"></span></label>
+      <label><span lang="zh">层数</span><span lang="en">layers</span> <input id="at-l" type="range" min="1" max="8" step="1" value="2"><span id="at-l-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="att" id="at-grid"></div></div>
+      <div class="col"><div class="stats" id="at-stats"></div><div class="callout" id="at-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. cost -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">长度的代价：计算、KV 缓存与预填充时间</span><span lang="en">The cost of length: compute, KV cache and prefill time</span></h2>
+    <p class="hint">
+      <span lang="zh">按 Llama-3 的结构估算（GQA，FP16，H100 按 50% 算力利用率）。每个词元的权重部分计算量固定，注意力部分随上下文线性增长，所以整段预填充的总计算量随长度平方增长。</span>
+      <span lang="en">Estimated for Llama-3's architecture (GQA, FP16, an H100 at 50% utilization). The weight part of each token's compute is fixed while the attention part grows with the context, so a whole prefill grows with the square of the length.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模型</span><span lang="en">model</span> <select id="cs-m"><option value="8">Llama-3-8B</option><option value="70">Llama-3-70B</option></select></label>
+      <label><span lang="zh">上下文</span><span lang="en">context</span> <input id="cs-t" type="range" min="10" max="20" step="0.5" value="17"><span id="cs-t-v" class="mono"></span></label>
+      <label><input type="checkbox" id="cs-w"> <span lang="zh">4k 滑动窗口</span><span lang="en">4k sliding window</span></label>
+    </div>
+    <div class="stats" id="cs-stats"></div>
+    <svg class="chart" id="cs-chart" viewBox="0 0 640 220"></svg>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../README.html">14 长上下文 · Long context</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="long_context_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.LONG_CONTEXT_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = v => (100 * v).toFixed(0) + "%";
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 50, R = 12, T = 10, B = 36;
+    const tx = v => o.xlog ? Math.log10(v) : v, ty = v => o.ylog ? Math.log10(v) : v;
+    const fx = v => L + (W - L - R) * (tx(v) - tx(o.x0)) / (tx(o.x1) - tx(o.x0));
+    const fy = v => T + (H - T - B) * (1 - (ty(Math.min(o.y1, Math.max(o.y0, v))) - ty(o.y0)) / (ty(o.y1) - ty(o.y0)));
+    let s = "";
+    if (o.band) s += `<rect x="${fx(o.band[0])}" y="${T}" width="${fx(o.band[1]) - fx(o.band[0])}" height="${H - T - B}" fill="${css("--primary")}" opacity=".08"/>`;
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    (o.hlines || []).forEach(h => { s += `<line x1="${L}" x2="${W - R}" y1="${fy(h.y)}" y2="${fy(h.y)}" stroke="${h.color}" stroke-dasharray="4 4"/>${h.label ? `<text x="${W - R - 4}" y="${fy(h.y) - 4}" text-anchor="end" style="fill:${h.color}">${h.label}</text>` : ""}`; });
+    series.forEach(se => {
+      if (se.line !== false) s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" ${se.dash ? `stroke-dasharray="${se.dash}"` : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="${se.r || 3.5}" fill="${se.fills ? se.fills[i] : se.color}"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 1. RoPE frequencies (same formulas as code/long_context.py) =================
+  const PRESETS = { small: { dim: 16, train: 64, beta: 8 }, llama: { dim: 128, train: 8192, beta: 32 } };
+  function freqs(dim, method, factor, train, beta, base = 10000) {
+    const idx = Array.from({ length: dim / 2 }, (_, i) => 2 * i / dim);
+    let inv = idx.map(e => 1 / base ** e);
+    if (method === "pi") inv = inv.map(v => v / factor);
+    if (method === "ntk") inv = idx.map(e => 1 / (base * factor ** (dim / (dim - 2))) ** e);
+    if (method === "yarn") inv = inv.map(v => { const turns = train * v / (2 * Math.PI), keep = Math.min(1, Math.max(0, (turns - 1) / (beta - 1))); return keep * v + (1 - keep) * v / factor; });
+    return inv;
+  }
+  function renderRp() {
+    const P = PRESETS[$("rp-preset").value], factor = 2 ** +$("rp-f").value, method = $("rp-m").value, test = P.train * factor;
+    $("rp-f-v").textContent = `${factor}× (${test.toLocaleString()} / ${P.train.toLocaleString()})`;
+    $("rp-pair").max = P.dim / 2 - 1;
+    const pair = Math.min(+$("rp-pair").value, P.dim / 2 - 1); $("rp-pair-v").textContent = pair;
+    const orig = freqs(P.dim, "none", 1, P.train, P.beta), now = freqs(P.dim, method, factor, P.train, P.beta);
+    const trainTurns = orig.map(v => P.train * v / (2 * Math.PI)), testTurns = now.map(v => test * v / (2 * Math.PI));
+    const ood = testTurns.map((t, i) => trainTurns[i] < 1 && t > trainTurns[i] * 1.05);
+    const xs = orig.map((_, i) => i);
+    const ymin = Math.min(...trainTurns, ...testTurns) / 2, ymax = Math.max(...trainTurns, ...testTurns) * 2;
+    const ticks = []; for (let e = Math.ceil(Math.log10(ymin)); e <= Math.floor(Math.log10(ymax)); e++) ticks.push(10 ** e);
+    chart($("rp-chart"), [
+      { x: xs, y: trainTurns, color: css("--ink"), width: 2.5 },
+      { x: xs, y: testTurns, color: css("--primary"), dots: true, fills: ood.map(o => o ? css("--bad") : css("--good")), width: 1.5 },
+    ], { x0: 0, x1: xs.length - 1, y0: ymin, y1: ymax, ylog: true, yticks: ticks, yfmt: v => v >= 1 ? v.toLocaleString() : v, xticks: xs.filter(i => xs.length <= 16 || i % 8 === 0),
+         hlines: [{ y: 1, color: css("--muted"), label: tr("1 圈", "1 turn") }],
+         xlabel: tr("维度对（越往右转得越慢）→ 纵轴：一个序列里转了几圈。黑线：训练；点：测试（红 = 没见过的角度）", "pair (slower to the right) → y: turns across a sequence. Black: training; dots: test (red = unseen angles)") });
+    // the circle for one pair / 单个维度对的圆
+    const tAng = Math.min(2 * Math.PI, P.train * orig[pair]), eAng = test * now[pair];
+    const arc = (a, r) => { const large = a > Math.PI ? 1 : 0; return a >= 2 * Math.PI - 1e-6 ? `<circle r="${r}" fill="none" stroke="${css("--ink")}" stroke-width="10" opacity=".25"/>` : `<path d="M ${r} 0 A ${r} ${r} 0 ${large} 0 ${r * Math.cos(a)} ${-r * Math.sin(a)}" fill="none" stroke="${css("--ink")}" stroke-width="10" opacity=".25"/>`; };
+    let s = `<circle r="80" fill="none" stroke="${css("--line")}"/>` + arc(tAng, 80);
+    const steps = Math.min(400, Math.ceil(eAng / 0.05) + 1);
+    let d = ""; for (let k = 0; k <= steps; k++) { const a = Math.min(eAng, 2 * Math.PI * 3) * k / steps, r = 64 - 14 * k / steps; d += `${k ? "L" : "M"}${(r * Math.cos(a)).toFixed(1)},${(-r * Math.sin(a)).toFixed(1)}`; }
+    s += `<path d="${d}" fill="none" stroke="${ood[pair] ? css("--bad") : css("--primary")}" stroke-width="2"/>`;
+    s += `<circle cx="${80 * Math.cos(eAng)}" cy="${-80 * Math.sin(eAng)}" r="5" fill="${ood[pair] ? css("--bad") : css("--good")}"/>`;
+    $("rp-circle").innerHTML = s;
+    $("rp-cap").textContent = tr(`第 ${pair} 对：训练中最多转到 ${(trainTurns[pair] * 360).toFixed(0)}°（灰色弧），测试时转到 ${(testTurns[pair] * 360).toFixed(0)}°。${ood[pair] ? "超出了训练时见过的角度。" : "都在见过的范围内。"}`,
+      `Pair ${pair}: training reached at most ${(trainTurns[pair] * 360).toFixed(0)}° (grey arc), the test reaches ${(testTurns[pair] * 360).toFixed(0)}°. ${ood[pair] ? "Beyond anything seen in training." : "All within what training covered."}`);
+    const fast = trainTurns.filter(t => t >= 1).length;
+    $("rp-stats").innerHTML = stat(tr("维度对", "pairs"), P.dim / 2) + stat(tr("训练中转满一圈的", "turned a full circle in training"), fast) +
+      stat(tr("测试时角度超范围的", "pairs at unseen angles"), ood.filter(Boolean).length, ood.some(Boolean) ? css("--bad") : css("--good")) +
+      stat(tr("最快一对的分辨率变化", "fastest pair's resolution"), (now[0] / orig[0]).toFixed(2) + "×", now[0] / orig[0] < 0.5 ? css("--accent") : "");
+  }
+
+  // ================= 2. measured =================
+  const METHODS = [["rope", "RoPE（原样）", "RoPE as trained", "#c5221f"], ["pi", "PI ×8", "PI ×8", "#9aa1ad"], ["ntk", "NTK ×8", "NTK ×8", "#3f51b5"],
+    ["yarn", "YaRN ×8", "YaRN ×8", "#8e24aa"], ["pi_ft", "PI ×8 + 微调 100 步", "PI ×8 + 100 fine-tuning steps", "#e8710a"], ["window", "滑动窗口 64", "window 64", "#188038"]];
+  const shown = { rope: true, ntk: true, pi_ft: true, window: true };
+  function renderMs() {
+    $("ms-checks").innerHTML = METHODS.map(([k, zh, en, c]) => `<label><input type="checkbox" data-k="${k}" ${shown[k] ? "checked" : ""}> <span class="dot" style="background:${c}"></span>${tr(zh, en)}</label>`).join("");
+    $("ms-checks").querySelectorAll("input").forEach(b => b.addEventListener("change", () => { shown[b.dataset.k] = b.checked; renderMs(); }));
+    const sm = y => y.map((_, i) => { const a = y.slice(Math.max(0, i - 7), i + 8); return a.reduce((p, c) => p + c, 0) / a.length; });
+    const on = METHODS.filter(([k]) => shown[k]);
+    chart($("ms-loss"), on.map(([k, , , c]) => ({ x: D.curves[k].map((_, i) => i), y: sm(D.curves[k]), color: c, width: 1.5 })),
+      { x0: 0, x1: D.test_len, y0: 1.8, y1: 3.3, band: [0, D.train_len], yticks: [1.8, 2.2, 2.6, 3.0], xticks: [0, 64, 128, 256, 384, 512], xlabel: tr("位置（蓝底 = 训练长度）→ 下一个词元的损失", "position (shaded = trained length) → next-token loss") });
+    chart($("ms-agree"), on.map(([k, , , c]) => ({ x: D.at, y: D.agree[k], color: c, dots: true, r: 3 })),
+      { x0: 0, x1: D.at.at(-1), y0: 0.3, y1: 1.02, band: [0, D.train_len], yticks: [0.4, 0.6, 0.8, 1.0], yfmt: pct, xticks: [0, 128, 256, 384], hlines: [{ y: 0.5, color: css("--muted") }],
+        xlabel: tr("前面的无关词元数 → 主谓一致正确率", "unrelated tokens before → agreement accuracy") });
+    chart($("ms-win"), [{ x: D.windows.map((_, i) => i), y: D.window_agree, color: "#188038", dots: true }],
+      { x0: 0, x1: D.windows.length - 1, y0: 0.3, y1: 1.02, yticks: [0.4, 0.6, 0.8, 1.0], yfmt: pct, xticks: D.windows.map((_, i) => i), xfmt: i => D.windows[i], hlines: [{ y: 0.5, color: css("--muted") }],
+        xlabel: tr("滑动窗口大小 → 主谓一致正确率", "window size → agreement accuracy") });
+    const m = k => (D.curves[k].slice(256).reduce((a, b) => a + b, 0) / 256).toFixed(2);
+    $("ms-note").innerHTML = tr(
+      `位置 256–512 的平均损失：原样 ${m("rope")}，PI ${m("pi")}，NTK ${m("ntk")}，YaRN ${m("yarn")}，PI + 微调 ${m("pi_ft")}，窗口 ${m("window")}（训练长度内约 ${(D.curves.rope.slice(0, 64).reduce((a, b) => a + b, 0) / 64).toFixed(2)}）。<b>PI 不微调反而最差</b>：所有位置都被压缩了，连短距离也变得陌生；微调 100 步就恢复了。NTK 不用训练也能撑到约 300，再远仍有维度对超出范围（对照第 1 节）。滑动窗口在这个只有短距离依赖的语言上一直很好，但窗口小于线索距离时（右下）就失效了。`,
+      `Mean loss at positions 256–512: as trained ${m("rope")}, PI ${m("pi")}, NTK ${m("ntk")}, YaRN ${m("yarn")}, PI + fine-tuning ${m("pi_ft")}, window ${m("window")} (about ${(D.curves.rope.slice(0, 64).reduce((a, b) => a + b, 0) / 64).toFixed(2)} within the trained length). <b>PI without fine-tuning is the worst</b>: every position is squeezed, so even short distances look unfamiliar; 100 fine-tuning steps fix it. NTK holds to about 300 without any training, beyond which some pairs still leave their range (compare section 1). The sliding window is fine on this language of short dependencies, but fails once it is narrower than the clue's distance (bottom right).`);
+  }
+
+  // ================= 3. attention patterns =================
+  const PATTERNS = [["full", "全注意力", "full"], ["window", "滑动窗口", "sliding window"], ["sink", "窗口 + 汇聚点", "window + sinks"], ["dilated", "空洞（隔 2 个）", "dilated (stride 2)"],
+    ["block", "块稀疏：局部 + 全局 + 随机", "block-sparse: local + global + random"], ["topk", "Top-k 块选择", "top-k block selection"]];
+  function rand(seed) { return () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+  function renderAt() {
+    const p = $("at-p").value, T = +$("at-t").value, w = +$("at-w").value, layers = +$("at-l").value;
+    $("at-t-v").textContent = T; $("at-w-v").textContent = w; $("at-l-v").textContent = layers;
+    const r = rand(11), cells = [];
+    const blk = j => Math.floor(j / w);
+    const randomBlocks = Array.from({ length: T }, () => Math.floor(r() * T / w));
+    const score = Array.from({ length: T }, () => Array.from({ length: Math.ceil(T / w) }, () => r()));
+    for (let i = 0; i < T; i++) for (let j = 0; j < T; j++) {
+      let c = "";
+      if (j <= i) {
+        if (p === "full") c = "on";
+        else if (p === "window") c = i - j < w ? "on" : "";
+        else if (p === "sink") c = i - j < w ? "on" : j < 2 ? "sink" : "";
+        else if (p === "dilated") c = (i - j) % 2 === 0 && (i - j) < 2 * w ? "on" : "";
+        else if (p === "block") c = blk(i) === blk(j) ? "on" : j < 2 || i < 2 ? "glob" : blk(j) === randomBlocks[i] ? "rand" : "";
+        else if (p === "topk") {
+          const cand = score[i].map((s, b) => [s, b]).filter(([, b]) => b < blk(i)).sort((a, b) => b[0] - a[0]).slice(0, 2).map(x => x[1]);
+          c = blk(j) === blk(i) ? "on" : cand.includes(blk(j)) ? "rand" : "";
+        }
+      }
+      cells.push(c);
+    }
+    $("at-grid").style.gridTemplateColumns = `repeat(${T}, minmax(0, 1fr))`;
+    $("at-grid").innerHTML = cells.map(c => `<div class="${c}"></div>`).join("");
+    const n = cells.filter(Boolean).length, full = T * (T + 1) / 2;
+    const reach = p === "window" ? Math.min(T - 1, layers * (w - 1)) : p === "dilated" ? Math.min(T - 1, layers * 2 * (w - 1)) : T - 1;
+    $("at-stats").innerHTML = stat(tr("要算的分数", "scores computed"), `${n} / ${full}`) + stat(tr("占全注意力", "of full attention"), pct(n / full), n / full < 0.5 ? css("--good") : "") +
+      stat(tr(`${layers} 层后最远能“看到”`, `reach after ${layers} layers`), tr(`${reach} 个位置`, `${reach} positions`));
+    const notes = {
+      full: tr("计算量和显存都随长度平方增长。", "Compute and memory grow with the square of the length."),
+      window: tr(`每层只看最近 ${w} 个，但信息可以一层层往后传：L 层后最远能间接看到 L × (w − 1) 个位置之前（Mistral、Gemma 等的部分层用它）。缓存也只需保留最近 w 个词元。`, `Each layer sees only the last ${w}, but information hops layer by layer: after L layers the reach is L × (w − 1) (used in some layers of Mistral, Gemma and others). The cache only needs the last w tokens.`),
+      sink: tr("StreamingLLM 发现：训练好的模型会把大量注意力放在开头几个词元上（汇聚点）。窗口滑走、把它们丢掉后模型会崩，留下这几个（橙色）就能稳定地流式生成。", "StreamingLLM found that trained models park a lot of attention on the first few tokens (sinks). Dropping them as the window slides breaks the model; keeping a few (orange) allows stable streaming."),
+      dilated: tr("隔几个位置看一个，用同样的计算量看得更远，但会漏掉中间的位置。", "Looking at every few positions reaches farther for the same cost, but skips those in between."),
+      block: tr("BigBird / Longformer：局部窗口（蓝）+ 少数能看全部、也被全部看到的全局词元（绿）+ 随机块（紫）。", "BigBird / Longformer: a local window (blue) + a few global tokens that see and are seen by all (green) + random blocks (purple)."),
+      topk: tr("MoBA、NSA（DeepSeek 原生稀疏注意力）的思路：先给每个块算一个粗略的相关性分数，再让每个查询只看最相关的 k 个块（紫）加上自己所在的块。看哪里由内容决定，而不是固定的模式。", "The idea of MoBA and NSA (DeepSeek's native sparse attention): score each block roughly, then let every query attend only to the k most relevant blocks (purple) plus its own. Where to look depends on content, not on a fixed pattern."),
+    };
+    $("at-note").innerHTML = notes[p];
+  }
+
+  // ================= 4. cost =================
+  const CFG = { "8": { params: 8.03e9, layers: 32, d: 4096, kv: 131072 }, "70": { params: 70.6e9, layers: 80, d: 8192, kv: 327680 } };
+  function renderCs() {
+    const m = CFG[$("cs-m").value], T = Math.round(2 ** +$("cs-t").value), win = $("cs-w").checked ? 4096 : null;
+    $("cs-t-v").textContent = T >= 1048576 ? (T / 1048576).toFixed(0) + "M" : (T / 1024).toFixed(0) + "k";
+    const att = t => 4 * m.layers * Math.min(t, win || t) * m.d, wFl = 2 * m.params;
+    const share = att(T) / (att(T) + wFl);
+    // prefill: sum over positions / 预填充：对所有位置求和
+    const span = win ? Math.min(T, win) : T;
+    const prefill = wFl * T + 4 * m.layers * m.d * (win ? (span * (span + 1) / 2 + (T - span) * span) : T * (T + 1) / 2);
+    const secs = prefill / (989e12 * 0.5), kv = m.kv * (win ? Math.min(T, win) : T) / 2 ** 30;
+    $("cs-stats").innerHTML = stat(tr("注意力占每词元计算", "attention share per token"), pct(share), share > 0.5 ? css("--bad") : "") +
+      stat(tr("KV 缓存（一条序列）", "KV cache (one sequence)"), kv.toFixed(kv < 10 ? 1 : 0) + " GiB", kv > 60 ? css("--bad") : "") +
+      stat(tr("预填充时间（单卡）", "prefill time (one GPU)"), secs < 60 ? secs.toFixed(1) + " s" : (secs / 60).toFixed(1) + " min");
+    const Ts = Array.from({ length: 21 }, (_, i) => 2 ** (10 + i / 2));
+    chart($("cs-chart"), [{ x: Ts, y: Ts.map(t => att(t) / (att(t) + wFl)), color: win ? "#188038" : css("--bad") }, { x: [T], y: [share], color: css("--accent"), dots: true, line: false, r: 6 }],
+      { x0: 1024, x1: 2 ** 20, xlog: true, y0: 0, y1: 1, yticks: [0, .25, .5, .75, 1], yfmt: pct, xticks: [1024, 8192, 65536, 524288], xfmt: v => v >= 1048576 ? "1M" : v / 1024 + "k",
+        xlabel: tr("上下文长度 → 注意力占每词元计算量的比例", "context length → attention share of per-token compute") });
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["用 RoPE 训练到 4k 的模型直接读 32k，常见的结果是？", "A model trained to 4k with RoPE reads 32k directly. What usually happens?"],
+      opts: [["没有影响，RoPE 天然支持任意长度", "Nothing; RoPE handles any length"], ["超出训练长度后质量迅速变差：慢的维度对转到了没见过的角度", "Quality drops quickly past the trained length: slow dimension pairs reach unseen angles"], ["直接报错", "It crashes"]],
+      a: 1, ex: ["RoPE 能“运行”在任意长度，但不保证效果。本章的小模型在 64 → 512 时损失从 1.99 升到约 2.6。", "RoPE runs at any length but doesn't guarantee quality. This chapter's model goes from loss 1.99 to about 2.6 from 64 to 512."] },
+    { q: ["位置插值（PI）不做任何微调时，效果如何？", "How does position interpolation (PI) do without fine-tuning?"],
+      opts: [["立刻完美", "Perfect right away"], ["往往更差：所有距离都被压缩，短距离也变得陌生；需要少量微调", "Often worse: every distance is squeezed, so even short ones look unfamiliar; it needs a little fine-tuning"], ["只影响长距离", "It only affects long distances"]],
+      a: 1, ex: ["原论文也是“插值 + 约 1000 步微调”。本章的小模型微调 100 步就恢复了。", "The original paper also fine-tunes for about 1000 steps. This chapter's small model recovers after 100."] },
+    { q: ["滑动窗口注意力的主要代价是什么？", "What is the main cost of sliding-window attention?"],
+      opts: [["计算量随长度平方增长", "Compute grows with the square of the length"], ["窗口外的信息只能靠多层间接传递，远处的细节容易丢失", "Information beyond the window can only hop through layers, so distant details are easily lost"], ["不能用 KV 缓存", "No KV cache"]],
+      a: 1, ex: ["所以常见做法是只在部分层用窗口，其余层保留全注意力。", "That is why models often use windows in some layers and full attention in others."] },
+    { q: ["上下文 128k 时，Llama-3-8B 每个词元的计算量里注意力约占多少？", "At 128k context, roughly what share of Llama-3-8B's per-token compute is attention?"],
+      opts: [["不到 10%", "under 10%"], ["约一半", "about half"], ["八成以上", "over 80%"]],
+      a: 2, ex: ["权重部分每词元约 2 × 80 亿次运算，注意力部分随上下文线性增长；128k 时约占 84%。", "The weights cost about 2 × 8B FLOPs per token while attention grows with the context; at 128k it is about 84%."] },
+    { q: ["“号称支持 128k 上下文”的模型，就一定能用好 128k 吗？", "Does a model that “supports 128k context” necessarily use all 128k well?"],
+      opts: [["是", "Yes"], ["不一定：有效上下文常常更短，放在中间的信息尤其容易被忽略", "Not necessarily: the effective context is often shorter, and information in the middle is easily missed"], ["只要显存够就能", "Yes, if there is enough memory"]],
+      a: 1, ex: ["RULER、“Lost in the Middle”等评测都发现了这一点；要在自己的任务上测。", "Benchmarks such as RULER and “Lost in the Middle” found exactly this; test on your own task."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fillSelects() {
+    const pv = $("rp-preset").value || "small";
+    $("rp-preset").innerHTML = `<option value="small">${tr("本章的小模型（头维度 16，训练 64）", "this chapter's model (head dim 16, trained on 64)")}</option><option value="llama">${tr("Llama-3 式（头维度 128，训练 8k）", "Llama-3-like (head dim 128, trained on 8k)")}</option>`;
+    $("rp-preset").value = pv;
+    const mv = $("rp-m").value || "none";
+    $("rp-m").options[0].text = tr("原样", "as trained");
+    $("rp-m").value = mv;
+    const av = $("at-p").value || "window";
+    $("at-p").innerHTML = PATTERNS.map(([v, zh, en]) => `<option value="${v}">${tr(zh, en)}</option>`).join("");
+    $("at-p").value = av;
+  }
+  function renderAll() { fillSelects(); renderRp(); renderMs(); renderAt(); renderCs(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["rp-preset", "rp-m", "rp-f", "rp-pair"].forEach(id => $(id).addEventListener("input", renderRp));
+  ["at-p", "at-t", "at-w", "at-l"].forEach(id => $(id).addEventListener("input", renderAt));
+  ["cs-m", "cs-t", "cs-w"].forEach(id => $(id).addEventListener("input", renderCs));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

@@ -90,6 +90,28 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | FP8 | FP8 (E4M3 / E5M2) | An 8-bit floating-point format with native support on recent GPUs, used for inference and even training | [12](12-inference-optimization/README.en.md) |
 | FlashAttention / 在线 softmax | FlashAttention / online softmax | Computes attention tile by tile, merging the softmax as it goes; exact, with no T × T matrix stored | [12](12-inference-optimization/README.en.md) |
 | 受带宽限制 | memory-bound | Speed set by how fast memory can be read, not by compute; token-by-token decoding is the classic case | [12](12-inference-optimization/README.en.md) |
+| 连续批处理 | continuous batching | Schedules per forward pass: finished requests leave and new ones join every iteration | [13](13-serving/README.en.md) |
+| 分页注意力 | PagedAttention | Stores the KV cache in fixed-size blocks tracked by a block table, allocated as needed | [13](13-serving/README.en.md) |
+| 前缀缓存 | prefix caching | Computes the KV of a shared prefix (e.g. a system prompt) once and shares it across requests | [13](13-serving/README.en.md) |
+| 分块预填充 | chunked prefill | Splits long prompts over several iterations mixed with decoding, so other users aren't stalled | [13](13-serving/README.en.md) |
+| 预填充/解码分离 | prefill/decode disaggregation | Runs prefill and decode on different GPUs and moves the KV cache between them | [13](13-serving/README.en.md) |
+| 首词元延迟 / 每词元延迟 | TTFT / TPOT | Time from arrival to the first token / average gap between later tokens | [13](13-serving/README.en.md) |
+| 有效吞吐 | goodput | Throughput of requests that meet their latency targets | [13](13-serving/README.en.md) |
+| 张量并行 / 流水线并行 | TP / PP (tensor / pipeline parallelism) | Split each layer's matrices across GPUs / put different layers on different GPUs | [13](13-serving/README.en.md) |
+| 位置插值 | position interpolation (PI) | Slows all RoPE frequencies so longer positions fall back into the trained range; needs a little fine-tuning | [14](14-long-context/README.en.md) |
+| NTK 缩放 / YaRN | NTK-aware scaling / YaRN | RoPE extensions that stretch the slow dimension pairs while keeping the fast ones | [14](14-long-context/README.en.md) |
+| 滑动窗口注意力 | sliding-window attention | Each token attends only to the last w tokens; cost grows linearly with length | [14](14-long-context/README.en.md) |
+| 注意力汇聚点 | attention sink | Models park much attention on the first few tokens, which must be kept when streaming | [14](14-long-context/README.en.md) |
+| 稀疏注意力 | sparse attention | Computes only some query-key scores, e.g. block-sparse or top-k block selection (NSA, MoBA) | [14](14-long-context/README.en.md) |
+| 有效上下文 | effective context | The context length a model actually uses well, often shorter than advertised | [14](14-long-context/README.en.md) |
+| 大海捞针 | needle in a haystack | Hide a fact in a long text and ask about it, testing long-range retrieval | [14](14-long-context/README.en.md) |
+| 混合专家 | MoE (mixture of experts) | Splits the FFN into many experts; each token is processed by the few the router picks | [15](15-moe/README.en.md) |
+| 路由器 / 门控 | router / gate | Scores the experts, picks the top-k and gives the weights for mixing their outputs | [15](15-moe/README.en.md) |
+| 总参数 / 激活参数 | total / active parameters | All parameters stored / those actually used for each token | [15](15-moe/README.en.md) |
+| 负载均衡 | load balancing | Keeping experts' token counts roughly equal, via an auxiliary loss or bias adjustment | [15](15-moe/README.en.md) |
+| 容量系数 | capacity factor | Each expert takes at most average load × factor tokens; the rest are dropped | [15](15-moe/README.en.md) |
+| 共享专家 | shared expert | An expert every token passes through, holding common knowledge | [15](15-moe/README.en.md) |
+| 全互换通信 | all-to-all | Communication that sends tokens to their experts' GPUs and back under expert parallelism | [15](15-moe/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

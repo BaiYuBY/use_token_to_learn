@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>推理服务系统交互演示 · Serving Systems Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .pool { display: grid; grid-template-columns: repeat(16, minmax(0, 1fr)); gap: 3px; margin-top: 8px; }
+  .pool div { aspect-ratio: 1; border-radius: 4px; border: 1px solid var(--line); background: var(--bg); font-size: 9px; display: flex; align-items: center; justify-content: center; color: var(--bg); font-family: ui-monospace, monospace; position: relative; overflow: hidden; }
+  .pool div .fill { position: absolute; left: 0; bottom: 0; width: 100%; opacity: .35; background: var(--bg); }
+  .reqs { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
+  .reqs span { font-size: .78rem; padding: 1px 6px; border-radius: 6px; border: 1px solid var(--line); font-family: ui-monospace, monospace; }
+  .gantt { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  td.best { color: var(--good); font-weight: 700; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">推理服务系统 · 交互演示</span><span lang="en">Serving Systems · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">一张 GPU 同时为很多用户生成文本：怎么排队、怎么拼批次、KV 缓存怎么放、模型太大时怎么切到多张卡。模拟器使用第 12 章的成本模型（理想化的 H100 运行 FP16 Llama-3-8B）。</span>
+        <span lang="en">One GPU generates text for many users at once: how requests queue, how batches are formed, where the KV cache lives, and how a model too big for one GPU is split. The simulator uses chapter 12's cost model (an idealised H100 running Llama-3-8B in FP16).</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. scheduler -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">调度模拟器：静态、连续、分块预填充、预填充/解码分离</span><span lang="en">Scheduler simulator: static, continuous, chunked prefill, disaggregated</span></h2>
+    <p class="hint">
+      <span lang="zh">请求按泊松过程到达，提示词 200–2000 词元，输出 20 至“最长输出”词元。每一轮的耗时 = max(读权重和 KV 的时间, 计算时间)。<b>TTFT</b>：从到达到第一个词元；<b>TPOT</b>：之后平均每个词元的间隔；<b>吞吐</b>：每秒输出的词元数。“分离”方案用两张卡（一张只做预填充，一张只做解码），为了公平，表中另列“两卡各自分块预填充”。</span>
+      <span lang="en">Requests arrive as a Poisson process with prompts of 200–2000 tokens and outputs of 20 up to the “longest output”. Each iteration takes max(time to read weights and KV, compute time). <b>TTFT</b>: arrival to first token; <b>TPOT</b>: average gap between later tokens; <b>throughput</b>: output tokens per second. “Disaggregated” uses two GPUs (one only prefills, one only decodes); for fairness the table also lists “2 GPUs, each chunked”.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">策略</span><span lang="en">policy</span> <select id="sc-pol"></select></label>
+      <label><span lang="zh">请求率（每秒）</span><span lang="en">requests per second</span> <input id="sc-rate" type="range" min="2" max="64" step="2" value="24"><span id="sc-rate-v" class="mono"></span></label>
+      <label><span lang="zh">最大批量</span><span lang="en">max batch</span> <input id="sc-b" type="range" min="3" max="8" step="1" value="6"><span id="sc-b-v" class="mono"></span></label>
+      <label><span lang="zh">每轮词元上限（分块）</span><span lang="en">tokens per iteration (chunked)</span> <input id="sc-chunk" type="range" min="7" max="11" step="1" value="9"><span id="sc-chunk-v" class="mono"></span></label>
+      <label><span lang="zh">最长输出</span><span lang="en">longest output</span> <input id="sc-out" type="range" min="100" max="2000" step="100" value="600"><span id="sc-out-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="sc-stats"></div>
+    <div class="scroll"><table class="t" id="sc-table"></table></div>
+    <h3><span lang="zh">前 30 个请求的时间线</span><span lang="en">Timeline of the first 30 requests</span></h3>
+    <div class="legend" id="sc-legend"></div>
+    <svg class="gantt" id="sc-gantt" viewBox="0 0 640 330"></svg>
+    <h3><span lang="zh">每一轮的耗时：长提示词插进来时，所有正在解码的用户都要等</span><span lang="en">Time per iteration: when a long prompt joins, every decoding user waits</span></h3>
+    <svg class="chart" id="sc-steps" viewBox="0 0 640 200"></svg>
+  </section>
+
+  <!-- 2. paged -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">PagedAttention：像操作系统分页一样管理 KV 缓存</span><span lang="en">PagedAttention: manage the KV cache like OS memory pages</span></h2>
+    <p class="hint">
+      <span lang="zh">64 个块，每块 16 个词元。“预留”模式下每个请求一来就按最大长度（256 词元 = 16 块）占位，用不完的部分（浅色）也不能给别人；“分页”模式按实际长度一块一块地分配；“分页 + 前缀共享”时，所有请求共用同一段 32 词元的系统提示词（2 块，引用计数显示在块上）。</span>
+      <span lang="en">64 blocks of 16 tokens. In “reserve” mode each request grabs blocks for its maximum length (256 tokens = 16 blocks) on arrival, and the unused part (pale) cannot be lent to anyone; “paged” allocates block by block as the sequence grows; with “paged + prefix sharing”, all requests share the same 32-token system prompt (2 blocks, reference count shown on them).</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模式</span><span lang="en">mode</span> <select id="pg-mode"></select></label>
+      <button id="pg-play">▶ <span lang="zh">播放 / 暂停</span><span lang="en">play / pause</span></button>
+      <button id="pg-step"><span lang="zh">走一步</span><span lang="en">one step</span></button>
+      <button id="pg-reset"><span lang="zh">重来</span><span lang="en">reset</span></button>
+    </div>
+    <div class="stats" id="pg-stats"></div>
+    <div class="pool" id="pg-pool"></div>
+    <div class="reqs" id="pg-reqs"></div>
+    <h3><span lang="zh">实测：迷你引擎（06 章的 GPT）每一轮的批量和使用中的块</span><span lang="en">Measured: the tiny engine (chapter 06's GPT), batch and blocks in use per iteration</span></h3>
+    <div class="legend" id="pg-legend"></div>
+    <svg class="chart" id="pg-engine" viewBox="0 0 640 200"></svg>
+  </section>
+
+  <!-- 3. parallelism -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">模型放不下一张卡：张量并行与流水线并行</span><span lang="en">When the model doesn't fit one GPU: tensor and pipeline parallelism</span></h2>
+    <p class="hint">
+      <span lang="zh"><b>张量并行（TP）</b>把每一层的矩阵切开，每张卡算一部分，每层要做 2 次 all-reduce 合并结果，所以只适合放在 NVLink 连接的同一台机器里。<b>流水线并行（PP）</b>把不同的层放到不同的卡上，只在相邻阶段之间传激活值，通信少，但有“气泡”：流水线没填满时有的卡在空等。<b>数据并行（DP）</b>就是多放几份完整副本，各自服务不同的请求。MoE 模型还有<b>专家并行（EP）</b>，见第 15 章。</span>
+      <span lang="en"><b>Tensor parallelism (TP)</b> splits every layer's matrices so each GPU computes a part; every layer needs 2 all-reduces to combine results, so it belongs inside one NVLink-connected machine. <b>Pipeline parallelism (PP)</b> puts different layers on different GPUs and only passes activations between neighbouring stages: little communication, but “bubbles” where some GPUs wait while the pipeline fills. <b>Data parallelism (DP)</b> simply runs more full replicas serving different requests. MoE models add <b>expert parallelism (EP)</b>; see chapter 15.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模型</span><span lang="en">model</span> <select id="pp-model"></select></label>
+      <label>TP <select id="pp-tp"><option>1</option><option>2</option><option>4</option><option selected>8</option></select></label>
+      <label>PP <select id="pp-pp"><option selected>1</option><option>2</option><option>4</option><option>8</option></select></label>
+      <label><span lang="zh">TP 互联</span><span lang="en">TP link</span> <select id="pp-link"><option value="450">NVLink (450 GB/s)</option><option value="64">PCIe 5.0 (64 GB/s)</option><option value="50">InfiniBand (50 GB/s)</option></select></label>
+      <label><span lang="zh">批量</span><span lang="en">batch</span> <input id="pp-b" type="range" min="0" max="8" step="1" value="5"><span id="pp-b-v" class="mono"></span></label>
+      <label><span lang="zh">微批次数</span><span lang="en">micro-batches</span> <input id="pp-m" type="range" min="1" max="32" step="1" value="8"><span id="pp-m-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="pp-stats"></div>
+    <div class="callout" id="pp-note"></div>
+  </section>
+
+  <!-- 4. quiz -->
+  <section class="quiz">
+    <h2><span class="step">4</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../README.html">13 推理服务系统 · Serving systems</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="serving_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.SERVING_DATA, G = D.gpu;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const sec = v => v >= 1 ? v.toFixed(2) + " s" : (1000 * v).toFixed(0) + " ms";
+  const ms = v => (1000 * v).toFixed(1) + " ms";
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 54, R = 12, T = 10, B = 36;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0), fy = v => T + (H - T - B) * (1 - (Math.min(o.y1, Math.max(o.y0, v)) - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    series.forEach(se => {
+      if (se.step) { let d = ""; se.x.forEach((v, i) => { d += `${i ? "L" : "M"}${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`; if (i < se.x.length - 1) d += `L${fx(se.x[i + 1]).toFixed(1)},${fy(se.y[i]).toFixed(1)}`; }); s += `<path d="${d}" fill="none" stroke="${se.color}" stroke-width="${se.width || 1.5}"/>`; }
+      else s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 1.5}" ${se.dash ? `stroke-dasharray="${se.dash}"` : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+    });
+    (o.hlines || []).forEach(h => { s += `<line x1="${L}" x2="${W - R}" y1="${fy(h.y)}" y2="${fy(h.y)}" stroke="${h.color}" stroke-dasharray="4 4"/><text x="${W - R - 4}" y="${fy(h.y) - 4}" text-anchor="end" style="fill:${h.color}">${h.label}</text>`; });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+
+  // ================= 1. the scheduler (same logic as code/serving.py) =================
+  function rng(seed) { return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  function workload(n, rate, outMax, seed = 1) {
+    const r = rng(seed), out = []; let t = 0;
+    const lu = (a, b) => Math.floor(Math.exp(Math.log(a) + r() * (Math.log(b) - Math.log(a))));
+    for (let i = 0; i < n; i++) { t += -Math.log(1 - r()) / rate; out.push({ arrival: t, prompt: lu(200, 2000), output: lu(20, outMax) }); }
+    return out;
+  }
+  const stepTime = (n, ctx) => Math.max((G.weight_bytes + ctx * G.kv_bytes) / G.bandwidth, 2 * G.params * n / G.flops);
+  function simulate(load, policy, maxBatch, chunk) {
+    const reqs = load.map(r => ({ ...r, first: null, done: null, start: null, made: 0, prefilled: 0 })), steps = [];
+    const capacity = (G.memory - G.weight_bytes) / G.kv_bytes;
+    let clock = 0, i = 0, running = [];
+    const fits = extra => running.reduce((a, r) => a + r.prompt + r.output, 0) + extra <= capacity;
+    if (policy === "static") {
+      while (i < reqs.length) {
+        clock = Math.max(clock, reqs[i].arrival);
+        const batch = [];
+        while (i < reqs.length && reqs[i].arrival <= clock && batch.length < maxBatch) batch.push(reqs[i++]);
+        let ctx = batch.reduce((a, r) => a + r.prompt, 0);
+        const dt = stepTime(ctx, 0); clock += dt; steps.push([clock, dt]);
+        batch.forEach(r => { r.start = clock - dt; r.first = clock; r.made = 1; });
+        while (batch.some(r => r.made < r.output)) {
+          ctx += batch.length;
+          const d = stepTime(batch.length, ctx); clock += d; steps.push([clock, d]);
+          batch.forEach(r => { if (r.made < r.output) { r.made++; if (r.made === r.output) r.done = clock; } });
+        }
+        batch.forEach(r => { r.done = r.done || clock; });
+      }
+      return { reqs, steps };
+    }
+    if (policy === "disaggregated") {
+      const ready = []; let pc = 0;
+      reqs.forEach(r => { r.start = Math.max(pc, r.arrival); pc = r.start + stepTime(r.prompt, 0); r.first = pc; ready.push([pc + r.prompt * G.kv_bytes / G.link, r]); });
+      ready.sort((a, b) => a[0] - b[0]);
+      while (i < ready.length || running.length) {
+        while (i < ready.length && ready[i][0] <= clock && running.length < maxBatch && fits(ready[i][1].prompt + ready[i][1].output)) { ready[i][1].made = 1; running.push(ready[i++][1]); }
+        if (!running.length) { clock = ready[i][0]; continue; }
+        const d = stepTime(running.length, running.reduce((a, r) => a + r.prompt + r.made, 0)); clock += d; steps.push([clock, d]);
+        running.forEach(r => r.made++);
+        running = running.filter(r => { if (r.made >= r.output) { r.done = clock; return false; } return true; });
+      }
+      return { reqs, steps };
+    }
+    while (i < reqs.length || running.length) {
+      while (i < reqs.length && reqs[i].arrival <= clock && running.length < maxBatch && fits(reqs[i].prompt + reqs[i].output)) { reqs[i].start = clock; running.push(reqs[i++]); }
+      if (!running.length) { clock = reqs[i].arrival; continue; }
+      const decoding = running.filter(r => r.prefilled === r.prompt);
+      let budget = policy === "chunked" ? chunk - decoding.length : Infinity, work = decoding.length;
+      const just = [];
+      running.forEach(r => { if (r.prefilled < r.prompt && budget > 0) { const take = Math.min(r.prompt - r.prefilled, budget); r.prefilled += take; budget -= take; work += take; if (r.prefilled === r.prompt) just.push(r); } });
+      const d = stepTime(work, running.reduce((a, r) => a + r.prefilled + r.made, 0)); clock += d; steps.push([clock, d]);
+      decoding.forEach(r => r.made++);
+      just.forEach(r => { r.first = clock; r.made = 1; });
+      running = running.filter(r => { if (r.made >= r.output && r.first !== null) { r.done = clock; return false; } return true; });
+    }
+    return { reqs, steps };
+  }
+  function metrics(reqs) {
+    const q = (xs, p) => xs[Math.min(xs.length - 1, Math.floor(p * xs.length))];
+    const ttft = reqs.map(r => r.first - r.arrival).sort((a, b) => a - b);
+    const tpot = reqs.map(r => (r.done - r.first) / Math.max(1, r.output - 1)).sort((a, b) => a - b);
+    const span = Math.max(...reqs.map(r => r.done)) - Math.min(...reqs.map(r => r.arrival));
+    return { ttft50: q(ttft, .5), ttft99: q(ttft, .99), tpot50: q(tpot, .5), tpot99: q(tpot, .99), tput: reqs.reduce((a, r) => a + r.output, 0) / span };
+  }
+  const POLS = [["static", "静态批处理", "static batching", 1], ["continuous", "连续批处理", "continuous batching", 1], ["chunked", "分块预填充", "chunked prefill", 1],
+    ["disaggregated", "预填充/解码分离", "disaggregated prefill/decode", 2], ["chunked_x2", "两卡各自分块预填充", "2 GPUs, each chunked", 2]];
+  function runPolicy(load, pol, mb, chunk) {
+    if (pol === "chunked_x2") { const a = simulate(load.filter((_, i) => i % 2 === 0), "chunked", mb, chunk), b = simulate(load.filter((_, i) => i % 2 === 1), "chunked", mb, chunk); return { reqs: a.reqs.concat(b.reqs), steps: a.steps }; }
+    return simulate(load, pol, mb, chunk);
+  }
+  function renderSc() {
+    const rate = +$("sc-rate").value, mb = 2 ** +$("sc-b").value, chunk = 2 ** +$("sc-chunk").value, outMax = +$("sc-out").value, pol = $("sc-pol").value;
+    $("sc-rate-v").textContent = rate; $("sc-b-v").textContent = mb; $("sc-chunk-v").textContent = chunk; $("sc-out-v").textContent = outMax;
+    const load = workload(300, rate, outMax);
+    const all = POLS.map(([p, zh, en, g]) => ({ p, name: tr(zh, en), g, ...runPolicy(load, p, mb, chunk) }));
+    all.forEach(a => { a.m = metrics(a.reqs); });
+    const cur = all.find(a => a.p === pol), m = cur.m;
+    $("sc-stats").innerHTML = stat(tr("吞吐", "throughput"), `${m.tput.toFixed(0)} tok/s`) + stat(tr("每张卡", "per GPU"), `${(m.tput / cur.g).toFixed(0)} tok/s`) +
+      stat("TTFT p50", sec(m.ttft50)) + stat("TTFT p99", sec(m.ttft99), m.ttft99 > 2 ? css("--bad") : "") + stat("TPOT p50", ms(m.tpot50)) + stat("TPOT p99", ms(m.tpot99), m.tpot99 > 0.03 ? css("--bad") : "");
+    const cols = [["tput", tr("吞吐 tok/s", "tok/s"), v => v.toFixed(0), 1], ["perg", tr("每卡 tok/s", "tok/s per GPU"), v => v.toFixed(0), 1], ["ttft50", "TTFT p50", sec, -1], ["ttft99", "TTFT p99", sec, -1], ["tpot50", "TPOT p50", ms, -1], ["tpot99", "TPOT p99", ms, -1]];
+    all.forEach(a => { a.m.perg = a.m.tput / a.g; });
+    $("sc-table").innerHTML = `<tr><th>${tr("策略", "policy")}</th><th>GPU</th>${cols.map(c => `<th>${c[1]}</th>`).join("")}</tr>` +
+      all.map(a => `<tr${a.p === pol ? ' style="font-weight:700"' : ""}><td>${a.name}</td><td>${a.g}</td>${cols.map(([k, , f, dir]) => { const vals = all.map(b => b.m[k]), best = dir > 0 ? Math.max(...vals) : Math.min(...vals); return `<td class="${Math.abs(a.m[k] - best) < 1e-9 ? "best" : ""}">${f(a.m[k])}</td>`; }).join("")}</tr>`).join("");
+    // gantt / 时间线
+    const rs = cur.reqs.slice(0, 30), t1 = Math.max(...rs.map(r => r.done)), svg = $("sc-gantt");
+    const W = 640, H = 330, L = 34, R = 10, T = 6, B = 26, rowH = (H - T - B) / rs.length, fx = t => L + (W - L - R) * t / t1;
+    let s = "";
+    [0, .25, .5, .75, 1].forEach(f => { s += `<line class="grid" x1="${fx(f * t1)}" x2="${fx(f * t1)}" y1="${T}" y2="${H - B}" stroke="${css("--line")}"/><text x="${fx(f * t1)}" y="${H - 8}" text-anchor="middle" fill="${css("--muted")}" font-size="11">${(f * t1).toFixed(1)} s</text>`; });
+    rs.forEach((r, k) => {
+      const y = T + k * rowH + 1, h = Math.max(2, rowH - 2);
+      s += `<rect x="${fx(r.arrival)}" y="${y}" width="${Math.max(0, fx(r.start) - fx(r.arrival))}" height="${h}" fill="${css("--muted")}" opacity=".35"/>`;
+      s += `<rect x="${fx(r.start)}" y="${y}" width="${Math.max(1, fx(r.first) - fx(r.start))}" height="${h}" fill="${css("--accent")}"/>`;
+      s += `<rect x="${fx(r.first)}" y="${y}" width="${Math.max(1, fx(r.done) - fx(r.first))}" height="${h}" fill="${css("--primary")}"/>`;
+      if (k % 5 === 0) s += `<text x="${L - 4}" y="${y + h - 1}" text-anchor="end" fill="${css("--muted")}" font-size="10">#${k}</text>`;
+    });
+    svg.innerHTML = s;
+    legend($("sc-legend"), [[css("--muted"), tr("排队", "waiting")], [css("--accent"), tr("预填充（被接纳 → 第一个词元）", "prefill (admitted → first token)")], [css("--primary"), tr("解码", "decode")]]);
+    // step times / 每轮耗时
+    const st = cur.steps.filter(x => x[0] <= t1 * 0.6);
+    const ymax = Math.max(0.02, ...st.map(x => x[1])) * 1.1;
+    chart($("sc-steps"), [{ x: st.map(x => x[0]), y: st.map(x => 1000 * x[1]), color: css("--primary"), step: true }],
+      { x0: 0, x1: t1 * 0.6, y0: 0, y1: 1000 * ymax, yticks: [0, 1000 * ymax / 3, 2000 * ymax / 3].map(v => Math.round(v)), yfmt: v => v + " ms",
+        xticks: [0, .2, .4, .6].map(f => +(f * t1).toFixed(1)), xfmt: v => v + " s", xlabel: tr(cur.g === 2 ? "时间（显示的是解码卡）" : "时间", cur.g === 2 ? "time (decode GPU shown)" : "time") });
+  }
+
+  // ================= 2. paged KV cache =================
+  const NB = 64, BS = 16, MAXLEN = 256, SYS = 32;
+  let pg = null, pgTimer = null;
+  function pgInit() {
+    const r = rng(5), reqs = [];
+    for (let i = 0; i < 40; i++) reqs.push({ id: i, arrive: Math.floor(i * 0.6), prompt: SYS + 8 + Math.floor(r() * 24), out: 8 + Math.floor(r() * 72), len: 0, blocks: [], state: "wait" });
+    pg = { t: 0, reqs, owner: new Array(NB).fill(-1), ref: new Array(NB).fill(0), shared: null, done: 0, peakRun: 0 };
+  }
+  const hue = id => `hsl(${(id * 47) % 360} 60% 50%)`;
+  function pgStep() {
+    const mode = $("pg-mode").value, free = () => pg.owner.map((o, i) => o === -1 && pg.ref[i] === 0 ? i : -1).filter(i => i >= 0);
+    const take = n => { const f = free(); if (f.length < n) return null; return f.slice(0, n); };
+    // grow running sequences by 8 tokens per step / 每步每条序列增长 8 个词元
+    pg.reqs.filter(q => q.state === "run").forEach(q => {
+      q.len = Math.min(q.prompt + q.out, q.len + 8);
+      if (mode !== "reserve") {
+        const need = Math.ceil(q.len / BS) - q.blocks.length - (q.sharedBlocks || 0);
+        if (need > 0) { const b = take(need); if (b) { b.forEach(x => { pg.owner[x] = q.id; }); q.blocks.push(...b); } else q.len -= 8; }
+      }
+      if (q.len >= q.prompt + q.out) {
+        q.state = "done"; pg.done++;
+        q.blocks.forEach(x => { pg.owner[x] = -1; });
+        q.blocks = [];
+        if (q.sharedBlocks) pg.shared.forEach(x => { pg.ref[x]--; if (pg.ref[x] === 0) { pg.owner[x] = -1; } });
+      }
+    });
+    if (pg.shared && pg.shared.every(x => pg.ref[x] === 0)) pg.shared = null;
+    // admit / 接纳
+    for (const q of pg.reqs.filter(q => q.state === "wait" && q.arrive <= pg.t)) {
+      let ok = false;
+      if (mode === "reserve") { const b = take(MAXLEN / BS); if (b) { b.forEach(x => { pg.owner[x] = q.id; }); q.blocks = b; ok = true; } }
+      else if (mode === "paged") { const b = take(Math.ceil(q.prompt / BS)); if (b) { b.forEach(x => { pg.owner[x] = q.id; }); q.blocks = b; ok = true; } }
+      else {
+        if (!pg.shared) { const s = take(SYS / BS); if (s) { pg.shared = s; s.forEach(x => { pg.owner[x] = -2; }); } }
+        if (pg.shared) { const b = take(Math.ceil((q.prompt - SYS) / BS)); if (b) { b.forEach(x => { pg.owner[x] = q.id; }); q.blocks = b; q.sharedBlocks = SYS / BS; pg.shared.forEach(x => pg.ref[x]++); ok = true; } }
+      }
+      if (!ok) break;  // first come, first served / 先来先服务
+      q.state = "run"; q.len = q.prompt;
+    }
+    pg.t++;
+    pg.peakRun = Math.max(pg.peakRun, pg.reqs.filter(q => q.state === "run").length);
+    renderPg();
+    if (pg.reqs.every(q => q.state === "done") && pgTimer) { clearInterval(pgTimer); pgTimer = null; }
+  }
+  function renderPg() {
+    const mode = $("pg-mode").value, running = pg.reqs.filter(q => q.state === "run");
+    const used = pg.owner.filter(o => o !== -1).length;
+    let tokens = running.reduce((a, q) => a + q.len - (q.sharedBlocks ? SYS : 0), 0) + (pg.shared ? SYS : 0);
+    const waiting = pg.reqs.filter(q => q.state === "wait" && q.arrive <= pg.t).length;
+    $("pg-stats").innerHTML = stat(tr("时间步", "step"), pg.t) + stat(tr("正在服务", "running"), running.length) + stat(tr("排队中", "waiting"), waiting, waiting ? css("--bad") : "") +
+      stat(tr("已完成", "finished"), `${pg.done} / ${pg.reqs.length}`) + stat(tr("占用的块", "blocks in use"), `${used} / ${NB}`) +
+      stat(tr("占用的块中真正存了 KV 的比例", "share of held blocks actually used"), used ? Math.round(100 * tokens / (used * BS)) + "%" : "—", used && tokens / (used * BS) < 0.6 ? css("--bad") : css("--good"));
+    const lenOf = id => { const q = pg.reqs[id]; return q; };
+    $("pg-pool").innerHTML = pg.owner.map((o, i) => {
+      if (o === -1) return "<div></div>";
+      if (o === -2) return `<div style="background:${css("--accent")}" title="shared">×${pg.ref[i]}</div>`;
+      const q = lenOf(o), k = q.blocks.indexOf(i), own = q.len - (q.sharedBlocks ? SYS : 0), filled = Math.max(0, Math.min(BS, own - k * BS));
+      return `<div style="background:${hue(o)}" title="#${o}"><span class="fill" style="height:${100 * (1 - filled / BS)}%"></span>${k === 0 ? o : ""}</div>`;
+    }).join("");
+    $("pg-reqs").innerHTML = running.map(q => `<span style="border-color:${hue(q.id)}">#${q.id} ${q.len}/${q.prompt + q.out}</span>`).join("");
+  }
+  function renderEngine() {
+    const e = D.engine, log = e.log;
+    chart($("pg-engine"), [{ x: log.map(r => r.it), y: log.map(r => r.batch.length * e.n_blocks / 6), color: css("--primary"), step: true },
+      { x: log.map(r => r.it), y: log.map(r => r.blocks), color: css("--accent") }],
+      { x0: 0, x1: log.at(-1).it, y0: 0, y1: e.n_blocks * 1.05, yticks: [0, 12, 24, 36, 48], xticks: [0, 10, 20, 30, 40].filter(v => v <= log.at(-1).it), hlines: [{ y: e.n_blocks, color: css("--bad"), label: tr(`块池 ${e.n_blocks}`, `pool ${e.n_blocks}`) }], xlabel: tr("迭代", "iteration") });
+    legend($("pg-legend"), [[css("--primary"), tr("批中的请求数（× 8，最多 6）", "requests in the batch (× 8, max 6)")], [css("--accent"), tr(`使用中的 KV 块（峰值 ${e.peak}；若每个请求预留整个上下文，需要 ${e.requests.length * e.reserved_blocks}）`, `KV blocks in use (peak ${e.peak}; reserving the full context per request would need ${e.requests.length * e.reserved_blocks})`)]]);
+  }
+
+  // ================= 3. parallelism =================
+  const MODELS = {
+    "Llama-3-8B": { params: 8.03e9, layers: 32, d: 4096, kv: 8, hd: 128 },
+    "Llama-3-70B": { params: 70.6e9, layers: 80, d: 8192, kv: 8, hd: 128 },
+    "Llama-3.1-405B": { params: 405e9, layers: 126, d: 16384, kv: 8, hd: 128 },
+  };
+  function renderPp() {
+    const m = MODELS[$("pp-model").value], tp = +$("pp-tp").value, pp = +$("pp-pp").value, link = +$("pp-link").value * 1e9, B = 2 ** +$("pp-b").value, mb = +$("pp-m").value;
+    $("pp-b-v").textContent = B; $("pp-m-v").textContent = mb;
+    const gpus = tp * pp, wPer = m.params * 2 / gpus / 1e9;
+    const kvHeadsPer = Math.max(1, m.kv / tp), kvPer = 2 * (m.layers / pp) * kvHeadsPer * m.hd * 2;  // bytes per token per GPU
+    const arBytes = 2 * (tp - 1) / tp * B * m.d * 2, perStep = 2 * (m.layers / pp) * arBytes;  // per decoding step per GPU
+    const nAR = 2 * m.layers / pp, commT = tp > 1 ? perStep / link + nAR * 8e-6 : 0;  // + ~8 µs latency per all-reduce
+    const readT = (wPer * 1e9 + kvPer * B * 4096) / 3.35e12;
+    const bubble = (pp - 1) / (mb + pp - 1);
+    const fits = wPer + kvPer * B * 4096 / 1e9 < 72;
+    $("pp-stats").innerHTML = stat(tr("GPU 数", "GPUs"), gpus) + stat(tr("每卡权重（FP16）", "weights per GPU (FP16)"), wPer.toFixed(1) + " GB", wPer > 72 ? css("--bad") : "") +
+      stat(tr("每卡 KV（4k 上下文 × 批量）", "KV per GPU (4k ctx × batch)"), (kvPer * B * 4096 / 1e9).toFixed(1) + " GB") +
+      stat(tr("放得下 80 GB？", "fits in 80 GB?"), fits ? "✓" : "✗", fits ? css("--good") : css("--bad")) +
+      stat(tr("每步 TP 通信", "TP traffic per step"), tp > 1 ? (perStep / 1e6).toFixed(1) + " MB" : "—") +
+      stat(tr("通信耗时 / 读显存耗时", "comm / memory-read time"), tp > 1 ? `${(1000 * commT).toFixed(2)} / ${(1000 * readT).toFixed(2)} ms` : "—", commT > readT ? css("--bad") : "") +
+      stat(tr("流水线气泡", "pipeline bubble"), (100 * bubble).toFixed(0) + "%", bubble > 0.3 ? css("--bad") : "");
+    $("pp-note").innerHTML = tr(
+      `TP = ${tp}：每层 2 次 all-reduce，共 ${nAR} 次/步；每次除了数据量，还有约 8 µs 的固定延迟，所以层数多、批量小时，延迟占大头。KV 头只有 ${m.kv} 个，TP 超过 ${m.kv} 时 KV 头要复制，每卡的 KV 不再减少。PP = ${pp}，${mb} 个微批次时，气泡占 (p−1)/(m+p−1) = ${(100 * bubble).toFixed(0)}%。`,
+      `TP = ${tp}: 2 all-reduces per layer, ${nAR} per step; besides the bytes, each costs a fixed ~8 µs, which dominates with many layers and small batches. There are only ${m.kv} KV heads, so above TP = ${m.kv} they are replicated and per-GPU KV stops shrinking. With PP = ${pp} and ${mb} micro-batches, the bubble is (p−1)/(m+p−1) = ${(100 * bubble).toFixed(0)}%.`);
+  }
+
+  // ================= 4. quiz =================
+  const QUIZ = [
+    { q: ["连续批处理比静态批处理好在哪？", "What does continuous batching improve over static batching?"],
+      opts: [["每个请求生成得更快", "Each request generates faster"], ["请求完成就立即离开、新请求随时加入，不用等整批最长的那个", "Finished requests leave and new ones join every iteration, instead of waiting for the batch's longest one"], ["不再需要 KV 缓存", "No KV cache is needed"]],
+      a: 1, ex: ["这叫迭代级调度（Orca，2022）。GPU 不再为已完成的请求空转，吞吐和首词元延迟都大幅改善。", "This is iteration-level scheduling (Orca, 2022). The GPU no longer idles on finished requests, so throughput and TTFT improve a lot."] },
+    { q: ["PagedAttention 主要解决什么问题？", "What does PagedAttention mainly solve?"],
+      opts: [["注意力计算太慢", "Slow attention arithmetic"], ["按最大长度预留 KV 显存造成的大量浪费和碎片", "The waste and fragmentation of reserving KV memory for the maximum length"], ["模型权重太大", "Weights that are too large"]],
+      a: 1, ex: ["按块分配后浪费不到一个块，同一张卡能同时服务的请求多出好几倍，还能在请求间共享相同前缀的块。", "With blocks, waste is under one block per sequence, several times more requests fit, and identical prefixes can share blocks."] },
+    { q: ["一个很长的提示词进来做预填充时，正在解码的其他用户会怎样？", "When a very long prompt is prefilled, what happens to users who are decoding?"],
+      opts: [["不受影响", "Nothing"], ["那一轮变得很长，他们的下一个词元被推迟（TPOT 抖动）", "That iteration becomes long and their next token is delayed (TPOT spikes)"], ["他们的请求被取消", "Their requests are cancelled"]],
+      a: 1, ex: ["分块预填充把长提示词拆成小块，和解码混在一起做；预填充/解码分离则干脆用不同的卡。", "Chunked prefill splits long prompts into pieces mixed with decoding; disaggregation puts them on different GPUs."] },
+    { q: ["为什么张量并行一般只在同一台机器内使用？", "Why is tensor parallelism usually kept inside one machine?"],
+      opts: [["每层都要 all-reduce，跨机器的网络太慢", "Every layer needs an all-reduce, and networks between machines are too slow"], ["跨机器无法分割矩阵", "Matrices cannot be split across machines"], ["许可证限制", "Licensing"]],
+      a: 0, ex: ["跨机器更适合流水线并行（只传相邻阶段的激活值）或数据并行（完全不通信）。", "Across machines, pipeline parallelism (activations between neighbouring stages only) or data parallelism (no communication) fit better."] },
+    { q: ["前缀缓存（如 SGLang 的 RadixAttention）在什么场景收益最大？", "When does prefix caching (e.g. SGLang's RadixAttention) help most?"],
+      opts: [["每个请求都完全不同", "Every request is completely different"], ["很多请求共用同一段系统提示词、文档或多轮对话的历史", "Many requests share a system prompt, documents or earlier turns of a conversation"], ["只生成一个词元的请求", "Requests generating a single token"]],
+      a: 1, ex: ["共享部分的 KV 只算一次、只存一份，后来的请求直接复用，省下预填充的计算和显存。", "The shared part's KV is computed and stored once and reused, saving prefill compute and memory."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fillSelects() {
+    const pv = $("sc-pol").value || "chunked";
+    $("sc-pol").innerHTML = POLS.map(([p, zh, en]) => `<option value="${p}">${tr(zh, en)}</option>`).join("");
+    $("sc-pol").value = pv;
+    const mv = $("pg-mode").value || "reserve";
+    $("pg-mode").innerHTML = [["reserve", "按最大长度预留", "reserve the max length"], ["paged", "分页", "paged"], ["prefix", "分页 + 前缀共享", "paged + prefix sharing"]].map(([v, zh, en]) => `<option value="${v}">${tr(zh, en)}</option>`).join("");
+    $("pg-mode").value = mv;
+    const ml = $("pp-model").value || "Llama-3-70B";
+    $("pp-model").innerHTML = Object.keys(MODELS).map(n => `<option>${n}</option>`).join("");
+    $("pp-model").value = ml;
+  }
+  function renderAll() { fillSelects(); renderSc(); renderPg(); renderEngine(); renderPp(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["sc-pol", "sc-rate", "sc-b", "sc-chunk", "sc-out"].forEach(id => $(id).addEventListener("input", renderSc));
+  $("pg-mode").addEventListener("input", () => { pgInit(); renderPg(); });
+  $("pg-step").addEventListener("click", pgStep);
+  $("pg-play").addEventListener("click", () => { if (pgTimer) { clearInterval(pgTimer); pgTimer = null; } else pgTimer = setInterval(pgStep, 250); });
+  $("pg-reset").addEventListener("click", () => { if (pgTimer) { clearInterval(pgTimer); pgTimer = null; } pgInit(); renderPg(); });
+  ["pp-model", "pp-tp", "pp-pp", "pp-link", "pp-b", "pp-m"].forEach(id => $(id).addEventListener("input", renderPp));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  pgInit();
+  for (let i = 0; i < 12; i++) pgStep();
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

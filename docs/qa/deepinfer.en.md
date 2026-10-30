@@ -41,12 +41,12 @@ Key design points (figures from DeepSeek's deployment Q&A):
 
 | Feature | What it does | Chapter |
 | --- | --- | --- |
-| Optimised kernels: FlashMLA, DeepGEMM, DeepEP, TileKernels and more | Fast attention, matrix multiplication and expert-parallel communication | [12 Inference optimization](../12-inference-optimization/README.en.md), 15 MoE (planned) |
-| Parallelism: attention data parallelism / balanced context parallelism, MoE expert parallelism + EPLB | Spread the model and requests over many accelerators and keep their load balanced | 13 Serving systems (planned) |
+| Optimised kernels: FlashMLA, DeepGEMM, DeepEP, TileKernels and more | Fast attention, matrix multiplication and expert-parallel communication | [12 Inference optimization](../12-inference-optimization/README.en.md), [15 MoE](../15-moe/README.en.md) |
+| Parallelism: attention data parallelism / balanced context parallelism, MoE expert parallelism + EPLB | Spread the model and requests over many accelerators and keep their load balanced | [13 Serving systems](../13-serving/README.en.md) |
 | DSpark speculative decoding with confidence-scheduled verification | Guess a few draft tokens and verify them together, choosing how many to verify by confidence; the document reports about 30% fewer draft tokens verified per step with essentially the same accepted length | [12 Inference optimization](../12-inference-optimization/README.en.md) |
-| Asynchronous scheduling | The CPU schedules the next step while the GPU computes this one, removing idle time | 13 Serving systems (planned) |
-| SWA bounded replay | On a cache hit, recompute only a short tail, working with sliding-window attention to cut prefill work | 14 Long context (planned) |
-| Batch-invariant inference, deterministic sampling | The same request gives exactly the same result whatever it is batched with and however often it runs | 13 Serving systems (planned) |
+| Asynchronous scheduling | The CPU schedules the next step while the GPU computes this one, removing idle time | [13 Serving systems](../13-serving/README.en.md) |
+| SWA bounded replay | On a cache hit, recompute only a short tail, working with sliding-window attention to cut prefill work | [14 Long context](../14-long-context/README.en.md) |
+| Batch-invariant inference, deterministic sampling | The same request gives exactly the same result whatever it is batched with and however often it runs | [13 Serving systems](../13-serving/README.en.md) |
 | Structured outputs | Force output to match a JSON schema, regex or grammar | 11 Decoding and sampling (planned) |
 
 ### 4. What it leaves out
@@ -80,9 +80,9 @@ The deployment document explains that these components are tightly coupled to De
 
 ## How it fits the knowledge base
 
-- **13 Inference serving systems** (planned; this question is why the chapter was added): batching, P/D disaggregation, parallelism and load balancing, with vLLM, SGLang and DeepInfer as case studies
+- **[13 Serving systems](../13-serving/README.en.md)** (this question is why the chapter was added): batching, P/D disaggregation, parallelism and load balancing, with vLLM, SGLang and DeepInfer as case studies
 - **[12 Inference optimization](../12-inference-optimization/README.en.md)**: KV cache, quantisation, speculative decoding, FlashAttention / MLA
-- **15 Mixture of experts** (planned): expert parallelism and load balancing
+- **[15 Mixture of experts](../15-moe/README.en.md)**: expert parallelism and load balancing
 - [04 Attention](../04-attention/README.en.md), [05 Transformer block](../05-transformer/README.en.md): where the KV cache and GQA come from
 
 ## Sources

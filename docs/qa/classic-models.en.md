@@ -163,7 +163,7 @@ def lstm_forward(x, w_ih, w_hh, b_ih, b_hh):
 - [04 Attention](../04-attention/README.en.md): how attention replaced the RNN's step-by-step relay
 - [05 Transformer block](../05-transformer/README.en.md): residual connections and the LSTM's additive memory
 - [How LLM compute is counted](compute.en.md): compute and bottlenecks compared across models
-- **14 Long context**, **16 Multimodal**, **19 RAG and vector databases** (planned): linear attention and state-space models, ViT, vector search
+- **[14 Long context](../14-long-context/README.en.md)**, **16 Multimodal**, **19 RAG and vector databases** (planned): linear attention and state-space models, ViT, vector search
 
 ## Sources
 
