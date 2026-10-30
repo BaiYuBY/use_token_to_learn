@@ -131,6 +131,14 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 拒绝采样微调 | rejection-sampling fine-tuning (RFT, expert iteration) | Keep training only on the model's own samples that pass a check | [17](17-code-models/README.en.md) |
 | 奖励投机 | reward hacking | The model exploits loopholes in the reward, e.g. special-casing tests or editing them | [17](17-code-models/README.en.md) |
 | 数据污染 | data contamination | Benchmark problems appear in the training data, inflating scores | [17](17-code-models/README.en.md) |
+| 上下文学习 / 少样本提示 | in-context learning (ICL) / few-shot prompting | Doing a new task from a few examples in the prompt, without changing any weights | [18](18-prompt-engineering/README.en.md) |
+| 系统提示 | system prompt | The developer's message at the start of a conversation, setting the task and rules | [18](18-prompt-engineering/README.en.md) |
+| 角色标记 | role tokens | Dedicated tokens separating system, user and assistant messages in a chat template; user text cannot produce them | [18](18-prompt-engineering/README.en.md) |
+| 归纳头 | induction head | An attention mechanism that finds an earlier position like the current one and copies what followed; thought to underlie in-context learning | [18](18-prompt-engineering/README.en.md) |
+| 提示注入 | prompt injection (direct / indirect) | Instructions hidden in user input or external data steer the model away from the developer's intent; indirect injection hides in web pages, emails or documents | [18](18-prompt-engineering/README.en.md) |
+| 指令层级 | instruction hierarchy | Training a model to prioritize the system prompt over the user, and the user over data, when they conflict | [18](18-prompt-engineering/README.en.md) |
+| 多示例越狱 | many-shot jailbreaking | Packing many examples into a long context to override safety training or system instructions | [18](18-prompt-engineering/README.en.md) |
+| 纵深防御 | defence in depth | Layered safeguards such as least privilege, output validation and human confirmation, rather than one line of defence | [18](18-prompt-engineering/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

@@ -205,7 +205,7 @@ python docs/qa/code/reliability.py
 - [10 推理模型与测试时计算](../10-reasoning/README.md)：先思考再回答、自洽性投票、验证器
 - [11 解码与采样](../11-decoding/README.md)：温度、约束解码与结构化输出
 - [推理强度是怎么设置的](reasoning-effort.md)：让模型多想一会儿的代价
-- **18 提示工程**、**19 RAG 与向量数据库**、**21 Agent 与 agent loop**、**23 评测**（计划中）
+- **[18 提示工程](../18-prompt-engineering/README.md)**、**19 RAG 与向量数据库**、**21 Agent 与 agent loop**、**23 评测**（计划中）
 
 ## 来源
 

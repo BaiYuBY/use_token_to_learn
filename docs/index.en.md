@@ -33,7 +33,8 @@ Each chapter follows the same rhythm:
 | 15 | [Mixture of experts](15-moe/README.md) | [Routing and load-balancing playground](15-moe/interactive/moe.html?lang=en) | ✅ done |
 | 16 | [Multimodal models](16-multimodal/README.md) | [Patches, CLIP and zero-shot, VLM captions playground](16-multimodal/interactive/multimodal.html?lang=en) | ✅ done |
 | 17 | [Code models](17-code-models/README.md) | [FIM, pass@k and test-based selection playground](17-code-models/interactive/code_models.html?lang=en) | ✅ done |
-| 18–24 | Applications and frontiers: prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
+| 18 | [Prompt engineering](18-prompt-engineering/README.md) | [Prompt bench: two models answer live](18-prompt-engineering/interactive/prompting.html?lang=en) | ✅ done |
+| 19–24 | Applications and frontiers: RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 

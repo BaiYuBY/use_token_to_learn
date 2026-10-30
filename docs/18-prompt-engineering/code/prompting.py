@@ -15,8 +15,8 @@ Covers / 包含:
     4. prompt injection: an instruction hidden in the user's text overrides the developer's system
        prompt; training an instruction hierarchy fixes that form of attack
        提示注入：藏在用户文本里的指令盖过开发者的系统提示；训练指令层级能挡住这种形式的攻击
-    5. many-shot injection: examples instead of an instruction get past the same defence
-       多示例注入：用示例代替指令，就绕过了同一道防线
+    5. many-shot injection: examples instead of an instruction, a form the defence never saw
+       多示例注入：用示例代替指令，这是防线没见过的形式
 """
 
 import copy
@@ -63,13 +63,13 @@ def prompt(system=None, user=None, examples=(), query="cat", task="kind?", label
     """<sys> [system task] <user> [user task] word label ; word label ; ... query -> answer
 
     examples are labelled by `task` (the task the developer wants); `user` is an instruction typed in
-    the user turn, at the start or just before the query. forge="real" puts a real <sys> role token in
-    front of it, as if the user's text could produce one; forge="escaped" turns it into the plain word
-    "sys", as a chat template does with user text. Returns the words, ending with the right answer.
-    示例按 task（开发者想要的任务）标注；user 是用户轮里的一条指令，放在开头或问题前。forge="real" 在它前面放一个真的
-    <sys> 角色标记，好像用户文本能生成它；forge="escaped" 把它变成普通单词 "sys"，就像对话模板处理用户文本那样。"""
+    the user turn, at the start or just before the query. forge="escaped" puts the word "sys" in front
+    of it: what a chat template turns a typed "<sys>" into, since user text can never produce a role
+    token. Returns the words, ending with the right answer.
+    示例按 task（开发者想要的任务）标注；user 是用户轮里的一条指令，放在开头或问题前。forge="escaped" 在它前面放单词
+    "sys"：对话模板会把用户打出的 "<sys>" 变成这个普通词，因为用户文本永远生成不了角色标记。返回的词序列以正确答案结尾。"""
     seq = ["<sys>"] + ([system] if system else []) + ["<user>"]
-    typed = (["<sys>"] if forge == "real" else ["sys"] if forge == "escaped" else []) + ([user] if user else [])
+    typed = (["sys"] if forge == "escaped" else []) + ([user] if user else [])
     if inject_at == "start":
         seq += typed
     for w in examples:
@@ -310,7 +310,10 @@ def main():
     for k in [1, 2, 4, 8]:
         shots[k] = example_injection(tuned, k)
         print(f"  {k} examples answered as another task: follows system {shots[k][0]:.0%}, follows the examples {shots[k][1]:.0%}")
-    assert shots[8][1] > 0.25 and shots[8][1] > shots[1][1] + 0.2  # the fine-tune did not cover this / 微调没覆盖到这种形式
+    # The fine-tune never saw this form, so the outcome is up to chance: depending on the seed (and even
+    # the number of CPU threads) 8 such examples lead the tuned model astray anywhere from 0% to about
+    # 60% of the time. Printed, not asserted.
+    # 微调没见过这种形式，结果全凭运气：随种子（甚至 CPU 线程数）不同，8 个这样的示例带偏模型的比例从 0% 到约 60% 不等。只打印，不断言。
 
 
 if __name__ == "__main__":
