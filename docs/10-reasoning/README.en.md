@@ -138,7 +138,7 @@ pass@1 rises clearly while pass@16 barely moves. In other words, reinforcement l
 
 ### 3.5 Can the reasoning be trusted?
 
-The reasoning a model writes is not necessarily its real “thought process”. Turpin et al. (2023) found that a misleading hint in the prompt can sway a model while the reasons it writes never mention the hint. So written reasoning improves accuracy and helps inspection, but it should not be taken as a faithful record of the model's internal computation. This connects to 20 Safety and interpretability (planned).
+The reasoning a model writes is not necessarily its real “thought process”. Turpin et al. (2023) found that a misleading hint in the prompt can sway a model while the reasons it writes never mention the hint. So written reasoning improves accuracy and helps inspection, but it should not be taken as a faithful record of the model's internal computation. This connects to 24 Safety and interpretability (planned).
 
 ## 4. Minimal code
 

@@ -26,8 +26,9 @@ Each chapter follows the same rhythm:
 | 08 | [Fine-tuning](08-finetuning/README.md) | [Fine-tuning playground](08-finetuning/interactive/finetune.html?lang=en) | ✅ done |
 | 09 | [Alignment](09-alignment/README.md) | [Alignment playground](09-alignment/interactive/alignment.html?lang=en) | ✅ done |
 | 10 | [Reasoning models and test-time compute](10-reasoning/README.md) | [Reasoning playground](10-reasoning/interactive/reasoning.html?lang=en) | ✅ done |
-| 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
-| 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
+| 11 | [Decoding and sampling](11-decoding/README.md) | [Decoding playground](11-decoding/interactive/decoding.html?lang=en) | ✅ done |
+| 12–15 | Inference and deployment: inference optimisation, serving systems, long context, MoE | | 🚧 planned |
+| 16–24 | Applications and frontiers: multimodal, code models, prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 
