@@ -64,7 +64,7 @@ Higher is not always better: on easy questions, overly long thinking can introdu
 - [10 Reasoning models and test-time compute](../10-reasoning/README.en.md): why chain of thought works, RL with verifiable rewards (GRPO), thinking budgets, with CPU experiments and a playground
 - [04 Attention](../04-attention/README.en.md): longer thinking means longer context, so attention compute and the KV cache grow too
 - [09 Alignment](../09-alignment/README.en.md): the basics of reinforcement learning (PPO, the KL penalty)
-- **11 Decoding and sampling** (planned): the thinking itself is generated token by token
+- **[11 Decoding and sampling](../11-decoding/README.en.md)**: the thinking itself is generated token by token
 
 ## Sources
 

@@ -47,7 +47,7 @@ flowchart LR
 | 异步调度 | CPU 安排下一步时，GPU 同时在算这一步，消除空等 | [13 推理服务系统](../13-serving/README.md) |
 | SWA 有界重放 | 缓存命中时，只重算最后一小段，配合滑动窗口注意力减少 Prefill 计算 | [14 长上下文](../14-long-context/README.md) |
 | batch 不变推理、确定性采样 | 同一个请求无论和谁一起批处理、跑几次，结果都完全一样 | [13 推理服务系统](../13-serving/README.md) |
-| 结构化输出 | 强制输出符合 JSON schema、正则表达式或语法 | 11 解码与采样（计划中） |
+| 结构化输出 | 强制输出符合 JSON schema、正则表达式或语法 | [11 解码与采样](../11-decoding/README.md) |
 
 ### 4. 没有开源什么
 

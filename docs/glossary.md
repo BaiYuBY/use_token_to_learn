@@ -112,6 +112,16 @@
 | 容量系数 | capacity factor | 每个专家最多接收“平均负载 × 系数”个词元，超出的被丢弃 | [15](15-moe/README.md) |
 | 共享专家 | shared expert | 每个词元都经过的专家，承担通用知识 | [15](15-moe/README.md) |
 | 全互换通信 | all-to-all | 专家并行时，把词元发往所选专家所在的卡、再收回结果的通信 | [15](15-moe/README.md) |
+| 视觉 Transformer | ViT (vision transformer) | 把图像切成小块，每块作为一个词元送进 Transformer | [16](16-multimodal/README.md) |
+| 块嵌入 | patch embedding | 把每个图像小块展平后乘一个矩阵得到的向量；等价于步长等于块大小的卷积 | [16](16-multimodal/README.md) |
+| 对比学习 / CLIP | contrastive learning / CLIP | 让配对的图文向量相似、不配对的不相似；CLIP 用批内其他样本作负例 | [16](16-multimodal/README.md) |
+| 零样本分类 | zero-shot classification | 把类别写成文字提示，按图像与提示的相似度分类，不训练分类头 | [16](16-multimodal/README.md) |
+| 提示词集成 | prompt ensembling | 同一类别用多种措辞写提示，把它们的向量取平均 | [16](16-multimodal/README.md) |
+| 视觉语言模型 | VLM (vision-language model) | 把图像编码器的输出接进语言模型，让它能看图回答、描述 | [16](16-multimodal/README.md) |
+| 投影层 | projector | 把图像特征映射到语言模型嵌入空间的小网络，如 LLaVA 的两层 MLP | [16](16-multimodal/README.md) |
+| 视觉词元 | visual tokens | 图像编码后交给语言模型的向量；数量随分辨率和帧数增长 | [16](16-multimodal/README.md) |
+| 组合泛化 / 属性绑定 | compositional generalization / attribute binding | 认出由见过的属性组成的新组合，并把属性正确地对应到物体上 | [16](16-multimodal/README.md) |
+| 多模态幻觉 | multimodal hallucination | 描述图中不存在的物体或属性，常是训练中常见的组合 | [16](16-multimodal/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

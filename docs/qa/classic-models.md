@@ -163,7 +163,7 @@ def lstm_forward(x, w_ih, w_hh, b_ih, b_hh):
 - [04 注意力机制](../04-attention/README.md)：注意力如何取代 RNN 的逐步传递
 - [05 Transformer 结构](../05-transformer/README.md)：残差连接与 LSTM 的“加法记忆”
 - [大模型的算力怎么算](compute.md)：各种模型的计算量与瓶颈对比
-- **[14 长上下文](../14-long-context/README.md)**、**16 多模态**、**19 RAG 与向量数据库**（计划中）：线性注意力与状态空间模型、ViT、向量检索
+- **[14 长上下文](../14-long-context/README.md)**、**[16 多模态模型](../16-multimodal/README.md)**、**19 RAG 与向量数据库**（计划中）：线性注意力与状态空间模型、ViT、向量检索
 
 ## 来源
 

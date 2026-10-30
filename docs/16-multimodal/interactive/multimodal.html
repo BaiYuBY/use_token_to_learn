@@ -1,0 +1,606 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>多模态模型交互演示 · Multimodal Models Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .gal { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .gal canvas { width: 32px; height: 32px; image-rendering: pixelated; border: 2px solid transparent; border-radius: 4px; cursor: pointer; }
+  .gal canvas.held { border-color: var(--bad); border-style: dashed; }
+  .gal canvas.sel { outline: 3px solid var(--accent); outline-offset: 1px; }
+  .gal .sep { width: 100%; font-size: .8rem; color: var(--muted); }
+  canvas.px { image-rendering: pixelated; }
+  #pa-canvas { width: 100%; max-width: 320px; height: auto; border-radius: 8px; border: 1px solid var(--line); cursor: crosshair; display: block; }
+  .vec { display: flex; flex-wrap: wrap; gap: 2px; margin: 6px 0; }
+  .vec span { width: 22px; height: 22px; border-radius: 3px; border: 1px solid var(--line); }
+  .mat { display: grid; gap: 2px; font-size: .72rem; }
+  .mat > div { padding: 3px 1px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; min-width: 0; overflow: hidden; }
+  .mat .hd { color: var(--muted); font-size: .66rem; line-height: 1.15; display: flex; align-items: flex-end; justify-content: center; }
+  .mat canvas { width: 28px; height: 28px; image-rendering: pixelated; border-radius: 3px; }
+  .mat .diag { outline: 2px solid var(--accent); outline-offset: -2px; }
+  .hbar { display: grid; grid-template-columns: 8.5em 1fr 3.4em; gap: 3px 8px; align-items: center; font-size: .82rem; }
+  .hbar .track { background: var(--bg); border: 1px solid var(--line); border-radius: 4px; height: 14px; overflow: hidden; }
+  .hbar .track i { display: block; height: 100%; }
+  .hbar .lab.truth { font-weight: 700; text-decoration: underline; }
+  .hbar .lab.heldp { color: var(--bad); }
+  .hbar .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 8px; margin-top: 8px; }
+  .card { display: flex; gap: 8px; align-items: center; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px; font-size: .82rem; }
+  .card canvas { width: 48px; height: 48px; image-rendering: pixelated; border-radius: 4px; flex: none; }
+  .card .w { color: var(--bad); font-weight: 700; }
+  .card small { color: var(--muted); display: block; }
+  .flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 10px 0; }
+  .flow .box { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; font-size: .86rem; }
+  .flow .box.train { border-color: var(--accent); border-width: 2px; }
+  .flow .box.frozen { border-style: dashed; }
+  .flow .arr { color: var(--muted); }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">多模态模型 · 交互演示</span><span lang="en">Multimodal Models · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">图像怎样变成词元，CLIP 怎样把图和文字放进同一个向量空间，视觉语言模型（VLM）怎样“看图说话”，以及它们会错在哪里。第 2–4 节的数字都来自本章代码在一个小世界上训练出的模型：16×16 的图，画着一个彩色图形，配一句描述。训练时故意留出了 4 个颜色-形状组合（红色虚线框），模型从未见过它们。</span>
+        <span lang="en">How an image becomes tokens, how CLIP puts pictures and text into one vector space, how a vision-language model (VLM) describes a picture, and where they go wrong. Sections 2–4 use models trained by this chapter's code on a tiny world: 16×16 pictures of one coloured shape, each with a caption. Four colour-shape pairs (red dashed frame) were held out of training, so the models never saw them.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. patches -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">图像切成小块，每块是一个词元</span><span lang="en">Cut the image into patches, one token per patch</span></h2>
+    <p class="hint">
+      <span lang="zh">ViT 把图像切成 p×p 的小块，把每块的像素（p×p×3 个数）展平成一个向量，再乘一个矩阵变成词元向量。这一步就是步长为 p 的卷积。点图上的一块，看它展平后的样子。本章的 ViT 用 p = 4：16×16 的图变成 16 个词元，再加一个 [CLS] 词元。</span>
+      <span lang="en">A ViT cuts the image into p×p patches, flattens each patch's pixels (p×p×3 numbers) into a vector and multiplies by a matrix to get a token vector. That step is a convolution with stride p. Click a patch to see it flattened. This chapter's ViT uses p = 4: a 16×16 image becomes 16 tokens, plus one [CLS] token.</span>
+    </p>
+    <div class="gal" id="pa-gal"></div>
+    <div class="row">
+      <div class="col" style="flex:0 1 320px">
+        <canvas id="pa-canvas" width="320" height="320"></canvas>
+      </div>
+      <div class="col">
+        <div class="controls">
+          <label><span lang="zh">块大小 p</span><span lang="en">patch size p</span> <select id="pa-p"><option>2</option><option selected>4</option><option>8</option><option>16</option></select></label>
+        </div>
+        <div class="stats" id="pa-stats"></div>
+        <div id="pa-vec-cap" class="hint"></div>
+        <div class="vec" id="pa-vec"></div>
+        <div class="callout" id="pa-note"></div>
+      </div>
+    </div>
+    <h3><span lang="zh">一张图要占多少个词元</span><span lang="en">How many tokens does an image cost?</span></h3>
+    <div class="controls">
+      <label><span lang="zh">预设</span><span lang="en">preset</span> <select id="tk-p"></select></label>
+      <label><span lang="zh">宽</span><span lang="en">width</span> <input id="tk-w" type="number" min="14" max="8192" step="14" style="width:5.5em"></label>
+      <label><span lang="zh">高</span><span lang="en">height</span> <input id="tk-h" type="number" min="14" max="8192" step="14" style="width:5.5em"></label>
+      <label><span lang="zh">块</span><span lang="en">patch</span> <select id="tk-patch"><option>14</option><option>16</option></select></label>
+      <label><span lang="zh">合并</span><span lang="en">merge</span> <select id="tk-m"><option value="1">1×1</option><option value="2">2×2</option><option value="3">3×3</option></select></label>
+      <label><span lang="zh">视频帧数</span><span lang="en">video frames</span> <input id="tk-f" type="number" min="1" max="2048" style="width:5em"></label>
+      <label><span lang="zh">时间合并</span><span lang="en">temporal merge</span> <select id="tk-t"><option value="1">1</option><option value="2">2</option></select></label>
+    </div>
+    <div class="stats" id="tk-stats"></div>
+    <div class="callout" id="tk-note"></div>
+  </section>
+
+  <!-- 2. CLIP -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">CLIP：一批图和一批描述的相似度矩阵</span><span lang="en">CLIP: the similarity matrix of a batch of pictures and captions</span></h2>
+    <p class="hint">
+      <span lang="zh">图像编码器和文本编码器各把输入变成一个单位向量，两者的点积就是余弦相似度。训练目标：在一批 N 对里，第 i 张图要在 N 条描述中挑中第 i 条（按行做 softmax 交叉熵），第 i 条描述也要挑中第 i 张图（按列）。乘在相似度前面的“温度倒数” s 决定 softmax 有多尖：本章模型学到的是 <b id="cl-learned"></b>。拖动它，看损失怎么变。</span>
+      <span lang="en">The image encoder and the text encoder each turn their input into a unit vector; their dot product is the cosine similarity. The objective: in a batch of N pairs, image i must pick caption i among the N captions (softmax cross-entropy along each row), and caption i must pick image i (along each column). The inverse temperature s multiplying the similarities sets how sharp the softmax is: this chapter's model learned <b id="cl-learned2"></b>. Drag it and watch the loss.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">批次来源</span><span lang="en">batch from</span> <select id="cl-src"></select></label>
+      <button id="cl-new">🎲 <span lang="zh">换一批</span><span lang="en">new batch</span></button>
+      <label><span lang="zh">显示</span><span lang="en">show</span> <select id="cl-show"></select></label>
+      <label><span lang="zh">s（温度倒数）</span><span lang="en">s (inverse temperature)</span> <input id="cl-s" type="range" min="0" max="2" step="0.01"><span id="cl-s-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="cl-stats"></div>
+    <div class="scroll"><div class="mat" id="cl-mat"></div></div>
+    <div class="callout" id="cl-note"></div>
+  </section>
+
+  <!-- 3. zero-shot -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">零样本分类：用文字当分类器</span><span lang="en">Zero-shot classification: text as the classifier</span></h2>
+    <p class="hint">
+      <span lang="zh">不训练任何分类头：把 16 个颜色-形状组合各写成一句提示，比如 “a small red circle on the left”，算出它们的文本向量；图像向量和哪个提示最近，就归为哪类。“提示词集成”把 4 个模板（大小 × 左右）的向量取平均，减少某一种措辞的偏差。点一张图。</span>
+      <span lang="en">No classifier head is trained: write each of the 16 colour-shape pairs as a prompt such as “a small red circle on the left”, embed the prompts, and assign the image to the closest one. “Prompt ensembling” averages the vectors of 4 templates (size × side) to reduce the bias of any one wording. Click a picture.</span>
+    </p>
+    <div class="gal" id="zs-gal"></div>
+    <div class="controls">
+      <label><span lang="zh">提示</span><span lang="en">prompts</span> <select id="zs-e"></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="hbar" id="zs-bars"></div></div>
+      <div class="col">
+        <div class="stats" id="zs-stats"></div>
+        <div class="hint" id="zs-conf-cap"></div>
+        <div class="scroll"><div class="mat" id="zs-conf"></div></div>
+      </div>
+    </div>
+    <div class="callout" id="zs-note"></div>
+  </section>
+
+  <!-- 4. VLM -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">视觉语言模型：看图写描述</span><span lang="en">A vision-language model writes captions</span></h2>
+    <p class="hint">
+      <span lang="zh">LLaVA 的做法：把冻结的图像编码器输出的所有块向量（这里 1 + 16 个）经过一个小的 MLP 投影层，当作语言模型输入序列最前面的 17 个“词元”，后面接文字，用下一个词预测训练。这里的语言模型很小，只训练投影层和语言模型。下面是它给 48 张测试图写的描述，红字是写错的词。</span>
+      <span lang="en">LLaVA's recipe: take all patch vectors from the frozen image encoder (here 1 + 16), pass them through a small MLP projector, and put them as the first 17 “tokens” of the language model's input, followed by the text, trained by next-word prediction. The language model here is tiny; only the projector and the language model are trained. Below are its captions for the 48 test pictures; red words are wrong.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">显示</span><span lang="en">show</span> <select id="vl-f"></select></label>
+    </div>
+    <div class="stats" id="vl-stats"></div>
+    <div class="cards" id="vl-cards"></div>
+    <div class="callout" id="vl-note"></div>
+  </section>
+
+  <!-- 5. architectures -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">图像怎样进入语言模型：四种接法</span><span lang="en">How images enter the language model: four designs</span></h2>
+    <p class="hint">
+      <span lang="zh">选一种结构，看图像信息从哪里进入、语言模型要处理多少个视觉词元、各阶段训练哪些部分。橙色实线框表示要训练，虚线框表示通常冻结。</span>
+      <span lang="en">Pick a design to see where image information enters, how many visual tokens the language model processes and which parts are trained. Solid orange boxes are trained; dashed boxes are usually frozen.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">结构</span><span lang="en">design</span> <select id="ar-s"></select></label>
+    </div>
+    <div class="flow" id="ar-flow"></div>
+    <div class="kv" id="ar-kv"></div>
+    <div class="callout" id="ar-note"></div>
+  </section>
+
+  <!-- 6. quiz -->
+  <section class="quiz">
+    <h2><span class="step">6</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../README.html">16 多模态模型 · Multimodal Models</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="multimodal_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.MULTIMODAL_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const fmt = n => n.toLocaleString("en-US");
+  const N = D.images.length;
+  const RGB = { red: "rgb(230,38,38)", green: "rgb(38,191,51)", blue: "rgb(51,77,242)", yellow: "rgb(242,217,26)" };
+  const ZH = { red: "红", green: "绿", blue: "蓝", yellow: "黄", circle: "圆", square: "方块", triangle: "三角", cross: "十字", small: "小", big: "大", left: "左", right: "右" };
+  const HELD = new Set(D.held_out.map(p => p.join(" ")));
+  const pairName = (c, s) => tr(`${ZH[c]}${ZH[s]}`, `${c} ${s}`);
+  const words = i => D.captions[i].split(" ");     // a size color shape on the side
+  const dot = (a, b) => a.reduce((s, v, k) => s + v * b[k], 0);
+  const softmax = xs => { const m = Math.max(...xs), e = xs.map(x => Math.exp(x - m)), z = e.reduce((a, b) => a + b, 0); return e.map(v => v / z); };
+
+  // draw image i into a 16x16 canvas (CSS scales it up, pixelated)
+  function thumb(i, cls) {
+    const c = document.createElement("canvas");
+    c.width = c.height = 16;
+    const ctx = c.getContext("2d"), img = ctx.createImageData(16, 16), px = D.images[i];
+    for (let k = 0; k < 256; k++) { img.data[4 * k] = px[3 * k]; img.data[4 * k + 1] = px[3 * k + 1]; img.data[4 * k + 2] = px[3 * k + 2]; img.data[4 * k + 3] = 255; }
+    ctx.putImageData(img, 0, 0);
+    if (cls) c.className = cls;
+    return c;
+  }
+  function gallery(el, sel, onPick) {
+    el.innerHTML = "";
+    for (let i = 0; i < N; i++) {
+      if (i === 0 || D.held[i] !== D.held[i - 1]) {
+        const s = document.createElement("div");
+        s.className = "sep";
+        s.textContent = D.held[i] ? tr("训练中没见过的颜色-形状组合：", "colour-shape pairs never seen in training:") : tr("见过的组合（但这些图本身都是新画的）：", "seen pairs (these pictures themselves are all new):");
+        el.appendChild(s);
+      }
+      const c = thumb(i, (D.held[i] ? "held" : "") + (i === sel ? " sel" : ""));
+      c.title = D.captions[i];
+      c.addEventListener("click", () => onPick(i));
+      el.appendChild(c);
+    }
+  }
+
+  // ================= 1. patches =================
+  let paImg = 0, paPatch = [2, 2];
+  function renderPa() {
+    gallery($("pa-gal"), paImg, i => { paImg = i; renderPa(); });
+    const p = +$("pa-p").value, n = 16 / p, cv = $("pa-canvas"), ctx = cv.getContext("2d"), S = cv.width / 16, px = D.images[paImg];
+    paPatch = paPatch.map(v => Math.min(v, n - 1));
+    for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) {
+      const k = 3 * (16 * y + x);
+      ctx.fillStyle = `rgb(${px[k]},${px[k + 1]},${px[k + 2]})`;
+      ctx.fillRect(x * S, y * S, S, S);
+    }
+    ctx.strokeStyle = "rgba(255,255,255,0.55)";
+    ctx.lineWidth = 1;
+    for (let k = 1; k < n; k++) {
+      ctx.beginPath(); ctx.moveTo(k * p * S + .5, 0); ctx.lineTo(k * p * S + .5, cv.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, k * p * S + .5); ctx.lineTo(cv.width, k * p * S + .5); ctx.stroke();
+    }
+    ctx.strokeStyle = css("--accent");
+    ctx.lineWidth = 3;
+    ctx.strokeRect(paPatch[0] * p * S + 1.5, paPatch[1] * p * S + 1.5, p * S - 3, p * S - 3);
+    ctx.fillStyle = "rgba(255,255,255,0.8)";
+    ctx.font = `${Math.max(9, Math.min(14, p * S / 3))}px sans-serif`;
+    if (n <= 8) for (let y = 0; y < n; y++) for (let x = 0; x < n; x++) ctx.fillText(String(y * n + x + 1), x * p * S + 3, y * p * S + 13);
+    $("pa-stats").innerHTML = stat(tr("词元数", "tokens"), `${n}×${n} = ${n * n}`) + stat(tr("每个词元的原始数字", "numbers per token"), `${p}×${p}×3 = ${3 * p * p}`) +
+      stat(tr("注意力矩阵", "attention matrix"), `${n * n + 1}²`);
+    const cells = [];
+    for (let y = 0; y < p; y++) for (let x = 0; x < p; x++) {
+      const k = 3 * (16 * (paPatch[1] * p + y) + paPatch[0] * p + x);
+      cells.push(`<span title="${px[k]}, ${px[k + 1]}, ${px[k + 2]}" style="background:rgb(${px[k]},${px[k + 1]},${px[k + 2]})"></span>`);
+    }
+    $("pa-vec-cap").textContent = tr(`第 ${paPatch[1] * n + paPatch[0] + 1} 块展平：${p * p} 个像素，每个 3 个数（R, G, B）→ 一个 ${3 * p * p} 维向量 → 乘 ${3 * p * p}×d 的矩阵 → 一个 d 维词元`,
+      `Patch ${paPatch[1] * n + paPatch[0] + 1} flattened: ${p * p} pixels, 3 numbers each (R, G, B) → a ${3 * p * p}-dim vector → times a ${3 * p * p}×d matrix → one d-dim token`);
+    $("pa-vec").innerHTML = p <= 8 ? cells.join("") : tr("（256 个像素，略）", "(256 pixels, omitted)");
+    $("pa-note").innerHTML = tr(
+      `块越小，词元越多、细节越多，但注意力的计算量随词元数平方增长：p = 2 时 ${(16 / 2) ** 2} 个词元，p = 16 时整张图只有 1 个词元，形状细节全被压进一个向量。真实模型常用 224–336 像素、p = 14 或 16，即 196–576 个词元。本章的 ViT 在“块嵌入”之后加上位置向量，因为把小块排成一列后，模型不再知道谁在左、谁在上。`,
+      `Smaller patches mean more tokens and more detail, but attention cost grows with the square of the token count: p = 2 gives ${(16 / 2) ** 2} tokens, p = 16 squeezes the whole picture into 1 token. Real models typically use 224–336 pixels with p = 14 or 16, i.e. 196–576 tokens. The ViT adds position vectors after the patch embedding, because once the patches are laid out in a row the model no longer knows which one was left or on top.`);
+  }
+  $("pa-canvas").addEventListener("click", e => {
+    const r = e.target.getBoundingClientRect(), p = +$("pa-p").value;
+    paPatch = [Math.floor((e.clientX - r.left) / r.width * 16 / p), Math.floor((e.clientY - r.top) / r.height * 16 / p)];
+    renderPa();
+  });
+
+  const TK_PRESETS = {
+    vit: { name: ["ViT-B/16（224 像素）", "ViT-B/16 (224 px)"], w: 224, h: 224, patch: 16, m: 1, f: 1, t: 1 },
+    llava: { name: ["LLaVA-1.5（336 像素，块 14）", "LLaVA-1.5 (336 px, patch 14)"], w: 336, h: 336, patch: 14, m: 1, f: 1, t: 1 },
+    hires: { name: ["高分辨率截图，块 14，2×2 合并（Qwen2-VL 式）", "high-res screenshot, patch 14, 2×2 merge (Qwen2-VL style)"], w: 1932, h: 1092, patch: 14, m: 2, f: 1, t: 1 },
+    video: { name: ["视频：64 帧 448×448，2×2 合并 + 相邻 2 帧合并", "video: 64 frames of 448×448, 2×2 merge + 2-frame merge"], w: 448, h: 448, patch: 14, m: 2, f: 64, t: 2 },
+  };
+  function loadTk() {
+    const P = TK_PRESETS[$("tk-p").value];
+    $("tk-w").value = P.w; $("tk-h").value = P.h; $("tk-patch").value = P.patch; $("tk-m").value = P.m; $("tk-f").value = P.f; $("tk-t").value = P.t;
+    renderTk();
+  }
+  function renderTk() {
+    const w = Math.max(1, +$("tk-w").value || 1), h = Math.max(1, +$("tk-h").value || 1), p = +$("tk-patch").value, m = +$("tk-m").value;
+    const f = Math.max(1, Math.round(+$("tk-f").value || 1)), t = +$("tk-t").value;
+    const raw = Math.ceil(w / p) * Math.ceil(h / p), per = Math.ceil(w / p / m) * Math.ceil(h / p / m), total = per * Math.ceil(f / t);
+    $("tk-stats").innerHTML = stat(tr("块数（每帧）", "patches per frame"), fmt(raw)) + stat(tr("合并后词元（每帧）", "tokens per frame after merge"), fmt(per)) +
+      stat(tr("总词元", "total tokens"), fmt(total), css("--accent")) + stat(tr("占 128K 上下文", "share of a 128K context"), pct(total / 131072, 1));
+    $("tk-note").innerHTML = tr(
+      `语言模型对这 ${fmt(total)} 个视觉词元和文字一视同仁：都要算注意力、占 KV 缓存（第 12 章）、计费。所以高分辨率和长视频是多模态的主要成本。常见的省法：把相邻 2×2 个块合并成 1 个（词元数 ÷ 4），把相邻两帧合并（÷ 2），按内容缩放分辨率，或者像 BLIP-2 的 Q-Former 那样只输出固定的 32 个查询词元。`,
+      `The language model treats these ${fmt(total)} visual tokens like text: each costs attention, KV cache (chapter 12) and money. High resolution and long video are therefore the main cost of multimodality. Common savings: merge each 2×2 group of patches into one token (÷ 4), merge neighbouring frames (÷ 2), scale resolution to the content, or emit a fixed 32 query tokens as BLIP-2's Q-Former does.`);
+  }
+
+  // ================= 2. CLIP =================
+  let clBatch = [];
+  function clNew() {
+    const src = $("cl-src").value;
+    const pool = [...Array(N).keys()].filter(i => src === "mix" || (src === "held") === D.held[i]);
+    const take = src === "mix" ? [...pool.filter(i => !D.held[i]).sort(() => Math.random() - .5).slice(0, 5), ...pool.filter(i => D.held[i]).sort(() => Math.random() - .5).slice(0, 3)] : pool.sort(() => Math.random() - .5).slice(0, 8);
+    clBatch = take.sort((a, b) => a - b);
+  }
+  const clScale = () => Math.pow(10, +$("cl-s").value);
+  function renderCl() {
+    const s = clScale(), B = clBatch.length;
+    $("cl-s-v").textContent = s.toFixed(1);
+    const sim = clBatch.map(i => clBatch.map(j => dot(D.image_emb[i], D.caption_emb[j])));
+    const rowP = sim.map(r => softmax(r.map(v => s * v)));
+    const colP = sim[0].map((_, j) => softmax(sim.map(r => s * r[j])));  // colP[j][i]
+    const lossI = -rowP.reduce((a, r, i) => a + Math.log(r[i]), 0) / B, lossT = -colP.reduce((a, c, j) => a + Math.log(c[j]), 0) / B;
+    const correct = sim.filter((r, i) => r.indexOf(Math.max(...r)) === i).length;
+    $("cl-stats").innerHTML = stat(tr("图→文 损失", "image→text loss"), lossI.toFixed(3)) + stat(tr("文→图 损失", "text→image loss"), lossT.toFixed(3)) +
+      stat(tr("对称损失", "symmetric loss"), ((lossI + lossT) / 2).toFixed(3), css("--accent")) + stat(tr("随机猜的损失 ln 8", "chance loss ln 8"), Math.log(B).toFixed(3)) +
+      stat(tr("每行最大值在对角线上", "row max on diagonal"), `${correct} / ${B}`, correct === B ? css("--good") : css("--bad"));
+    const show = $("cl-show").value, el = $("cl-mat");
+    el.style.gridTemplateColumns = `34px repeat(${B}, minmax(46px, 1fr))`;
+    el.innerHTML = "";
+    const add = (html, cls, style) => { const d = document.createElement("div"); d.innerHTML = html; if (cls) d.className = cls; if (style) d.style.cssText = style; el.appendChild(d); return d; };
+    add("", "hd");
+    clBatch.forEach(j => {
+      const w = words(j);
+      add(`${tr(ZH[w[1]], w[1])} ${tr(ZH[w[2]], w[2])}<br>${tr(ZH[w[3]], w[3])} ${tr(ZH[w[6]], w[6])}`, "hd", D.held[j] ? `color:${css("--bad")}` : "");
+    });
+    const lo = Math.min(...sim.flat()), hi = Math.max(...sim.flat());
+    clBatch.forEach((i, a) => {
+      const h = add("", "hd");
+      h.appendChild(thumb(i, ""));
+      clBatch.forEach((j, b) => {
+        const v = show === "cos" ? sim[a][b] : rowP[a][b], t = show === "cos" ? (v - lo) / (hi - lo || 1) : v;
+        add(show === "cos" ? v.toFixed(2) : pct(v), a === b ? "diag" : "", `background:rgba(63,81,181,${(0.08 + 0.85 * t).toFixed(2)});color:${t > .55 ? "#fff" : "inherit"}`);
+      });
+    });
+    $("cl-note").innerHTML = tr(
+      `s 很小时，softmax 几乎是平的：即使对角线已经最大，损失也接近随机猜的 ${Math.log(B).toFixed(2)}，梯度推不动模型。s 很大时，概率接近 0 或 1：对的更对，错的错得很重。CLIP 把 s 当作参数学习（初始 1/0.07 ≈ 14.3，上限 100）。“没见过的组合”批次里，文本编码器也从没见过这些描述，对角线更容易不是最大，第 3 节会看到原因。另外注意：同一批里如果有两张都是“小红圆”，它们彼此也是负例，这叫假负例，批越大越常见。`,
+      `With a small s the softmax is almost flat: even when the diagonal is already the largest, the loss stays near the chance value ${Math.log(B).toFixed(2)} and the gradient barely moves the model. With a large s probabilities approach 0 or 1: right answers get more right, wrong ones are punished hard. CLIP learns s as a parameter (initialised at 1/0.07 ≈ 14.3, capped at 100). In a batch of unseen pairs the text encoder has never seen those captions either, and the diagonal is more often not the largest; section 3 shows why. Also: if a batch holds two “small red circles”, they count as negatives for each other. These false negatives become more common as batches grow.`);
+  }
+
+  // ================= 3. zero-shot =================
+  let zsImg = 24;
+  function renderZs() {
+    gallery($("zs-gal"), zsImg, i => { zsImg = i; renderZs(); });
+    const ens = $("zs-e").value === "ens", P = ens ? D.prompt_ens : D.prompt_one;
+    const probs = softmax(P.map(p => D.logit_scale * dot(D.image_emb[zsImg], p)));
+    const w = words(zsImg), best = probs.indexOf(Math.max(...probs));
+    $("zs-bars").innerHTML = D.pairs.map(([c, s], k) => {
+      const truth = c === w[2] && s === w[3], held = HELD.has(`${c} ${s}`);
+      return `<span class="lab ${truth ? "truth" : ""} ${held ? "heldp" : ""}">${pairName(c, s)}${held ? " *" : ""}</span>` +
+        `<span class="track"><i style="width:${(100 * probs[k]).toFixed(1)}%;background:${RGB[c]}"></i></span><span class="num">${pct(probs[k], 1)}</span>`;
+    }).join("");
+    const key = (D.held[zsImg] ? "held_" : "seen_") + (ens ? "ens" : "one"), z = D.zero_shot;
+    const right = D.pairs[best][0] === w[2] && D.pairs[best][1] === w[3];
+    $("zs-stats").innerHTML = stat(tr("这张图的预测", "prediction for this picture"), pairName(...D.pairs[best]), right ? css("--good") : css("--bad")) +
+      stat(tr("800 张见过组合的图", "800 seen-pair pictures"), pct(z[`seen_${ens ? "ens" : "one"}`].pair)) +
+      stat(tr("800 张没见过组合的图", "800 unseen-pair pictures"), pct(z[`held_${ens ? "ens" : "one"}`].pair), css("--bad")) +
+      stat(tr("其中颜色对的比例", "of which colour right"), pct(z[`held_${ens ? "ens" : "one"}`].color));
+    // confusion (always the ensembled prompts, as exported)
+    $("zs-conf-cap").textContent = tr("1,600 张测试图的混淆矩阵（4 模板集成；行 = 真实，列 = 预测，每行归一化；红色行 = 没见过的组合）",
+      "Confusion matrix over 1,600 test pictures (4-template ensemble; rows = truth, columns = prediction, row-normalized; red rows = unseen pairs)");
+    const el = $("zs-conf");
+    el.style.gridTemplateColumns = `5.5em repeat(16, minmax(14px, 1fr))`;
+    let html = `<div class="hd"></div>` + D.pairs.map(([c, s]) => `<div class="hd" title="${c} ${s}"><span class="dot" style="background:${RGB[c]};margin:0"></span></div>`).join("");
+    D.confusion.forEach((row, r) => {
+      const tot = row.reduce((a, b) => a + b, 0) || 1, [c, s] = D.pairs[r], held = HELD.has(`${c} ${s}`);
+      html += `<div class="hd" style="justify-content:flex-start;${held ? `color:${css("--bad")};font-weight:700` : ""}">${pairName(c, s)}</div>` +
+        row.map((v, k) => `<div title="${pairName(c, s)} → ${pairName(...D.pairs[k])}: ${v}" style="background:rgba(63,81,181,${(0.04 + 0.9 * v / tot).toFixed(2)})"></div>`).join("");
+    });
+    el.innerHTML = html;
+    $("zs-note").innerHTML = tr(
+      `见过的组合：颜色几乎全对，形状大多对。没见过的组合：颜色仍然 ${pct(z.held_ens.color)} 正确，形状却只有 ${pct(z.held_ens.shape)}（4 选 1 的随机水平是 25%）。看混淆矩阵的红色行：模型会把“绿三角”判成某个见过的绿色组合。它没学会“形状”和“颜色”是两个可以自由组合的属性，而是把训练里见过的组合当作一个个整体来记。这就是组合泛化（属性绑定）失败；真实的 CLIP 在 Winoground、ARO 这类测试上也有同样的弱点，比如分不清“马在吃草”和“草在吃马”。`,
+      `Seen pairs: colour is almost always right and shape mostly right. Unseen pairs: colour is still ${pct(z.held_ens.color)} right but shape only ${pct(z.held_ens.shape)} (chance among 4 shapes is 25%). Look at the red rows of the confusion matrix: a “green triangle” is classified as some seen green pair. The model has not learned shape and colour as two attributes that combine freely; it memorizes the combinations it saw as wholes. This is a failure of compositional generalization (attribute binding), and real CLIP models show the same weakness on tests like Winoground and ARO, e.g. telling “the horse is eating the grass” from “the grass is eating the horse”.`);
+  }
+
+  // ================= 4. VLM =================
+  function renderVl() {
+    const f = $("vl-f").value, el = $("vl-cards");
+    el.innerHTML = "";
+    for (let i = 0; i < N; i++) {
+      if ((f === "seen" && D.held[i]) || (f === "held" && !D.held[i])) continue;
+      const t = words(i), o = D.vlm[i].split(" "), d = document.createElement("div");
+      d.className = "card";
+      d.appendChild(thumb(i, ""));
+      const txt = document.createElement("div");
+      txt.innerHTML = o.map((wd, k) => wd === t[k] ? wd : `<span class="w">${wd}</span>`).join(" ") +
+        `<small>${tr("真实", "truth")}: ${t.join(" ")}${D.held[i] ? tr("（没见过的组合）", " (unseen pair)") : ""}</small>`;
+      d.appendChild(txt);
+      el.appendChild(d);
+    }
+    const v = D.vlm_scores;
+    $("vl-stats").innerHTML = stat(tr("见过的组合：整句全对", "seen pairs: exactly right"), pct(v.seen.exact), css("--good")) +
+      stat(tr("见过的组合：形状对", "seen pairs: shape right"), pct(v.seen.shape)) +
+      stat(tr("没见过的组合：整句全对", "unseen pairs: exactly right"), pct(v.held.exact, 1), css("--bad")) +
+      stat(tr("没见过的组合：形状对", "unseen pairs: shape right"), pct(v.held.shape, 1), css("--bad"));
+    $("vl-note").innerHTML = tr(
+      `（各 400 张测试图的统计。）对没见过的组合，模型几乎总是把颜色、大小、位置说对，却把形状换成这个颜色在训练里出现过的某个形状：画面里是绿三角，它写“green circle”。两个原因叠在一起：冻结的图像特征本身就分不清这些组合（第 3 节），而语言模型从没写过“green triangle”，它只见过 green 后面跟 circle、square 或 cross。结果是一句通顺、笃定、却错了的描述。这正是 VLM“幻觉”的一种来源：说出训练数据里常见的东西，而不是图里真有的东西。大模型上的对应现象有 POPE、CHAIR 等基准测量的“物体幻觉”。`,
+      `(Statistics over 400 test pictures each.) For unseen pairs the model almost always gets colour, size and position right but swaps the shape for one this colour had in training: the picture shows a green triangle, it writes “green circle”. Two causes stack up: the frozen image features already confuse these combinations (section 3), and the language model has never written “green triangle”; after “green” it has only seen circle, square or cross. The result is a fluent, confident, wrong caption. This is one source of VLM “hallucination”: saying what was common in the training data rather than what is in the picture. In large models the counterpart is the object hallucination measured by benchmarks such as POPE and CHAIR.`);
+  }
+
+  // ================= 5. architectures =================
+  const ARCH = {
+    llava: {
+      name: ["LLaVA：投影层 + 前缀词元", "LLaVA: projector + prefix tokens"],
+      flow: [["图像编码器（CLIP ViT）", "image encoder (CLIP ViT)", "frozen"], ["MLP 投影层", "MLP projector", "train"], ["视觉词元 + 文字词元", "visual + text tokens", ""], ["语言模型", "language model", "train"]],
+      kv: [["视觉词元数（336 像素）", "visual tokens (336 px)", "576"], ["图像进入的位置", "where the image enters", ["输入序列，和文字一样", "the input sequence, just like text"]],
+        ["训练", "training", ["阶段 1 只训投影层（图文对）；阶段 2 训投影层 + 语言模型（指令数据）", "stage 1 trains only the projector (image-text pairs); stage 2 the projector + LLM (instruction data)"]]],
+      note: ["最简单、最常用的接法，本章第 4 节就是它。缺点是视觉词元多，分辨率一高，序列就很长。", "The simplest and most common design; section 4 of this page uses it. The downside: many visual tokens, so high resolution means very long sequences."],
+    },
+    qformer: {
+      name: ["BLIP-2：Q-Former 压缩成固定数量的查询", "BLIP-2: a Q-Former compresses to fixed queries"],
+      flow: [["图像编码器", "image encoder", "frozen"], ["Q-Former（32 个可学习查询，交叉注意力读图）", "Q-Former (32 learned queries cross-attend to the image)", "train"], ["线性层", "linear", "train"], ["语言模型", "language model", "frozen"]],
+      kv: [["视觉词元数", "visual tokens", ["固定 32 个，与分辨率无关", "a fixed 32, independent of resolution"]], ["图像进入的位置", "where the image enters", ["输入序列", "the input sequence"]],
+        ["训练", "training", ["图像编码器和语言模型都冻结，只训练 Q-Former（约 1.9 亿参数）", "both the image encoder and the LLM stay frozen; only the Q-Former (~188M parameters) is trained"]]],
+      note: ["词元省，但 32 个查询是一个瓶颈：细小的文字、计数、位置这类细节容易丢。后来的高分辨率模型多数回到了 LLaVA 式的直接投影加合并。", "Token-cheap, but 32 queries are a bottleneck: fine text, counts and positions get lost. Later high-resolution models mostly returned to LLaVA-style direct projection plus merging."],
+    },
+    flamingo: {
+      name: ["Flamingo：在语言模型层间插交叉注意力", "Flamingo: cross-attention inserted between LLM layers"],
+      flow: [["图像编码器", "image encoder", "frozen"], ["Perceiver 重采样器（64 个词元）", "Perceiver resampler (64 tokens)", "train"], ["门控交叉注意力层，插在语言模型层之间", "gated cross-attention layers between LLM layers", "train"], ["语言模型", "language model", "frozen"]],
+      kv: [["视觉词元数", "visual tokens", ["每张图 64 个，但不进入输入序列", "64 per image, but they are not in the input sequence"]], ["图像进入的位置", "where the image enters", ["每隔几层，文字通过交叉注意力去“看”图", "every few layers, text looks at the image through cross-attention"]],
+        ["训练", "training", ["冻结语言模型，只训新加的层；门控初始为 0，开始时模型和原来完全一样", "the LLM is frozen and only the new layers are trained; gates start at 0 so the model initially behaves exactly like the original"]]],
+      note: ["不占输入序列，适合图文交错的长文档，原语言模型的能力也不受影响。Llama 3.2 Vision 用的也是交叉注意力适配器。", "It doesn't use the input sequence, suits long interleaved image-text documents and leaves the original LLM's abilities intact. Llama 3.2 Vision also uses cross-attention adapters."],
+    },
+    native: {
+      name: ["原生多模态：从头一起训练（早期融合）", "Native multimodal: trained together from scratch (early fusion)"],
+      flow: [["图像切块 / 离散图像词元", "image patches / discrete image tokens", "train"], ["同一个 Transformer 处理图像和文字", "one Transformer for images and text", "train"], ["可以输出文字，也可以输出图像词元", "outputs text, or image tokens", ""]],
+      kv: [["视觉词元数", "visual tokens", ["由分词器决定（如每张图 1,024 个离散词元）", "set by the tokenizer (e.g. 1,024 discrete tokens per image)"]], ["图像进入的位置", "where the image enters", ["输入序列，从预训练第一天起", "the input sequence, from the first day of pretraining"]],
+        ["训练", "training", ["所有部分在图文混合数据上一起预训练", "everything is pretrained together on mixed image-text data"]]],
+      note: ["Chameleon 把图像量化成离散词元，与文字共用一个词表，所以也能生成图像；Gemini、GPT-4o 等被描述为原生多模态，但具体结构没有完全公开。成本最高，图文之间的融合也最深。", "Chameleon quantizes images into discrete tokens that share a vocabulary with text, so it can also generate images; Gemini and GPT-4o are described as natively multimodal, but their exact architectures are not fully public. The most expensive route, with the deepest fusion between images and text."],
+    },
+  };
+  function renderAr() {
+    const A = ARCH[$("ar-s").value];
+    $("ar-flow").innerHTML = A.flow.map(([zh, en, cls]) => `<span class="box ${cls}">${tr(zh, en)}</span>`).join(`<span class="arr">→</span>`);
+    $("ar-kv").innerHTML = A.kv.map(([zh, en, v]) => `<span>${tr(zh, en)}</span><b>${Array.isArray(v) ? tr(...v) : v}</b>`).join("");
+    $("ar-note").innerHTML = tr(...A.note);
+  }
+
+  // ================= 6. quiz =================
+  const QUIZ = [
+    { q: ["ViT 用 14×14 的块处理 336×336 的图，会得到多少个图像词元？", "A ViT with 14×14 patches on a 336×336 image yields how many image tokens?"],
+      opts: [["24", "24"], ["576", "576"], ["112,896", "112,896"]],
+      a: 1, ex: ["336 / 14 = 24，24 × 24 = 576。这正是 LLaVA-1.5 每张图的视觉词元数。", "336 / 14 = 24 and 24 × 24 = 576, exactly LLaVA-1.5's visual tokens per image."] },
+    { q: ["CLIP 训练时，一批 N 对图文里的负例从哪里来？", "In CLIP training, where do the negatives come from in a batch of N image-text pairs?"],
+      opts: [["人工标注的错误描述", "Hand-written wrong captions"], ["同一批里其他 N − 1 条描述（或图）", "The other N − 1 captions (or images) in the same batch"], ["随机噪声", "Random noise"]],
+      a: 1, ex: ["每张图只有自己的描述是正例，其余都当负例，所以批越大，负例越多、任务越难，CLIP 用了 32,768 的批大小。代价是偶尔会有假负例。", "Only an image's own caption is a positive; everything else is a negative. Bigger batches give more negatives and a harder task; CLIP used a batch of 32,768. The price is occasional false negatives."] },
+    { q: ["为什么 CLIP 能做“零样本”分类？", "Why can CLIP classify “zero-shot”?"],
+      opts: [["它在 ImageNet 上训练过分类头", "It trained a classifier head on ImageNet"], ["类别名写成文字提示后，和图像在同一个向量空间里比较相似度即可", "Class names written as text prompts can be compared with the image in the same vector space"], ["它记住了所有图片", "It memorized every image"]],
+      a: 1, ex: ["分类器就是文本编码器对各个类别提示的输出。换一组类别，只需换一组提示。", "The classifier is just the text encoder's output for each class prompt. A new set of classes needs only a new set of prompts."] },
+    { q: ["本章的 VLM 看到一个绿色三角形（训练里从没有绿三角），最常写出什么？", "This chapter's VLM sees a green triangle (never in training). What does it usually write?"],
+      opts: [["green triangle", "green triangle"], ["一个训练里见过的绿色形状，比如 green circle", "A green shape seen in training, e.g. green circle"], ["拒绝回答", "It refuses"]],
+      a: 1, ex: ["颜色对、形状错：图像特征本来就把这些组合混在一起，语言模型又只见过 green 后面跟哪几个形状，于是说出了训练里常见的组合。这是幻觉的一种来源。", "Right colour, wrong shape: the image features already blur these combinations, and the language model has only seen certain shapes after “green”, so it says a combination common in training. One source of hallucination."] },
+    { q: ["高分辨率图片和视频让多模态模型变贵，主要原因是？", "Why do high-resolution images and video make multimodal models expensive?"],
+      opts: [["视觉词元数随像素数和帧数增长，每个都要算注意力、占 KV 缓存", "Visual tokens grow with pixels and frames, and each costs attention and KV cache"], ["图像编码器参数特别多", "The image encoder has huge numbers of parameters"], ["图片需要先转成文字", "Images must first be converted to text"]],
+      a: 0, ex: ["所以才有 2×2 合并、时间维合并、Q-Former 压缩、按需裁剪等各种减少视觉词元的办法。", "Hence 2×2 merging, temporal merging, Q-Former compression, adaptive cropping and other ways to cut visual tokens."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function opts(id, list, def) {
+    const v = $(id).value || def;
+    $(id).innerHTML = list.map(([k, zh, en]) => `<option value="${k}">${tr(zh, en)}</option>`).join("");
+    $(id).value = v;
+  }
+  function fillSelects() {
+    opts("tk-p", Object.entries(TK_PRESETS).map(([k, P]) => [k, ...P.name]), "llava");
+    opts("cl-src", [["seen", "见过的组合", "seen pairs"], ["mix", "混合（5 见过 + 3 没见过）", "mixed (5 seen + 3 unseen)"], ["held", "没见过的组合", "unseen pairs"]], "seen");
+    opts("cl-show", [["prob", "按行 softmax 概率（图→文）", "row softmax (image→text)"], ["cos", "余弦相似度", "cosine similarity"]], "prob");
+    opts("zs-e", [["ens", "4 个模板取平均（集成）", "4 templates averaged (ensemble)"], ["one", "单个模板：a small … on the left", "one template: a small … on the left"]], "ens");
+    opts("vl-f", [["all", "全部 48 张", "all 48"], ["seen", "见过的组合", "seen pairs"], ["held", "没见过的组合", "unseen pairs"]], "all");
+    opts("ar-s", Object.entries(ARCH).map(([k, A]) => [k, ...A.name]), "llava");
+    $("cl-learned").textContent = $("cl-learned2").textContent = `s = ${D.logit_scale.toFixed(1)}`;
+  }
+  function renderAll() { fillSelects(); renderPa(); renderTk(); renderCl(); renderZs(); renderVl(); renderAr(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("pa-p").addEventListener("input", renderPa);
+  $("tk-p").addEventListener("input", loadTk);
+  ["tk-w", "tk-h", "tk-patch", "tk-m", "tk-f", "tk-t"].forEach(id => $(id).addEventListener("input", renderTk));
+  $("cl-src").addEventListener("input", () => { clNew(); renderCl(); });
+  $("cl-new").addEventListener("click", () => { clNew(); renderCl(); });
+  ["cl-show", "cl-s"].forEach(id => $(id).addEventListener("input", renderCl));
+  $("zs-e").addEventListener("input", renderZs);
+  $("vl-f").addEventListener("input", renderVl);
+  $("ar-s").addEventListener("input", renderAr);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  $("cl-s").value = Math.log10(D.logit_scale).toFixed(2);
+  clBatch = [0, 1, 2, 3, 4, 5, 6, 7];
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+  loadTk();
+})();
+</script>
+</body>
+</html>

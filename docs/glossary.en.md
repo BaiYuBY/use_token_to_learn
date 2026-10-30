@@ -112,6 +112,16 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 容量系数 | capacity factor | Each expert takes at most average load × factor tokens; the rest are dropped | [15](15-moe/README.en.md) |
 | 共享专家 | shared expert | An expert every token passes through, holding common knowledge | [15](15-moe/README.en.md) |
 | 全互换通信 | all-to-all | Communication that sends tokens to their experts' GPUs and back under expert parallelism | [15](15-moe/README.en.md) |
+| 视觉 Transformer | ViT (vision transformer) | Cuts an image into patches and feeds each to a Transformer as a token | [16](16-multimodal/README.en.md) |
+| 块嵌入 | patch embedding | The vector from flattening an image patch and multiplying by a matrix; equivalent to a convolution with stride = patch size | [16](16-multimodal/README.en.md) |
+| 对比学习 / CLIP | contrastive learning / CLIP | Makes matching image-text vectors similar and non-matching ones dissimilar; CLIP uses the rest of the batch as negatives | [16](16-multimodal/README.en.md) |
+| 零样本分类 | zero-shot classification | Write classes as text prompts and classify by image-prompt similarity, with no classifier head trained | [16](16-multimodal/README.en.md) |
+| 提示词集成 | prompt ensembling | Write each class in several wordings and average their vectors | [16](16-multimodal/README.en.md) |
+| 视觉语言模型 | VLM (vision-language model) | Wires an image encoder's output into a language model so it can answer about and describe images | [16](16-multimodal/README.en.md) |
+| 投影层 | projector | A small network mapping image features into the language model's embedding space, e.g. LLaVA's two-layer MLP | [16](16-multimodal/README.en.md) |
+| 视觉词元 | visual tokens | The vectors an encoded image hands to the language model; their number grows with resolution and frame count | [16](16-multimodal/README.en.md) |
+| 组合泛化 / 属性绑定 | compositional generalization / attribute binding | Recognizing new combinations of seen attributes and binding each attribute to the right object | [16](16-multimodal/README.en.md) |
+| 多模态幻觉 | multimodal hallucination | Describing objects or attributes not in the image, often a combination common in training | [16](16-multimodal/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

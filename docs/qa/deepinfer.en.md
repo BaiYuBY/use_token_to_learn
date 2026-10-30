@@ -47,7 +47,7 @@ Key design points (figures from DeepSeek's deployment Q&A):
 | Asynchronous scheduling | The CPU schedules the next step while the GPU computes this one, removing idle time | [13 Serving systems](../13-serving/README.en.md) |
 | SWA bounded replay | On a cache hit, recompute only a short tail, working with sliding-window attention to cut prefill work | [14 Long context](../14-long-context/README.en.md) |
 | Batch-invariant inference, deterministic sampling | The same request gives exactly the same result whatever it is batched with and however often it runs | [13 Serving systems](../13-serving/README.en.md) |
-| Structured outputs | Force output to match a JSON schema, regex or grammar | 11 Decoding and sampling (planned) |
+| Structured outputs | Force output to match a JSON schema, regex or grammar | [11 Decoding and sampling](../11-decoding/README.en.md) |
 
 ### 4. What it leaves out
 
