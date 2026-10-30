@@ -25,7 +25,7 @@
 | 07 | [规模定律 Scaling Laws](07-scaling-laws/README.md) | [Scaling Laws 演示](07-scaling-laws/interactive/scaling.html) | ✅ 已完成 |
 | 08 | [微调 Fine-tuning](08-finetuning/README.md) | [微调演示](08-finetuning/interactive/finetune.html) | ✅ 已完成 |
 | 09 | [对齐 Alignment](09-alignment/README.md) | [对齐演示](09-alignment/interactive/alignment.html) | ✅ 已完成 |
-| 10 | 训练：推理模型与测试时计算 | | 🚧 计划中 |
+| 10 | [推理模型与测试时计算 Reasoning](10-reasoning/README.md) | [推理模型演示](10-reasoning/interactive/reasoning.html) | ✅ 已完成 |
 | 11–15 | 推理与部署：解码采样、推理优化、推理服务系统、长上下文、MoE | | 🚧 计划中 |
 | 16–20 | 应用与前沿：多模态、RAG、Agent、评测、安全与可解释性 | | 🚧 计划中 |
 

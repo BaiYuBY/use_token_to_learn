@@ -62,6 +62,7 @@ plugins:
             规模定律: Scaling Laws
             微调: Fine-tuning
             对齐: Alignment
+            推理模型与测试时计算: Reasoning Models & Test-time Compute
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -108,6 +109,7 @@ nav:
       - 规模定律: 07-scaling-laws/README.md
       - 微调: 08-finetuning/README.md
       - 对齐: 09-alignment/README.md
+      - 推理模型与测试时计算: 10-reasoning/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

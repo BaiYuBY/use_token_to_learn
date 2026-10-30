@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>推理模型交互演示 · Reasoning Models Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  canvas.hm { width: 100%; max-width: 260px; aspect-ratio: 1; image-rendering: pixelated; border: 1px solid var(--line); border-radius: 6px; display: block; }
+  .hm-wrap { display: flex; gap: 12px; flex-wrap: wrap; }
+  .hm-wrap figure { margin: 0; flex: 1 1 200px; max-width: 260px; }
+  .hm-wrap figcaption { font-size: .85rem; color: var(--muted); margin-top: 4px; }
+  .tokens { display: flex; flex-wrap: wrap; gap: 2px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; margin: 8px 0; }
+  .tokens span { min-width: 1.3em; text-align: center; padding: 2px 3px; border-radius: 4px; background: var(--bg); border: 1px solid var(--line); }
+  .tokens span.resp { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+  .tokens span.prompt.train { background: var(--b1); color: var(--bg); border-color: var(--b1); }
+  .tokens span.nl { color: var(--muted); }
+  .tokens .br { flex-basis: 100%; height: 0; padding: 0; border: 0; background: none; }
+  input[type=text] { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 8px; width: 9em; }
+  table.t td.ok { color: var(--good); }
+  table.t td.no { color: var(--bad); }
+  table.t td.mono, table.t th.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+  #rs-samples th, #rs-samples td { text-align: left; }
+  .samples { display: grid; gap: 4px; margin-top: 8px; }
+  .samples div { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; padding: 4px 8px; border-radius: 6px; background: var(--bg); border: 1px solid var(--line); }
+  .samples b { display: inline-block; min-width: 3.2em; }
+  .resp { display: grid; gap: 8px; margin-top: 8px; }
+  .resp div { padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+  .resp div.win { border-color: var(--good); box-shadow: 0 0 0 2px var(--good) inset; }
+  .prob { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 1.05rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 12px; margin: 8px 0; white-space: pre-wrap; word-break: break-all; }
+  .prob .think { color: var(--accent); }
+  .prob .cut { color: var(--muted); text-decoration: line-through; }
+  .grp { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .grp button { min-width: 64px; }
+  .grp button.ok { border-color: var(--good); color: var(--good); }
+  .grp button.no { border-color: var(--bad); color: var(--bad); }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">推理模型 · 交互演示</span><span lang="en">Reasoning Models · Interactive Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">为什么让模型“先想一想”会更准？想多久合适？多采样几次有没有用？强化学习又教会了它什么？本页的数据来自本章代码在 CPU 上的真实训练：一个小模型学做“只保留个位数的连续加乘”。</span>
+        <span lang="en">Why does letting a model “think first” make it more accurate? How long should it think? Does sampling several times help? What does reinforcement learning teach it? The data on this page comes from real CPU training of this chapter's code: a small model learns chains of “+d” and “*d” that keep only the last digit.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. think vs direct -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">先思考，还是直接回答？</span><span lang="en">Think first, or answer right away?</span></h2>
+    <p class="hint">
+      <span lang="zh">题目：从一个数字出发，从左到右做 k 次 “+d” 或 “×d”，每步只留个位。模型每生成一个字符，只做一次固定量的计算。直接作答时，它要在写下答案的那一个字符里完成全部 k 步；先思考时，它每写一个中间结果只需要算一步。同一个模型，两种模式的正确率差别巨大。</span>
+      <span lang="en">The task: start from a digit and apply k operations “+d” or “×d” from left to right, keeping only the last digit. Each character the model generates gets one fixed amount of computation. Answering directly, it must do all k steps inside the single character of the answer; thinking first, each intermediate result needs only one step. Same model, very different accuracy.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">步数</span><span lang="en">steps</span> k <input id="td-k" type="range" min="1" max="12" step="1" value="5"><span id="td-k-v" class="mono"></span></label>
+      <button id="td-new"><span lang="zh">换一道题</span><span lang="en">new problem</span></button>
+    </div>
+    <div class="prob" id="td-prob"></div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="td-chart" viewBox="0 0 420 230"></svg>
+        <div class="legend"><span><span class="dot" style="background:var(--accent)"></span><span lang="zh">先思考</span><span lang="en">think first</span></span><span><span class="dot" style="background:var(--primary)"></span><span lang="zh">直接作答</span><span lang="en">answer now</span></span></div></div>
+      <div class="col"><div class="kv" id="td-stats"></div><div class="callout" id="td-note"></div></div>
+    </div>
+    <h3><span lang="zh">模型的真实输出</span><span lang="en">The model's actual outputs</span></h3>
+    <div class="scroll"><table class="t" id="td-examples"></table></div>
+  </section>
+
+  <!-- 2. budget -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">思考预算：想到一半被打断会怎样？</span><span lang="en">Thinking budget: what if thinking is cut short?</span></h2>
+    <p class="hint">
+      <span lang="zh">只允许模型写前 B 个思考字符，然后强制它写 “A:” 作答（s1 论文的 budget forcing 就是这样控制思考长度的）。k 步的题需要 2k − 1 个字符才能想完：预算够了，正确率才会跳上去。难题需要更长的思考。</span>
+      <span lang="en">Let the model write only the first B characters of its thinking, then force it to write “A:” and answer (this is how the s1 paper's budget forcing controls thinking length). A k-step problem needs 2k − 1 characters to finish thinking: accuracy only jumps once the budget is enough. Harder problems need longer thinking.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">预算</span><span lang="en">budget</span> B <input id="bd-b" type="range" min="0" max="12" step="1" value="5"><span id="bd-b-v" class="mono"></span></label>
+    </div>
+    <div class="prob" id="bd-prob"></div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="bd-chart" viewBox="0 0 420 230"></svg><div class="legend" id="bd-legend"></div></div>
+      <div class="col"><div class="kv" id="bd-stats"></div><div class="callout" id="bd-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. sampling -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">多采样几次：投票，还是验证？</span><span lang="en">Sample more: vote, or verify?</span></h2>
+    <p class="hint">
+      <span lang="zh">另一种花测试时算力的方法：同一道题采样 n 条推理。“多数投票”（self-consistency）选出现最多的答案；“pass@n”假设有一个验证器，只要 n 条里有一条对就算对。这里用一个训练不足的模型，在 6–12 步的难题上测试。</span>
+      <span lang="en">Another way to spend test-time compute: sample n reasoning chains per problem. Majority voting (self-consistency) takes the most common answer; pass@n assumes a verifier and counts a problem solved if any of the n chains is right. Tested here with a lightly trained model on hard problems of 6–12 steps.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">采样次数</span><span lang="en">samples</span> n <input id="sc-n" type="range" min="0" max="4" step="1" value="2"><span id="sc-n-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="sc-chart" viewBox="0 0 420 230"></svg><div class="legend" id="sc-legend"></div></div>
+      <div class="col"><div class="kv" id="sc-stats"></div><div class="callout" id="sc-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. GRPO -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">GRPO：只靠“对不对”学推理</span><span lang="en">GRPO: learning to reason from right-or-wrong alone</span></h2>
+    <p class="hint">
+      <span lang="zh">DeepSeek-R1 的做法：同一道题采样一组回答，用规则判对错（不需要奖励模型），每个回答的优势 = (它的得分 − 组内平均) ÷ 组内标准差。点击下面 8 个回答切换对错，看优势怎么变：全对或全错时，优势全为 0，这一组就什么也学不到。</span>
+      <span lang="en">DeepSeek-R1's recipe: sample a group of answers to the same problem, judge each with a rule (no reward model), and give each answer an advantage = (its score − group mean) ÷ group std. Click the 8 answers below to flip right/wrong and watch the advantages: when all are right or all are wrong, every advantage is 0 and the group teaches nothing.</span>
+    </p>
+    <div class="grp" id="gr-group"></div>
+    <div class="kv" id="gr-stats"></div>
+    <h3><span lang="zh">本章的 GRPO 训练</span><span lang="en">This chapter's GRPO run</span></h3>
+    <div class="row">
+      <div class="col"><svg class="chart" id="gr-chart" viewBox="0 0 420 230"></svg>
+        <div class="legend"><span><span class="dot" style="background:var(--accent)"></span><span lang="zh">采样</span><span lang="en">sampled</span></span><span><span class="dot" style="background:var(--primary)"></span><span lang="zh">贪心解码</span><span lang="en">greedy</span></span></div></div>
+      <div class="col"><div class="scroll"><table class="t" id="gr-table"></table></div><div class="callout" id="gr-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 5. effort -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">推理强度：准确率、延迟和成本的取舍</span><span lang="en">Reasoning effort: trading accuracy, latency and cost</span></h2>
+    <p class="hint">
+      <span lang="zh">API 里的 low / medium / high 本质上是在调思考预算。下面把第 2 节的实验数据换算成一个混合了 1–12 步题目的“产品”：选一个档位，看平均正确率、每题生成的字符数，以及按每秒 50 个词元估算的延迟。</span>
+      <span lang="en">The low / medium / high settings in APIs mostly tune the thinking budget. Below, part 2's data is turned into a “product” serving a mix of 1–12-step problems: pick a level and see the mean accuracy, characters generated per problem, and latency at 50 tokens per second.</span>
+    </p>
+    <div class="controls" id="ef-levels"></div>
+    <div class="row">
+      <div class="col"><div class="kv" id="ef-stats"></div></div>
+      <div class="col"><div class="callout" id="ef-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 6. quiz -->
+  <section class="quiz">
+    <h2><span class="step">6</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../">10 · Reasoning</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<!-- Generated by figures/reasoning_figures.py -->
+<script src="reasoning_data.js"></script>
+<script>
+(() => {
+  const D = window.REASONING_DATA;
+  const $ = id => document.getElementById(id);
+  if (!D) { document.querySelector("main").insertAdjacentHTML("afterbegin", "<p>reasoning_data.js missing</p>"); return; }
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+  const pct = v => (v * 100).toFixed(0) + "%";
+
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 44, R = 12, T = 12, B = 36;
+    const tx = v => o.xlog ? Math.log2(v) : v;
+    const fx = v => L + (W - L - R) * (tx(v) - tx(o.x0)) / (tx(o.x1) - tx(o.x0));
+    const fy = v => T + (H - T - B) * (1 - (Math.min(o.y1, Math.max(o.y0, v)) - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    series.forEach(se => {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" ${se.dash ? 'stroke-dasharray="5 4"' : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots !== false) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="3" fill="${se.color}"/>`; });
+    });
+    if (o.vline !== undefined) s += `<line x1="${fx(o.vline)}" x2="${fx(o.vline)}" y1="${T}" y2="${H - B}" stroke="${css("--ink")}" stroke-dasharray="3 3"/>`;
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 4}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= problems =================
+  let seed = 7;
+  const rand = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+  const makeProblem = k => { let p = String(Math.floor(rand() * 10)); for (let i = 0; i < k; i++) p += (rand() < 0.5 ? "+" : "*") + Math.floor(rand() * 10); return p; };
+  const stepsOf = p => { let v = +p[0]; const out = []; for (let i = 1; i < p.length; i += 2) { v = p[i] === "+" ? (v + +p[i + 1]) % 10 : (v * +p[i + 1]) % 10; out.push(v); } return out; };
+  const show = p => p.replace(/\*/g, "×");
+  let problem = makeProblem(5);
+
+  // ================= 1. think vs direct =================
+  function renderTd() {
+    const k = +$("td-k").value;
+    $("td-k-v").textContent = k;
+    if ((problem.length - 1) / 2 !== k) problem = makeProblem(k);
+    const st = stepsOf(problem);
+    $("td-prob").innerHTML = `Q: ${show(problem)}<br><span class="think">T: ${st.join(",")}</span><br>A: ${st[st.length - 1]}`;
+    const ks = D.ks, th = ks.map(x => D.modes.think.acc[x]), di = ks.map(x => D.modes.direct.acc[x]);
+    chart($("td-chart"), [{ x: ks, y: th, color: css("--accent") }, { x: ks, y: di, color: css("--primary") }],
+      { x0: 1, x1: 12, y0: 0, y1: 1, xticks: [1, 3, 6, 9, 12], yticks: [0, 0.25, 0.5, 0.75, 1], yfmt: pct, vline: k, xlabel: tr("步数 k", "steps k") });
+    $("td-stats").innerHTML = kv([
+      [tr("先思考：正确率", "think first: accuracy"), pct(D.modes.think.acc[k])],
+      [tr("直接作答：正确率", "answer now: accuracy"), pct(D.modes.direct.acc[k])],
+      [tr("先思考：生成字符", "think first: characters"), D.modes.think.length[k].toFixed(0)],
+      [tr("直接作答：生成字符", "answer now: characters"), D.modes.direct.length[k].toFixed(0)],
+    ]);
+    $("td-note").innerHTML = k === 1
+      ? tr("只有 1 步时，两种模式都能做对：一次前向计算足够完成一步运算。", "With a single step both modes succeed: one forward pass is enough for one operation.")
+      : tr(`k = ${k} 时，直接作答只有 ${pct(D.modes.direct.acc[k])}（一直猜 0 就能对约 25%），先思考是 ${pct(D.modes.think.acc[k])}。这个 3 层的小模型在一次前向计算里连两步都组合不起来；把中间结果写出来，后面的字符就能“看到”前面算好的结果，相当于把计算摊到了多个词元上。代价是输出更长。`,
+           `At k = ${k}, answering directly gets ${pct(D.modes.direct.acc[k])} (always guessing 0 already gets about 25%) and thinking first gets ${pct(D.modes.think.acc[k])}. This 3-layer model cannot chain even two steps inside one forward pass; writing out intermediate results lets later characters “see” what was already computed, spreading the computation over many tokens. The price is a longer output.`);
+    $("td-examples").innerHTML = `<tr><th>k</th><th>${tr("题目", "problem")}</th><th>${tr("答案", "answer")}</th><th>${tr("直接作答", "answer now")}</th><th>${tr("先思考", "think first")}</th></tr>` +
+      Object.entries(D.examples).map(([kk, e]) => {
+        const ok = t => (t.match(/A:(\d+)/) || [])[1] == e.answer;
+        return `<tr><td>${kk}</td><td class="mono">${show(e.problem)}</td><td>${e.answer}</td><td class="mono ${ok(e.direct) ? "ok" : "no"}">${e.direct.trim()}</td><td class="mono ${ok(e.think) ? "ok" : "no"}" style="white-space:normal">${e.think.trim().replace("\n", " ")}</td></tr>`;
+      }).join("");
+  }
+
+  // ================= 2. budget =================
+  const BK = Object.keys(D.budget), BCOL = ["--b1", "--b2", "--b3", "--b4"];
+  function renderBd() {
+    const i = +$("bd-b").value, b = D.budgets[i];
+    $("bd-b-v").textContent = b;
+    chart($("bd-chart"), BK.map((k, j) => ({ x: D.budgets, y: D.budget[k], color: css(BCOL[j]) })),
+      { x0: 0, x1: D.budgets[D.budgets.length - 1], y0: 0, y1: 1, xticks: [0, 6, 12, 18, 24], yticks: [0, 0.5, 1], yfmt: pct, vline: b, xlabel: tr("思考预算（字符）", "thinking budget (characters)") });
+    $("bd-legend").innerHTML = BK.map((k, j) => `<span><span class="dot" style="background:var(${BCOL[j]})"></span>k = ${k}</span>`).join("");
+    $("bd-stats").innerHTML = kv(BK.map(k => [`k = ${k} ${tr(`（需要 ${2 * k - 1} 个字符）`, `(needs ${2 * k - 1})`)}`, pct(D.budget[k][i])]));
+    const p = D.examples["9"].problem, full = "T:" + stepsOf(p).join(",");
+    const kept = full.slice(0, 2 + b), cut = full.slice(2 + b);
+    $("bd-prob").innerHTML = `Q: ${show(p)}<br><span class="think">${kept}</span><span class="cut">${cut}</span>${cut ? tr(" ← 被截断", " ← cut") : ""}<br>A: ?`;
+    $("bd-note").innerHTML = tr("预算不够时，模型会把没想完的中间结果当成答案，正确率很低，甚至低于瞎猜。注意预算刚好够时曲线是陡峭的跳变：这类“步数固定”的题，想到一半和没想差不多。真实的推理模型更平滑，因为它们可以换一种更短的思路，或者在被截断前先给出一个“大概”的答案。",
+      "With too little budget, the model takes an unfinished intermediate result as its answer, and accuracy is very low, even below random guessing. Note the sharp jump once the budget is just enough: for problems with a fixed number of steps, half-finished thinking is as good as none. Real reasoning models degrade more gracefully, because they can switch to a shorter line of thought or commit to a rough answer before being cut off.");
+  }
+
+  // ================= 3. sampling =================
+  function renderSc() {
+    const rows = D.sampling.before, i = +$("sc-n").value, r = rows[i];
+    $("sc-n-v").textContent = r.n;
+    const ns = rows.map(x => x.n);
+    const ser = [
+      { key: "pass_chain", label: tr("pass@n：整条推理正确（有验证器）", "pass@n: whole chain right (with a verifier)"), color: css("--accent") },
+      { key: "pass_answer", label: tr("pass@n：只看答案", "pass@n: answer only"), color: css("--muted"), dash: true },
+      { key: "majority", label: tr("多数投票", "majority vote"), color: css("--primary") },
+    ];
+    chart($("sc-chart"), [...ser.map(s => ({ x: ns, y: rows.map(x => x[s.key]), color: s.color, dash: s.dash })), { x: ns, y: ns.map(n => 1 - 0.9 ** n), color: css("--line"), dash: true, dots: false }],
+      { xlog: true, x0: 1, x1: 16, y0: 0, y1: 1, xticks: ns, yticks: [0, 0.25, 0.5, 0.75, 1], yfmt: pct, vline: r.n, xlabel: tr("每题采样次数 n", "samples per problem n") });
+    $("sc-legend").innerHTML = ser.map(s => `<span><span class="dot" style="background:${s.color}"></span>${s.label}</span>`).join("") + `<span><span class="dot" style="background:var(--line)"></span>${tr("随机猜", "random guess")}</span>`;
+    $("sc-stats").innerHTML = kv([[tr("贪心解码（1 次）", "greedy (1 sample)"), pct(D.sampling.greedy_before)], [tr("多数投票", "majority vote"), pct(r.majority)], [tr("pass@n（整条推理）", "pass@n (whole chain)"), pct(r.pass_chain)], [tr("pass@n（只看答案）", "pass@n (answer only)"), pct(r.pass_answer)], [tr("生成量", "tokens generated"), `${r.n}×`]]);
+    $("sc-note").innerHTML = tr(`有验证器时，多采样的收益很大：n = ${r.n} 时 ${pct(r.pass_chain)} 的题至少有一条完全正确的推理。多数投票却几乎没用（${pct(r.majority)}，还不如贪心解码）：一个可能的原因是这个模型的错误是<b>系统性</b>的：同一道题的几次采样常错在同一步，错误答案反而成了“多数”。只看答案的 pass@n 被高估了：答案只有 10 种可能，猜也能猜中。`,
+      `With a verifier, more samples help a lot: at n = ${r.n}, ${pct(r.pass_chain)} of problems have at least one fully correct chain. Majority voting barely helps (${pct(r.majority)}, below greedy decoding): a likely reason is that this model's mistakes are <b>systematic</b>: samples of the same problem often go wrong at the same step, so a wrong answer becomes the majority. Answer-only pass@n is inflated: with only ten possible answers, guessing gets there too.`);
+  }
+
+  // ================= 4. GRPO =================
+  const group = [1, 0, 0, 1, 0, 0, 0, 1];
+  function renderGr() {
+    const mean = group.reduce((a, b) => a + b, 0) / group.length;
+    const sd = Math.sqrt(group.reduce((a, b) => a + (b - mean) ** 2, 0) / (group.length - 1));
+    const adv = group.map(r => (r - mean) / (sd + 1e-4));
+    $("gr-group").innerHTML = group.map((r, i) => `<button data-i="${i}" class="${r ? "ok" : "no"}">${r ? "✓" : "✗"} ${adv[i] >= 0 ? "+" : ""}${adv[i].toFixed(2)}</button>`).join("");
+    $("gr-group").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { group[+b.dataset.i] ^= 1; renderGr(); }));
+    $("gr-stats").innerHTML = kv([[tr("组内平均", "group mean"), mean.toFixed(2)], [tr("组内标准差", "group std"), sd.toFixed(2)],
+      [tr("学习信号", "learning signal"), sd === 0 ? `<span class="bad">${tr("无：全对或全错", "none: all right or all wrong")}</span>` : tr("有：对的被加强，错的被削弱", "yes: right ones pushed up, wrong ones down")]]);
+    const h = D.grpo, xs = h.map(e => e.step);
+    chart($("gr-chart"), [{ x: xs, y: h.map(e => e.sampled), color: css("--accent") }, { x: xs, y: h.map(e => e.greedy), color: css("--primary") }],
+      { x0: 0, x1: xs[xs.length - 1], y0: 0, y1: 1, xticks: [0, 100, 200, 300, 400], yticks: [0, 0.25, 0.5, 0.75, 1], yfmt: pct, xlabel: tr("GRPO 步数", "GRPO steps") });
+    const b = D.sampling.before, a = D.sampling.after, last = b.length - 1;
+    $("gr-table").innerHTML = `<tr><th></th><th>${tr("GRPO 前", "before")}</th><th>${tr("GRPO 后", "after")}</th></tr>` +
+      [[tr("贪心解码", "greedy"), D.sampling.greedy_before, D.sampling.greedy_after], ["pass@1", b[0].pass_chain, a[0].pass_chain],
+       [`pass@${b[last].n}`, b[last].pass_chain, a[last].pass_chain], [tr(`多数投票 @${b[last].n}`, `majority @${b[last].n}`), b[last].majority, a[last].majority]]
+        .map(r => `<tr><td>${r[0]}</td><td>${pct(r[1])}</td><td>${pct(r[2])}</td></tr>`).join("");
+    $("gr-note").innerHTML = tr(`奖励只看推理对不对，不需要奖励模型，也不需要人工写示范。GRPO 之后，采样一次就完全正确的比例（pass@1）从 ${pct(b[0].pass_chain)} 变为 ${pct(a[0].pass_chain)}；而采样 ${b[last].n} 次至少对一次的比例（pass@${b[last].n}）从 ${pct(b[last].pass_chain)} 变为 ${pct(a[last].pass_chain)}。强化学习主要是让模型更稳定地走对的路，而不是教会它原本完全不会的东西。`,
+      `The reward only checks whether the reasoning is right: no reward model, no human demonstrations. After GRPO, the share of problems solved fully by one sample (pass@1) went from ${pct(b[0].pass_chain)} to ${pct(a[0].pass_chain)}, while solving at least once in ${b[last].n} samples (pass@${b[last].n}) went from ${pct(b[last].pass_chain)} to ${pct(a[last].pass_chain)}. Reinforcement learning mostly makes the model take the right path more reliably, rather than teaching it something it could not do at all.`);
+  }
+
+  // ================= 5. effort =================
+  const LEVELS = [["none", 0], ["low", 6], ["medium", 12], ["high", 24]];
+  let level = 2;
+  function renderEf() {
+    $("ef-levels").innerHTML = LEVELS.map(([n, b], i) => `<button data-i="${i}" class="${i === level ? "on" : ""}">${n} (${b})</button>`).join("");
+    $("ef-levels").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { level = +b.dataset.i; renderEf(); }));
+    const b = LEVELS[level][1], bi = D.budgets.indexOf(b);
+    // accuracy for k in 1..12: interpolate the measured k = 3, 6, 9, 12 curves / 用实测的四条曲线近似 1–12 步
+    const accFor = k => { const need = 2 * k - 1; if (b === 0) return D.modes.direct.acc[k]; return b >= need ? D.modes.think.acc[k] : D.budget[String(BK.reduce((best, x) => Math.abs(x - k) < Math.abs(best - k) ? x : best, BK[0]))][bi]; };
+    const ks = D.ks, acc = ks.reduce((s, k) => s + accFor(k), 0) / ks.length;
+    const chars = ks.reduce((s, k) => s + (b === 0 ? D.modes.direct.length[k] : Math.min(b, 2 * k - 1) + 5), 0) / ks.length;
+    $("ef-stats").innerHTML = kv([[tr("思考预算", "thinking budget"), `${b} ${tr("字符", "chars")}`], [tr("平均正确率（1–12 步混合）", "mean accuracy (mix of 1–12 steps)"), pct(acc)], [tr("每题平均生成", "generated per problem"), `${chars.toFixed(1)} ${tr("字符", "chars")}`], [tr("延迟（50 词元/秒）", "latency (50 tokens/s)"), `${(chars / 50 * 1000).toFixed(0)} ms`]]);
+    $("ef-note").innerHTML = tr("档位越高，越慢、越贵，但难题答得更对。真实产品里，简单问题用低档就够，复杂的数学、编程和规划才值得用高档。各家 API 的档位设置见", "Higher levels are slower and costlier but get hard problems right. In real products, easy questions are fine on low; complex math, coding and planning justify high. For how APIs expose these levels, see") +
+      ` <a href="../../qa/reasoning-effort.html">${tr("推理强度问答", "the reasoning effort Q&A")}</a>。`;
+  }
+
+  // ================= 6. quiz =================
+  const QUIZ = [
+    { q: ["为什么“先写出思考过程”能让模型更准？", "Why does writing out its reasoning make a model more accurate?"],
+      opts: [["思考过程让模型的参数变多了", "Thinking adds parameters"], ["每个词元的计算量固定，写出中间结果等于把计算分摊到更多词元上", "Each token gets a fixed amount of compute; writing intermediate results spreads the work over more tokens"], ["思考过程会被单独训练", "The thinking is trained separately"]],
+      a: 1, ex: ["后面的词元可以通过注意力“看到”前面写下的中间结果，不必在一次前向计算里完成所有步骤。", "Later tokens can attend to intermediate results written earlier, instead of doing every step in one forward pass."] },
+    { q: ["GRPO 的一组 8 个回答全部答对，这一组提供的学习信号是？", "If all 8 answers in a GRPO group are right, the learning signal from that group is:"],
+      opts: [["很强，全部加强", "Strong: reinforce all of them"], ["为零：优势都是 0", "Zero: every advantage is 0"], ["只加强最短的那个", "Only the shortest is reinforced"]],
+      a: 1, ex: ["优势是和组内平均比较的，大家一样好就没有可学的差别。所以训练题要难度适中。", "Advantages compare against the group mean; if everyone is equally good there is nothing to learn. Training problems should be moderately hard."] },
+    { q: ["多数投票在什么情况下帮不上忙？", "When does majority voting fail to help?"],
+      opts: [["采样次数太多时", "When there are too many samples"], ["不同的采样常犯同样的错误（错误不独立）时", "When different samples tend to make the same mistake (errors are not independent)"], ["答案太短时", "When answers are short"]],
+      a: 1, ex: ["投票只在错误彼此独立、正确答案是“最常见答案”时有效；如果几次采样常犯同样的错误，投票就帮不上忙。", "Voting only helps when errors are independent and the right answer is the most common one; if samples tend to make the same mistake, voting cannot fix it."] },
+    { q: ["推理强度从 low 调到 high，通常会发生什么？", "Moving reasoning effort from low to high usually:"],
+      opts: [["更快、更便宜", "is faster and cheaper"], ["思考更长：难题更准，但更慢、更贵", "thinks longer: more accurate on hard problems, but slower and costlier"], ["换成了一个更大的模型", "switches to a bigger model"]],
+      a: 1, ex: ["思考词元也按输出计费，并且要逐个生成。", "Thinking tokens are billed as output and generated one at a time."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderTd(); renderBd(); renderSc(); renderGr(); renderEf(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("td-k").addEventListener("input", renderTd);
+  $("td-new").addEventListener("click", () => { problem = makeProblem(+$("td-k").value); renderTd(); });
+  $("bd-b").addEventListener("input", renderBd);
+  $("sc-n").addEventListener("input", renderSc);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

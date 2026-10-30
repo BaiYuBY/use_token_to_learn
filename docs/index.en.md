@@ -25,7 +25,7 @@ Each chapter follows the same rhythm:
 | 07 | [Scaling laws](07-scaling-laws/README.md) | [Scaling laws playground](07-scaling-laws/interactive/scaling.html?lang=en) | ✅ done |
 | 08 | [Fine-tuning](08-finetuning/README.md) | [Fine-tuning playground](08-finetuning/interactive/finetune.html?lang=en) | ✅ done |
 | 09 | [Alignment](09-alignment/README.md) | [Alignment playground](09-alignment/interactive/alignment.html?lang=en) | ✅ done |
-| 10 | Training: reasoning models and test-time compute | | 🚧 planned |
+| 10 | [Reasoning models and test-time compute](10-reasoning/README.md) | [Reasoning playground](10-reasoning/interactive/reasoning.html?lang=en) | ✅ done |
 | 11–15 | Inference and deployment: decoding, inference optimisation, serving systems, long context, MoE | | 🚧 planned |
 | 16–20 | Applications and frontiers: multimodal, RAG, agents, evaluation, safety and interpretability | | 🚧 planned |
 

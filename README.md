@@ -25,6 +25,7 @@
 | 07 规模定律 Scaling Laws | [中文](docs/07-scaling-laws/README.md) · [EN](docs/07-scaling-laws/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/07-scaling-laws/interactive/scaling.html) | [scaling.py](docs/07-scaling-laws/code/scaling.py) |
 | 08 微调 Fine-tuning | [中文](docs/08-finetuning/README.md) · [EN](docs/08-finetuning/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/08-finetuning/interactive/finetune.html) | [lora.py](docs/08-finetuning/code/lora.py) · [sft.py](docs/08-finetuning/code/sft.py) |
 | 09 对齐 Alignment | [中文](docs/09-alignment/README.md) · [EN](docs/09-alignment/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/09-alignment/interactive/alignment.html) | [align.py](docs/09-alignment/code/align.py) |
+| 10 推理模型与测试时计算 Reasoning | [中文](docs/10-reasoning/README.md) · [EN](docs/10-reasoning/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/10-reasoning/interactive/reasoning.html) | [reasoning.py](docs/10-reasoning/code/reasoning.py) |
 
 ## 前沿问答
 
