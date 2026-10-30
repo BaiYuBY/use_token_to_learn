@@ -7,7 +7,7 @@
 - 📖 **讲解**（中英双语 Markdown）：直觉 → 图解 → 公式 → 代码 → 误区 → 自测
 - 🖼️ **静态图**：由脚本生成的 PNG，以及 Mermaid 流程图
 - 🎮 **交互演示**：单文件 HTML，在浏览器里拖滑块、点按钮
-- 🧑‍💻 **PyTorch 代码**：最小实现，并与官方实现对比
+- 🧑‍💻 **PyTorch 代码**：最小实现，并与官方实现对比；每章另有一个 Jupyter notebook，可在 Colab 中一键打开
 
 🌐 **在线阅读：** <https://baiyuby.github.io/use_token_to_learn/>
 
@@ -36,6 +36,7 @@
 - [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](docs/qa/deepinfer.md)
 - [大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？](docs/qa/compute.md)（附[算力计算器](https://baiyuby.github.io/use_token_to_learn/qa/interactive/compute.html)）
 - [CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？](docs/qa/classic-models.md)（附[交互演示](https://baiyuby.github.io/use_token_to_learn/qa/interactive/classic-models.html)）
+- [怎么让大模型的输出更可靠？怎么减少编造？](docs/qa/reliability.md)（附[交互演示](https://baiyuby.github.io/use_token_to_learn/qa/interactive/reliability.html)）
 
 完整的大纲和路线图见 [PLAN.md](PLAN.md)，写作规范见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
@@ -80,7 +81,7 @@ Learn large language models interactively. Every topic includes:
 - 📖 **A write-up** (Chinese and English): intuition → pictures → math → code → misconceptions → self-check
 - 🖼️ **Figures**: script-generated PNGs plus Mermaid diagrams
 - 🎮 **An interactive playground**: a single-file HTML page with sliders and buttons
-- 🧑‍💻 **PyTorch code**: a minimal implementation checked against the built-in one
+- 🧑‍💻 **PyTorch code**: a minimal implementation checked against the built-in one, plus a Jupyter notebook per chapter that opens in Colab
 
 🌐 **Read online:** <https://baiyuby.github.io/use_token_to_learn/en/>
 

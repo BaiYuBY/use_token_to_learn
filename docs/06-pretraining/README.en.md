@@ -2,7 +2,7 @@
 
 > **In one sentence:** pre-training does one thing over and over on huge amounts of text: predict the next token and pay a cross-entropy penalty for mistakes. Data quality and quantity, the learning-rate schedule and the compute budget decide whether the model ends up learning rules or memorizing.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/pretraining.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/pretraining.html?lang=en)** · 📓 [Notebook](06-pretraining.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/06-pretraining/06-pretraining.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/pretraining.html?lang=en)
 

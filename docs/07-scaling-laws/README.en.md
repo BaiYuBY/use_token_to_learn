@@ -2,7 +2,7 @@
 
 > **In one sentence:** language-model loss falls as a power law in parameters, data and compute, regularly enough that small experiments can predict big models. At fixed compute, model and data should grow together (Chinchilla: about 20 tokens per parameter); once serving costs count, a smaller model trained on more data is often the better deal.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/scaling.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/scaling.html?lang=en)** · 📓 [Notebook](07-scaling-laws.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/07-scaling-laws/07-scaling-laws.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/scaling.html?lang=en)
 

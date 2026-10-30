@@ -28,6 +28,8 @@ jobs:
         run: |
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -r requirements.txt
+      - name: Check notebooks are up to date
+        run: make notebooks-check
       - name: Run code examples
         run: make code
       - name: Build site

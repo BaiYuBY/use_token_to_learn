@@ -2,7 +2,7 @@
 
 > **In one sentence:** At each step a language model only outputs a probability distribution over the next token; the **decoding strategy** decides which one to pick. Greedy decoding and beam search chase high probability: safe but monotonous, and prone to repetition. Sampling brings variety: temperature sets how sharp the distribution is, and top-k, top-p and min-p cut off the unreliable long tail. Repetition penalties break loops. Constrained decoding compiles format rules into a state machine and guarantees the output follows the format.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/decoding.html?lang=en)** (the model runs right in your browser)
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/decoding.html?lang=en)** (the model runs right in your browser) · 📓 [Notebook](11-decoding.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/11-decoding/11-decoding.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/decoding.html?lang=en)
 

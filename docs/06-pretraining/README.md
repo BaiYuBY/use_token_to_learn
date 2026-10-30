@@ -2,7 +2,7 @@
 
 > **一句话总结：** 预训练就是在海量文本上反复做一件事：预测下一个词元，并用交叉熵惩罚预测错误。数据的质量与数量、学习率调度和算力预算，决定了模型最终学到的是规律还是死记硬背。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/pretraining.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/pretraining.html?lang=zh)** · 📓 [Notebook](06-pretraining.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/06-pretraining/06-pretraining.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/pretraining.html?lang=zh)
 

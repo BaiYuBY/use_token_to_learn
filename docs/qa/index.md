@@ -10,6 +10,7 @@
 | [DeepSeek 开源的 DeepInfer 是什么？为什么重要？](deepinfer.md) | 2026-10-29 | 推理引擎、推理服务、MoE | 13 推理服务系统（计划中） |
 | [大模型的算力怎么量化？哪些环节最耗算力？和 RNN、CNN、KNN 比贵在哪？](compute.md)（🎮 [算力计算器](interactive/compute.html)） | 2026-10-30 | 算力、FLOPs、训练与推理成本 | [07 规模定律](../07-scaling-laws/README.md)、[08 微调](../08-finetuning/README.md)、12 推理优化（计划中） |
 | [CNN、RNN、KNN 是怎么工作的？和大模型有什么不同？](classic-models.md)（🎮 [交互演示](interactive/classic-models.html)） | 2026-10-30 | CNN、RNN、LSTM、KNN、模型对比 | [02 词嵌入](../02-embedding/README.md)、[04 注意力机制](../04-attention/README.md)、[05 Transformer 结构](../05-transformer/README.md) |
+| [怎么让大模型的输出更可靠？怎么减少编造？](reliability.md)（🎮 [交互演示](interactive/reliability.html)） | 2026-10-30 | 可靠性、提示工程、角色扮演、校验与重试、幻觉 | [08 微调](../08-finetuning/README.md)、[10 推理模型](../10-reasoning/README.md)、[11 解码与采样](../11-decoding/README.md) |
 
 ## 每一页的结构
 

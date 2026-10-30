@@ -2,7 +2,7 @@
 
 > **In one sentence:** attention lets every token gather information from other tokens, in proportion to how relevant they are.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/attention.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/attention.html?lang=en)** · 📓 [Notebook](04-attention.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/04-attention/04-attention.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/attention.html?lang=en)
 

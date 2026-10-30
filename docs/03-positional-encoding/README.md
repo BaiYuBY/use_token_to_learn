@@ -2,7 +2,7 @@
 
 > **一句话总结：** 自注意力本身不知道词的先后顺序，位置编码把“第几个”这条信息交给模型。可以直接加到输入上（正弦、可学习），也可以在计算注意力时旋转 q 和 k（RoPE）。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/positional.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/positional.html?lang=zh)** · 📓 [Notebook](03-positional-encoding.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/03-positional-encoding/03-positional-encoding.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/positional.html?lang=zh)
 

@@ -2,7 +2,7 @@
 
 > **一句话总结：** SFT 教会模型“怎么回答”，对齐教它“哪种回答更好”。做法是收集人对两个回答的偏好，训练一个奖励模型去模仿这种偏好，再用强化学习（RLHF，常用 PPO）提高奖励，同时用 KL 惩罚把模型拴在 SFT 模型附近。DPO 把这两步合成一步，直接从偏好对学习。奖励模型只是人类偏好的近似，优化得太狠，模型会钻它的空子（奖励黑客）。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/alignment.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/alignment.html?lang=zh)** · 📓 [Notebook](09-alignment.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/09-alignment/09-alignment.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/alignment.html?lang=zh)
 

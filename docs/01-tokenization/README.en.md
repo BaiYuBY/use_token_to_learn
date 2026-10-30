@@ -2,7 +2,7 @@
 
 > **In one sentence:** a tokenizer cuts text into tokens and maps them to integer ids, the only thing a model can “see” as input and the only thing it can produce as output.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/tokenizer.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/tokenizer.html?lang=en)** · 📓 [Notebook](01-tokenization.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/01-tokenization/01-tokenization.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/tokenizer.html?lang=en)
 

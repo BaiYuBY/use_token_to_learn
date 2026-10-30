@@ -1,0 +1,554 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>可靠输出交互演示 · Reliable Outputs Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.5rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7.5em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .bar { display: flex; height: 22px; border-radius: 6px; overflow: hidden; border: 1px solid var(--line); margin: 6px 0; }
+  .bar span { display: block; height: 100%; }
+  textarea { width: 100%; font: 13px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px; resize: vertical; }
+  pre.out { white-space: pre-wrap; word-break: break-word; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-size: 13px; margin: 8px 0 0; max-height: 460px; overflow: auto; }
+  .checks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 6px 14px; }
+  .checks label { align-items: flex-start; font-size: .92rem; }
+  .checks small { display: block; color: var(--muted); font-size: .8rem; }
+  .lines div { padding: 4px 8px; border-radius: 6px; margin: 4px 0; background: var(--bg); border: 1px solid var(--line); font-size: .92rem; }
+  .lines .ok { border-color: var(--good); }
+  .lines .no { border-color: var(--bad); }
+  .lines .warn { border-color: var(--accent); }
+  .sent { font-family: ui-monospace, monospace; font-size: .85rem; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">让大模型的输出更可靠 · 交互演示</span><span lang="en">Making LLM Outputs Reliable · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">把模型当成一个会出错的部件，在外面搭系统：拆分步骤、校验重试、多次投票、不确定就拒答、引用核对防编造。每个滑块背后都是同一组公式；第 2 节还有 11 章小模型的实测数据。</span>
+        <span lang="en">Treat the model as a component that makes mistakes and build a system around it: split the steps, validate and retry, vote, abstain when unsure, and check quotes against the source. Every slider runs the same formulas; section 2 also shows measurements from chapter 11's small model.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. chain -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">误差会累积：少让模型做，多让代码做</span><span lang="en">Errors compound: let code do what code can</span></h2>
+    <p class="hint">
+      <span lang="zh">一个流程由 n 个模型步骤串起来，每步正确率 p，整体正确率就是 p<sup>n</sup>。把其中确定性的步骤（计算、查表、规则判断）交给代码，它们的正确率就是 100%。</span>
+      <span lang="en">A pipeline of n model steps, each right with probability p, is right with p<sup>n</sup>. Hand the deterministic steps (arithmetic, lookups, rules) to code and those become 100% right.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">步骤数</span><span lang="en">steps</span> n <input id="ch-n" type="range" min="1" max="20" step="1" value="6"><span id="ch-n-v" class="mono"></span></label>
+      <label><span lang="zh">每步正确率</span><span lang="en">per-step accuracy</span> p <input id="ch-p" type="range" min="0.5" max="1" step="0.01" value="0.95"><span id="ch-p-v" class="mono"></span></label>
+      <label><span lang="zh">交给代码的步骤</span><span lang="en">steps done by code</span> <input id="ch-m" type="range" min="0" max="6" step="1" value="2"><span id="ch-m-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="ch-stats"></div>
+    <svg class="chart" id="ch-chart" viewBox="0 0 640 230"></svg>
+  </section>
+
+  <!-- 2. retry -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">校验 + 重试：校验器能看到的错误才会消失</span><span lang="en">Validate and retry: only errors the validator sees go away</span></h2>
+    <p class="hint">
+      <span lang="zh">每次尝试正确率 p。程序校验器（JSON Schema、取值范围、业务规则）能拦下比例为 c 的错误答案，拦下就重试，最多 r 次；全部被拦下的转人工。漏网的错误会被直接接受，所以准确率的上限是 p / (p + (1−p)(1−c))。</span>
+      <span lang="en">Each attempt is right with probability p. A programmatic validator (JSON Schema, ranges, business rules) rejects a fraction c of the wrong answers and triggers a retry, up to r attempts; if all are rejected, a human takes over. Errors it misses are accepted, so accuracy is capped at p / (p + (1−p)(1−c)).</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">单次正确率</span><span lang="en">one attempt</span> p <input id="rt-p" type="range" min="0.05" max="0.99" step="0.01" value="0.6"><span id="rt-p-v" class="mono"></span></label>
+      <label><span lang="zh">校验覆盖率</span><span lang="en">validator coverage</span> c <input id="rt-c" type="range" min="0" max="1" step="0.01" value="0.9"><span id="rt-c-v" class="mono"></span></label>
+      <label><span lang="zh">最多尝试</span><span lang="en">max attempts</span> r <input id="rt-r" type="range" min="1" max="8" step="1" value="3"><span id="rt-r-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="rt-stats"></div>
+    <div class="bar" id="rt-bar"></div>
+    <div class="legend" id="rt-legend"></div>
+    <svg class="chart" id="rt-chart" viewBox="0 0 640 230" style="margin-top:8px"></svg>
+    <h3><span lang="zh">实测：11 章的小 GPT“写一个合乎语法的句子”</span><span lang="en">Measured: chapter 11's small GPT “writes a grammatical sentence”</span></h3>
+    <p class="hint" id="rt-real-note"></p>
+    <div class="controls">
+      <button id="rt-load-full"><span lang="zh">用实测参数：完整语法检查</span><span lang="en">use measured: full grammar check</span></button>
+      <button id="rt-load-weak"><span lang="zh">用实测参数：只查前 3 个词</span><span lang="en">use measured: first 3 words only</span></button>
+    </div>
+    <div class="scroll"><table class="t" id="rt-table"></table></div>
+    <div class="row" style="margin-top:8px">
+      <div class="col"><b class="good"><span lang="zh">两个校验器都会拦下</span><span lang="en">caught by both validators</span></b><div id="rt-ex-caught" class="sent"></div></div>
+      <div class="col"><b class="bad"><span lang="zh">完整检查能拦下，只查前 3 个词会漏掉</span><span lang="en">caught by the full check, missed by the 3-word check</span></b><div id="rt-ex-missed" class="sent"></div></div>
+    </div>
+  </section>
+
+  <!-- 3. vote -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">多次采样投票：分散的错误会被压过，一致的错误会被固定</span><span lang="en">Majority vote: scattered errors are outvoted, consistent ones are locked in</span></h2>
+    <p class="hint">
+      <span lang="zh">现实中的题目有难有易。设一部分是简单题（模型常对），其余是难题（模型常错）。错误答案越分散（选项越多），多数票越容易选中正确答案；如果模型在难题上总是犯同一个错，投票只会把这个错误确认下来。</span>
+      <span lang="en">Real questions vary in difficulty. Some are easy (the model is usually right), the rest hard (usually wrong). The more the wrong answers scatter over options, the easier it is for the majority to land on the right one; if the model always makes the same mistake on a hard question, voting just confirms it.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">简单题占比</span><span lang="en">share of easy questions</span> <input id="vt-s" type="range" min="0" max="1" step="0.05" value="0.7"><span id="vt-s-v" class="mono"></span></label>
+      <label><span lang="zh">简单题单次正确率</span><span lang="en">easy: one sample</span> <input id="vt-pe" type="range" min="0.3" max="1" step="0.01" value="0.9"><span id="vt-pe-v" class="mono"></span></label>
+      <label><span lang="zh">难题单次正确率</span><span lang="en">hard: one sample</span> <input id="vt-ph" type="range" min="0" max="0.7" step="0.01" value="0.3"><span id="vt-ph-v" class="mono"></span></label>
+      <label><span lang="zh">错误答案分散在几个选项</span><span lang="en">wrong answers spread over</span> <input id="vt-m" type="range" min="1" max="9" step="1" value="1"><span id="vt-m-v" class="mono"></span></label>
+      <label><span lang="zh">投票次数</span><span lang="en">samples</span> k <input id="vt-k" type="range" min="1" max="21" step="2" value="5"><span id="vt-k-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="vt-stats"></div>
+    <svg class="chart" id="vt-chart" viewBox="0 0 640 230"></svg>
+  </section>
+
+  <!-- 4. abstain -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">票数不够就转人工：用覆盖率换准确率</span><span lang="en">Hand off when the votes disagree: trade coverage for accuracy</span></h2>
+    <p class="hint">
+      <span lang="zh">沿用第 3 节的题目和 k 次采样。只有得票最多的答案拿到至少 t 票时才自动作答，否则转人工。t 越高，自动作答的比例越低，但答出来的更可靠。这也是检测“编造”的一种办法：编造的细节每次采样都不一样。</span>
+      <span lang="en">Same questions and k samples as section 3. Answer automatically only when the top answer gets at least t votes; otherwise hand it to a human. A higher t answers fewer questions, but the answers given are more often right. This is also a way to catch fabrication: invented details change from sample to sample.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">至少几票一致</span><span lang="en">votes needed</span> t <input id="ab-t" type="range" min="1" max="5" step="1" value="4"><span id="ab-t-v" class="mono"></span></label>
+    </div>
+    <div class="stats" id="ab-stats"></div>
+    <div class="bar" id="ab-bar"></div>
+    <div class="legend" id="ab-legend"></div>
+    <svg class="chart" id="ab-chart" viewBox="0 0 640 230" style="margin-top:8px"></svg>
+  </section>
+
+  <!-- 5. quotes -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">防编造：先引用，再用程序核对引用</span><span lang="en">Against fabrication: quote first, then check the quotes in code</span></h2>
+    <p class="hint">
+      <span lang="zh">让模型只根据资料回答，并给每条结论附上逐字引用（写在「」里）。下面的检查器就是一个十几行的程序：引用在资料中能找到 → 有依据；找不到 → 编造的引用；没有引用 → 无法核实；明确说“资料中没有提到” → 可以接受的拒答。改改右边的回答试试。</span>
+      <span lang="en">Ask the model to answer only from the source and to attach a verbatim quote (in “”) to every claim. The checker below is a dozen lines of code: quote found in the source → supported; not found → fabricated quote; no quote → cannot verify; an explicit “the source does not mention” → an acceptable refusal. Edit the answer on the right and see.</span>
+    </p>
+    <div class="row">
+      <div class="col"><b><span lang="zh">资料</span><span lang="en">source</span></b><textarea id="qt-src" rows="7"></textarea></div>
+      <div class="col"><b><span lang="zh">模型的回答（每行一条）</span><span lang="en">model answer (one claim per line)</span></b><textarea id="qt-ans" rows="7"></textarea></div>
+    </div>
+    <div class="controls"><button id="qt-reset"><span lang="zh">恢复示例</span><span lang="en">reset example</span></button></div>
+    <div class="lines" id="qt-out"></div>
+  </section>
+
+  <!-- 6. prompt builder -->
+  <section>
+    <h2><span class="step">6</span><span lang="zh">角色扮演提示词：逐项拼出来</span><span lang="en">A role-play prompt, piece by piece</span></h2>
+    <p class="hint">
+      <span lang="zh">勾选需要的部分，下面会拼出一份系统提示词模板（{花括号}里换成你的内容）。每一项都对应讲解页里的一条做法；勾得越多不一定越好，真正有没有用，要在你的评测集上测。</span>
+      <span lang="en">Tick the parts you need and a system-prompt template is assembled below (replace the {braces} with your content). Each part matches a practice in the write-up; more is not automatically better, so measure on your own test set.</span>
+    </p>
+    <div class="checks" id="pb-checks"></div>
+    <div class="controls"><button id="pb-copy"><span lang="zh">复制</span><span lang="en">copy</span></button><span class="hint" id="pb-count"></span></div>
+    <pre class="out" id="pb-out"></pre>
+  </section>
+
+  <!-- 7. quiz -->
+  <section class="quiz">
+    <h2><span class="step">7</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../reliability.html">前沿问答 · Q&amp;A</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="reliability_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.RELIABILITY_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const pct = (v, d = 1) => (100 * v).toFixed(d) + "%";
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const esc = s => s.replace(/[&<>]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;" })[c]);
+  function bar(el, parts) { el.innerHTML = parts.map(([v, c, t]) => `<span title="${t}" style="width:${100 * v}%;background:${c}"></span>`).join(""); }
+  function legend(el, parts) { el.innerHTML = parts.map(([v, c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t} ${pct(v)}</span>`).join(""); }
+
+  // seeded random numbers, so the simulations do not flicker / 固定种子，模拟结果不抖动
+  function rng(seed) {
+    return () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  }
+
+  // ================= chart helper =================
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 50, R = 12, T = 12, B = 40;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0);
+    const fy = v => T + (H - T - B) * (1 - (Math.min(o.y1, Math.max(o.y0, v)) - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    (o.hlines || []).forEach(h => { s += `<line x1="${L}" x2="${W - R}" y1="${fy(h.y)}" y2="${fy(h.y)}" stroke="${h.color}" stroke-dasharray="4 4"/><text x="${h.left ? L + 6 : W - R - 4}" y="${fy(h.y) - 4}" text-anchor="${h.left ? "start" : "end"}" style="fill:${h.color}">${h.label}</text>`; });
+    series.forEach(se => {
+      if (se.line !== false) s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.width || 2}" ${se.dash ? `stroke-dasharray="${se.dash}"` : ""} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="${se.r || 3.5}" fill="${se.fill || se.color}" stroke="${se.color}" stroke-width="1.5"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const PCT_TICKS = [0, 0.2, 0.4, 0.6, 0.8, 1];
+
+  // ================= 1. chain =================
+  function renderCh() {
+    const n = +$("ch-n").value, p = +$("ch-p").value;
+    $("ch-m").max = n;
+    const m = Math.min(+$("ch-m").value, n);
+    $("ch-n-v").textContent = n; $("ch-p-v").textContent = pct(p, 0); $("ch-m-v").textContent = m;
+    const all = p ** n, mixed = p ** (n - m);
+    const colorOf = v => v >= 0.9 ? css("--good") : v >= 0.8 ? css("--accent") : css("--bad");
+    $("ch-stats").innerHTML = stat(tr("全部由模型完成", "all steps by the model"), pct(all), colorOf(all)) +
+      stat(tr(`${m} 步交给代码`, `${m} step(s) by code`), pct(mixed), colorOf(mixed)) +
+      stat(tr("要达到 90%，每步至少需要", "for 90%, each model step needs"), n - m > 0 ? pct(0.9 ** (1 / (n - m))) : "—");
+    const xs = Array.from({ length: 20 }, (_, i) => i + 1);
+    chart($("ch-chart"), [
+      { x: xs, y: xs.map(k => p ** k), color: css("--primary") },
+      { x: xs, y: xs.map(k => p ** Math.max(0, k - m)), color: css("--good"), dash: "5 4" },
+      { x: [n], y: [all], color: css("--primary"), dots: true, line: false, r: 5 },
+      { x: [n], y: [mixed], color: css("--good"), dots: true, line: false, r: 5 },
+    ], { x0: 1, x1: 20, y0: 0, y1: 1, yticks: PCT_TICKS, yfmt: v => pct(v, 0), xticks: [1, 5, 10, 15, 20],
+         hlines: [{ y: 0.9, color: css("--muted"), label: "90%" }, { y: 0.8, color: css("--muted"), label: "80%" }],
+         xlabel: tr("步骤数 n（实线：全部由模型完成；虚线：其中 m 步交给代码）", "steps n (solid: all by the model; dashed: m of them by code)") });
+  }
+
+  // ================= 2. retry =================
+  function retry(p, c, r) {
+    const q = (1 - p) * c;
+    let reach = 0;
+    for (let i = 0; i < r; i++) reach += q ** i;
+    return { acc: p * reach, human: q ** r, wrong: (1 - p) * (1 - c) * reach, calls: reach };
+  }
+  function renderRt() {
+    const p = +$("rt-p").value, c = +$("rt-c").value, r = +$("rt-r").value;
+    $("rt-p-v").textContent = pct(p, 0); $("rt-c-v").textContent = pct(c, 0); $("rt-r-v").textContent = r;
+    const o = retry(p, c, r), cap = p / (p + (1 - p) * (1 - c));
+    $("rt-stats").innerHTML = stat(tr("最终正确", "right"), pct(o.acc), css("--good")) +
+      stat(tr("漏网的错误", "accepted errors"), pct(o.wrong), css("--bad")) +
+      stat(tr("转人工", "to a human"), pct(o.human), css("--accent")) +
+      stat(tr("平均调用次数", "calls on average"), o.calls.toFixed(2)) +
+      stat(tr("重试无限次的上限", "cap with unlimited retries"), pct(cap));
+    const parts = [[o.acc, css("--good"), tr("正确", "right")], [o.wrong, css("--bad"), tr("漏网的错误", "accepted errors")], [o.human, css("--accent"), tr("转人工", "to a human")]];
+    bar($("rt-bar"), parts); legend($("rt-legend"), parts);
+    const xs = [1, 2, 3, 4, 5, 6, 7, 8];
+    chart($("rt-chart"), [
+      { x: xs, y: xs.map(k => retry(p, 1, k).acc), color: css("--good"), dash: "5 4", width: 1.5 },
+      { x: xs, y: xs.map(k => retry(p, 0, k).acc), color: css("--muted"), dash: "5 4", width: 1.5 },
+      { x: xs, y: xs.map(k => retry(p, c, k).acc), color: css("--primary"), dots: true },
+      { x: [r], y: [o.acc], color: css("--primary"), dots: true, line: false, r: 6, fill: css("--bg") },
+    ], { x0: 1, x1: 8, y0: 0, y1: 1, yticks: PCT_TICKS, yfmt: v => pct(v, 0), xticks: xs,
+         hlines: [{ y: cap, color: css("--accent"), label: tr(`上限 ${pct(cap, 0)}`, `cap ${pct(cap, 0)}`), left: true }],
+         xlabel: tr("最多尝试次数（蓝：当前覆盖率；绿虚线：覆盖 100%；灰虚线：不校验）", "max attempts (blue: current coverage; green dashed: 100%; grey dashed: no validator)") });
+  }
+  function renderReal() {
+    $("rt-real-note").innerHTML = tr(
+      `温度 T = ${D.retry_T}，${D.n_tasks} 个任务，每个任务最多尝试 ${D.curves.full.accuracy.length} 次。单次合乎语法的比例 p = <b>${pct(D.p)}</b>；“只查前 3 个词”的校验器能拦下 <b>${pct(D.c_weak)}</b> 的错误，而且从不误杀正确的句子。实测与公式基本一致。`,
+      `Temperature T = ${D.retry_T}, ${D.n_tasks} tasks, up to ${D.curves.full.accuracy.length} attempts each. One attempt is grammatical with p = <b>${pct(D.p)}</b>; the “first 3 words only” validator catches <b>${pct(D.c_weak)}</b> of the errors and never rejects a right sentence. Measurements match the formula closely.`);
+    const rs = D.curves.full.accuracy.map((_, i) => i + 1);
+    $("rt-table").innerHTML = `<tr><th>${tr("最多尝试", "max attempts")}</th>${rs.map(r => `<th>${r}</th>`).join("")}</tr>` +
+      [["full", 1, tr("完整语法检查", "full grammar check")], ["weak", D.c_weak, tr("只查前 3 个词", "first 3 words only")]].map(([key, c, name]) =>
+        `<tr><td>${name}：${tr("实测", "measured")}</td>${D.curves[key].accuracy.map(v => `<td><b>${pct(v, 0)}</b></td>`).join("")}</tr>` +
+        `<tr><td>${name}：${tr("公式", "formula")}</td>${rs.map(r => `<td>${pct(retry(D.p, c, r).acc, 0)}</td>`).join("")}</tr>`).join("");
+    $("rt-ex-caught").innerHTML = D.examples.caught.slice(0, 4).map(s => `<div>✗ ${esc(s)}</div>`).join("");
+    $("rt-ex-missed").innerHTML = D.examples.missed.slice(0, 4).map(s => `<div>✗ ${esc(s)}</div>`).join("");
+  }
+  function load(c) { $("rt-p").value = D.p; $("rt-c").value = c; $("rt-r").value = 4; renderRt(); }
+
+  // ================= 3 & 4. vote and abstain =================
+  function simulate(p, k, m, trials, seed) {
+    // returns, for every trial, [is the plurality answer right, votes for it] / 每次模拟：多数票是否正确、得票数
+    const rand = rng(seed), out = [];
+    for (let t = 0; t < trials; t++) {
+      const counts = new Array(m + 1).fill(0);
+      for (let i = 0; i < k; i++) counts[rand() < p ? 0 : 1 + Math.floor(rand() * m)]++;
+      const top = Math.max(...counts), best = counts.map((c, i) => c === top ? i : -1).filter(i => i >= 0);
+      out.push([best[Math.floor(rand() * best.length)] === 0, top]);
+    }
+    return out;
+  }
+  function voteAcc(p, k, m) {
+    if (m === 1) {  // exact binomial / 精确的二项分布
+      let s = 0, c = 1;
+      for (let j = 0; j <= k; j++) { if (j > 0) c = c * (k - j + 1) / j; if (2 * j > k) s += c * p ** j * (1 - p) ** (k - j); }
+      return s;
+    }
+    return simulate(p, k, m, 3000, 7).filter(t => t[0]).length / 3000;
+  }
+  function vtParams() {
+    return { s: +$("vt-s").value, pe: +$("vt-pe").value, ph: +$("vt-ph").value, m: +$("vt-m").value, k: +$("vt-k").value };
+  }
+  function renderVt() {
+    const { s, pe, ph, m, k } = vtParams();
+    $("vt-s-v").textContent = pct(s, 0); $("vt-pe-v").textContent = pct(pe, 0); $("vt-ph-v").textContent = pct(ph, 0);
+    $("vt-m-v").textContent = m; $("vt-k-v").textContent = k;
+    const mix = kk => s * voteAcc(pe, kk, m) + (1 - s) * voteAcc(ph, kk, m);
+    const one = s * pe + (1 - s) * ph, v = mix(k);
+    $("vt-stats").innerHTML = stat(tr("单次采样", "one sample"), pct(one)) +
+      stat(tr(`${k} 次投票`, `vote of ${k}`), pct(v), v > one + 0.005 ? css("--good") : v < one - 0.005 ? css("--bad") : "") +
+      stat(tr("简单题 / 难题", "easy / hard"), `${pct(voteAcc(pe, k, m), 0)} / ${pct(voteAcc(ph, k, m), 0)}`) +
+      stat(tr("调用次数", "calls"), `×${k}`);
+    const ks = [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21];
+    chart($("vt-chart"), [
+      { x: ks, y: ks.map(kk => voteAcc(pe, kk, m)), color: css("--good"), dash: "5 4", width: 1.5 },
+      { x: ks, y: ks.map(kk => voteAcc(ph, kk, m)), color: css("--bad"), dash: "5 4", width: 1.5 },
+      { x: ks, y: ks.map(mix), color: css("--primary"), dots: true },
+    ], { x0: 1, x1: 21, y0: 0, y1: 1, yticks: PCT_TICKS, yfmt: v => pct(v, 0), xticks: ks,
+         xlabel: tr("投票次数 k（蓝：全部题目；绿虚线：简单题；红虚线：难题）", "samples k (blue: all questions; green dashed: easy; red dashed: hard)") });
+    renderAb();
+  }
+  function renderAb() {
+    const { s, pe, ph, m, k } = vtParams();
+    $("ab-t").max = k;
+    const t = Math.min(+$("ab-t").value, k);
+    $("ab-t-v").textContent = `${t} / ${k}`;
+    const N = 4000, easy = simulate(pe, k, m, N, 11), hard = simulate(ph, k, m, N, 13);
+    const point = need => {
+      let ans = 0, right = 0;
+      [[easy, s], [hard, 1 - s]].forEach(([trials, w]) => trials.forEach(([ok, top]) => { if (top >= need) { ans += w; right += w * ok; } }));
+      return { cov: ans / N, acc: ans ? right / ans : 1, wrong: (ans - right) / N };
+    };
+    const cur = point(t), base = point(1);
+    $("ab-stats").innerHTML = stat(tr("自动作答", "answered"), pct(cur.cov)) +
+      stat(tr("作答部分的准确率", "accuracy when answering"), pct(cur.acc), css("--good")) +
+      stat(tr("每 100 题答错", "wrong per 100"), (100 * cur.wrong).toFixed(1), css("--bad")) +
+      stat(tr("不拒答时每 100 题答错", "wrong per 100 without abstaining"), (100 * base.wrong).toFixed(1));
+    const parts = [[cur.cov - cur.wrong, css("--good"), tr("自动答对", "answered right")], [cur.wrong, css("--bad"), tr("自动答错", "answered wrong")], [1 - cur.cov, css("--accent"), tr("转人工", "to a human")]];
+    bar($("ab-bar"), parts); legend($("ab-legend"), parts);
+    const pts = Array.from({ length: k }, (_, i) => point(i + 1));
+    chart($("ab-chart"), [
+      { x: pts.map(q => q.cov), y: pts.map(q => q.acc), color: css("--primary"), dots: true },
+      { x: [cur.cov], y: [cur.acc], color: css("--accent"), dots: true, line: false, r: 6 },
+    ], { x0: 0, x1: 1, y0: Math.max(0, Math.floor(Math.min(...pts.map(q => q.acc)) * 10) / 10 - 0.1), y1: 1,
+         yticks: [0, 0.2, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1].filter(v => v >= Math.floor(Math.min(...pts.map(q => q.acc)) * 10) / 10 - 0.1), yfmt: v => pct(v, 0),
+         xticks: PCT_TICKS, xfmt: v => pct(v, 0),
+         xlabel: tr("覆盖率（自动作答的比例）→ 纵轴：作答部分的准确率；每个点是一个阈值 t", "coverage (share answered) → y: accuracy on answered; one dot per threshold t") });
+  }
+
+  // ================= 5. quote checker =================
+  const QT = {
+    zh: { src: "星河咖啡机 X2 使用说明\n水箱容量 1.2 升。\n支持美式和拿铁两种模式。\n保修期为 12 个月，人为损坏不在保修范围内。\n清洁：每周用柠檬酸除垢一次。",
+          ans: "水箱容量是 1.2 升。「水箱容量 1.2 升」\n保修期是两年。「保修期为 24 个月」\n支持卡布奇诺模式。\n人为损坏不保修。「人为损坏不在保修范围内」\n资料中没有提到功率。" },
+    en: { src: "Galaxy coffee maker X2 manual\nThe water tank holds 1.2 litres.\nTwo modes: americano and latte.\nThe warranty lasts 12 months and does not cover accidental damage.\nCleaning: descale with citric acid once a week.",
+          ans: "The tank holds 1.2 litres. “The water tank holds 1.2 litres.”\nThe warranty is two years. “The warranty lasts 24 months”\nIt has a cappuccino mode.\nAccidental damage is not covered. “does not cover accidental damage”\nThe source does not mention the power rating." },
+  };
+  const ABSTAIN = /没有提到|未提及|没有说明|does not mention|not mentioned|doesn't say/i;
+  function renderQt() {
+    const norm = s => s.replace(/\s+/g, " ").trim();
+    const src = norm($("qt-src").value);
+    const lines = $("qt-ans").value.split("\n").map(l => l.trim()).filter(Boolean);
+    $("qt-out").innerHTML = lines.map(l => {
+      const quotes = [...l.matchAll(/「([^」]+)」|“([^”]+)”|"([^"]+)"/g)].map(m => norm(m[1] || m[2] || m[3]));
+      let cls, tag;
+      if (quotes.length && quotes.every(q => src.includes(q))) { cls = "ok"; tag = tr("✅ 有依据：引用在资料中找到", "✅ supported: quote found in the source"); }
+      else if (quotes.length) { cls = "no"; tag = tr("❌ 引用在资料中找不到：很可能是编造，拦下重试", "❌ quote not in the source: likely fabricated, reject and retry"); }
+      else if (ABSTAIN.test(l)) { cls = "ok"; tag = tr("✅ 明确拒答：资料里确实没有时，这是正确行为", "✅ explicit refusal: the right behaviour when the source has no answer"); }
+      else { cls = "warn"; tag = tr("⚠️ 没有引用：无法核实，要求补引用或删掉", "⚠️ no quote: cannot verify, ask for one or drop the claim"); }
+      return `<div class="${cls}">${esc(l)}<br><small>${tag}</small></div>`;
+    }).join("");
+  }
+  function resetQt() { $("qt-src").value = QT[lang].src; $("qt-ans").value = QT[lang].ans; renderQt(); }
+
+  // ================= 6. prompt builder =================
+  const PB = [
+    { id: "role", on: true, name: ["角色与目标", "Role and goal"], why: ["一句话说清你是谁、为谁、要达成什么", "who you are, for whom, and to what end"],
+      zh: "# 角色\n你是{角色名}，{身份，例如：一家咖啡店的店员}。你的目标是{目标，例如：帮顾客选到合适的饮品}。",
+      en: "# Role\nYou are {name}, {identity, e.g. a barista at a coffee shop}. Your goal is {goal, e.g. to help customers pick a drink}." },
+    { id: "card", on: true, name: ["设定卡", "Persona card"], why: ["固定不变的事实写下来，模型才不会自己编", "write the fixed facts down so the model does not invent them"],
+      zh: "# 设定卡（必须始终一致）\n- 性格：{例如：热情、耐心}\n- 说话风格：{例如：口语化}，每次回复不超过 {3} 句\n- 你知道的事：{经历、店里的菜单……}\n- 设定卡里没有的个人经历，不要编造具体细节，可以笼统带过或把话题引回{主题}",
+      en: "# Persona card (always consistent)\n- Personality: {e.g. warm, patient}\n- Style: {e.g. casual}, at most {3} sentences per reply\n- What you know: {background, the menu, ...}\n- For personal history not on this card, do not invent specifics; stay vague or steer back to {topic}" },
+    { id: "ctx", on: true, name: ["背景与原因", "Context and reasons"], why: ["说明“为什么”，模型能推广到没写到的情况", "explaining why helps the model generalise to unlisted cases"],
+      zh: "# 背景\n用户是{谁}，在{什么场景}下和你对话。{为什么需要上面这些要求，例如：回复会被语音播放，所以要短}。",
+      en: "# Context\nUsers are {who}, talking to you in {what setting}. {Why the rules matter, e.g. replies are read aloud, so keep them short}." },
+    { id: "rules", on: true, name: ["规则（正面表述）", "Rules, stated positively"], why: ["把“不要做 X”改成“遇到 X 时这样做”", "turn “don't do X” into “when X, do this”"],
+      zh: "# 规则\n- 遇到{情况 A}时，{应该怎么做}\n- 遇到与{主题}无关的问题时，礼貌地说明你只负责{主题}，并给出一个相关的建议\n- 涉及{价格 / 订单}等需要准确数字的问题，只使用下方资料里的数字",
+      en: "# Rules\n- When {situation A}, {what to do}\n- When asked about something unrelated to {topic}, say politely that you only help with {topic} and offer a related suggestion\n- For {prices / orders} and other exact figures, use only numbers from the documents below" },
+    { id: "docs", on: true, name: ["只根据资料", "Answer from documents"], why: ["事实交给资料，而不是模型的记忆", "facts come from documents, not the model's memory"],
+      zh: "# 资料\n<documents>\n{菜单、政策、FAQ……}\n</documents>\n回答事实性问题时，只能使用 <documents> 中的内容。",
+      en: "# Documents\n<documents>\n{menu, policies, FAQ, ...}\n</documents>\nFor factual questions, use only what is in <documents>." },
+    { id: "quote", on: false, name: ["先引用再回答", "Quote first"], why: ["引用可以用程序核对（第 5 节）", "quotes can be checked in code (section 5)"],
+      zh: "回答事实性问题前，先在 <quotes> 中逐字摘出支持答案的原文；找不到可引用的原文，就不要回答这一点。",
+      en: "Before answering a factual question, copy the supporting sentences verbatim into <quotes>; if there is nothing to quote, do not answer that point." },
+    { id: "fallback", on: true, name: ["不确定时的退路", "A way out when unsure"], why: ["允许说不知道，能明显减少编造", "allowing “I don't know” cuts fabrication"],
+      zh: "如果资料中没有答案，或者你不确定，就回答：“{固定的拒答语，例如：这个我不太清楚，我帮你问问店长}”。不要猜测。",
+      en: "If the documents do not contain the answer, or you are unsure, reply: “{a fixed fallback, e.g. I'm not sure, let me check with the manager}”. Do not guess." },
+    { id: "format", on: false, name: ["结构化输出", "Structured output"], why: ["配合 JSON Schema / 约束解码，格式 100% 合法", "with a JSON Schema / constrained decoding the format is always valid"],
+      zh: "# 输出格式\n只输出一个 JSON 对象，符合：\n{\"reply\": string, \"emotion\": \"happy\" | \"neutral\" | \"sorry\", \"needs_human\": boolean}",
+      en: "# Output format\nOutput only one JSON object matching:\n{\"reply\": string, \"emotion\": \"happy\" | \"neutral\" | \"sorry\", \"needs_human\": boolean}" },
+    { id: "examples", on: true, name: ["示例（含拒答）", "Examples, including a refusal"], why: ["示范语气和边界；拒答也要示范", "show the tone and the boundaries; show a refusal too"],
+      zh: "# 示例\n<example>\n用户：{普通问题}\n{角色名}：{理想回答}\n</example>\n<example>\n用户：{资料里没有答案的问题}\n{角色名}：{固定的拒答语}\n</example>\n<example>\n用户：{试图让你跳出角色的话}\n{角色名}：{保持角色的回答}\n</example>",
+      en: "# Examples\n<example>\nUser: {a normal question}\n{name}: {ideal reply}\n</example>\n<example>\nUser: {a question the documents cannot answer}\n{name}: {the fixed fallback}\n</example>\n<example>\nUser: {an attempt to break character}\n{name}: {an in-character reply}\n</example>" },
+    { id: "think", on: false, name: ["先想再答", "Think before replying"], why: ["对需要判断的问题有效；思考内容不展示", "helps on judgement calls; the thinking is hidden"],
+      zh: "复杂问题先在 <thinking> 中判断用户意图、适用哪条规则、资料里有没有答案，再写回复。<thinking> 的内容不会展示给用户。",
+      en: "For tricky messages, first decide in <thinking> what the user wants, which rule applies and whether the documents answer it, then write the reply. <thinking> is not shown to the user." },
+    { id: "remind", on: false, name: ["每轮提醒（多轮对话）", "Per-turn reminder"], why: ["防止多轮之后人设漂移", "prevents persona drift over many turns"],
+      zh: "（由程序附在每条用户消息前，不写进系统提示）\n[提醒：你是{角色名}，保持{语气}；回复不超过 {3} 句；资料里没有的就说“{固定的拒答语}”。]",
+      en: "(added by your code before every user message, not part of the system prompt)\n[Reminder: you are {name}; keep a {tone} tone; at most {3} sentences; if the documents do not say, reply “{the fixed fallback}”.]" },
+  ];
+  const pbOn = Object.fromEntries(PB.map(x => [x.id, x.on]));
+  function renderPb() {
+    $("pb-checks").innerHTML = PB.map(x => `<label><input type="checkbox" data-id="${x.id}" ${pbOn[x.id] ? "checked" : ""}><span>${tr(...x.name)}<small>${tr(...x.why)}</small></span></label>`).join("");
+    $("pb-checks").querySelectorAll("input").forEach(b => b.addEventListener("change", () => { pbOn[b.dataset.id] = b.checked; renderPbOut(); }));
+    renderPbOut();
+  }
+  function renderPbOut() {
+    const text = PB.filter(x => pbOn[x.id]).map(x => x[lang]).join("\n\n");
+    $("pb-out").textContent = text;
+    $("pb-count").textContent = tr(`${PB.filter(x => pbOn[x.id]).length} 项 · ${text.length} 字符`, `${PB.filter(x => pbOn[x.id]).length} parts · ${text.length} characters`);
+  }
+  $("pb-copy").addEventListener("click", () => {
+    const done = () => { $("pb-count").textContent = tr("已复制", "copied"); };
+    try { navigator.clipboard.writeText($("pb-out").textContent).then(done, () => {}); } catch (e) {}
+  });
+
+  // ================= 7. quiz =================
+  const QUIZ = [
+    { q: ["一个流程有 4 个模型步骤，每步 90%。整体正确率大约是？", "A pipeline has 4 model steps at 90% each. End-to-end accuracy is about?"],
+      opts: [["90%", "90%"], ["66%", "66%"], ["36%", "36%"]],
+      a: 1, ex: ["0.9⁴ ≈ 0.66。所以能交给代码的步骤尽量交给代码。", "0.9⁴ ≈ 0.66, so hand every step you can to code."] },
+    { q: ["单次正确率 50%，校验器只能拦下一半的错误，无限次重试后准确率最多是？", "One attempt is right 50% of the time and the validator catches half the errors. With unlimited retries, accuracy is at most?"],
+      opts: [["100%", "100%"], ["约 67%", "about 67%"], ["50%", "50%"]],
+      a: 1, ex: ["上限 = p / (p + (1−p)(1−c)) = 0.5 / 0.75 ≈ 67%。漏网的错误会被直接接受。", "Cap = p / (p + (1−p)(1−c)) = 0.5 / 0.75 ≈ 67%. Missed errors are accepted."] },
+    { q: ["对一道模型通常会犯同一个错的难题，多次采样投票会怎样？", "On a hard question where the model usually makes the same mistake, what does voting do?"],
+      opts: [["一定变好", "It always helps"], ["变差：错误答案更可能赢得多数", "It hurts: the wrong answer is more likely to win the majority"], ["没有影响", "No effect"]],
+      a: 1, ex: ["单次正确率低于 50% 且错误一致时，票数越多，越确定地选中错误答案。", "With accuracy below 50% and consistent errors, more votes pick the wrong answer more surely."] },
+    { q: ["下面哪种做法最能减少“编造不存在的内容”？", "Which practice best reduces fabricated content?"],
+      opts: [["在提示词里写“不要编造”", "Writing “do not make things up” in the prompt"], ["提供资料、要求逐字引用，并用程序核对引用是否存在", "Provide documents, require verbatim quotes, and check in code that they exist"], ["把温度调到 2", "Raising the temperature to 2"]],
+      a: 1, ex: ["只靠一句禁令效果有限；把事实交给资料，再用程序验证引用，错误才能被发现和拦下。", "A ban alone does little; ground the facts in documents and verify quotes in code so errors are caught."] },
+    { q: ["让模型“再检查一遍自己的答案”（没有任何外部信息），通常效果如何？", "Asking the model to “check its own answer again”, with no outside information, usually…"],
+      opts: [["稳定提升准确率", "reliably improves accuracy"], ["效果有限，甚至可能把对的改错", "helps little, and can turn right answers wrong"], ["一定能发现所有错误", "finds every error"]],
+      a: 1, ex: ["研究发现，没有外部反馈的自我纠错常常无效（Huang et al., 2023）。有效的是程序校验、工具结果、资料核对这类外部信号。", "Studies find self-correction without outside feedback often fails (Huang et al., 2023). What works is an external signal: a validator, a tool result, a source check."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderCh(); renderRt(); renderReal(); renderVt(); renderQt(); renderPb(); renderQuiz(); }
+  let qtTouched = false;
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    if (!qtTouched) { $("qt-src").value = QT[l].src; $("qt-ans").value = QT[l].ans; }
+    renderAll();
+  }
+  ["ch-n", "ch-p", "ch-m"].forEach(id => $(id).addEventListener("input", renderCh));
+  ["rt-p", "rt-c", "rt-r"].forEach(id => $(id).addEventListener("input", renderRt));
+  $("rt-load-full").addEventListener("click", () => load(1));
+  $("rt-load-weak").addEventListener("click", () => load(D.c_weak));
+  ["vt-s", "vt-pe", "vt-ph", "vt-m", "vt-k"].forEach(id => $(id).addEventListener("input", renderVt));
+  $("ab-t").addEventListener("input", renderAb);
+  ["qt-src", "qt-ans"].forEach(id => $(id).addEventListener("input", () => { qtTouched = true; renderQt(); }));
+  $("qt-reset").addEventListener("click", () => { qtTouched = false; resetQt(); });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

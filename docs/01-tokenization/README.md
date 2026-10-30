@@ -2,7 +2,7 @@
 
 > **一句话总结：** 分词器把文本切成词元（token）并映射成整数编号，这是模型唯一能“看到”的输入，也是它唯一能输出的东西。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/tokenizer.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/tokenizer.html?lang=zh)** · 📓 [Notebook](01-tokenization.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/01-tokenization/01-tokenization.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/tokenizer.html?lang=zh)
 

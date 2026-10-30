@@ -2,7 +2,7 @@
 
 > **一句话总结：** 注意力让序列中的每个词，根据“相关程度”从其他词那里按比例收集信息。
 >
-> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/attention.html?lang=zh)**
+> 🌐 [English version](README.en.md) · 🎮 **[打开交互演示](interactive/attention.html?lang=zh)** · 📓 [Notebook](04-attention.ipynb)（[在 Colab 中打开](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/04-attention/04-attention.ipynb)）
 
 [![交互演示预览](assets/interactive-preview.png)](interactive/attention.html?lang=zh)
 

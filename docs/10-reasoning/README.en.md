@@ -2,7 +2,7 @@
 
 > **In one sentence:** Each token a model generates gets one fixed amount of computation. Letting it write out its reasoning first (a chain of thought) splits a hard problem into many steps and spreads the work over many tokens. Reasoning models are models trained specifically to think before answering: they learn longer, more reliable reasoning through reinforcement learning on problems that can be checked automatically (such as DeepSeek-R1's GRPO). Longer thinking gets hard problems right more often but is slower and costlier; that is the trade-off behind test-time compute and reasoning effort.
 >
-> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/reasoning.html?lang=en)**
+> 🌐 [中文版](README.md) · 🎮 **[Open the interactive playground](interactive/reasoning.html?lang=en)** · 📓 [Notebook](10-reasoning.ipynb) ([open in Colab](https://colab.research.google.com/github/BaiYuBY/use_token_to_learn/blob/main/docs/10-reasoning/10-reasoning.ipynb))
 
 [![Interactive playground preview](assets/interactive-preview.en.png)](interactive/reasoning.html?lang=en)
 
