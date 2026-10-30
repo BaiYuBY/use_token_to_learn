@@ -27,7 +27,8 @@ Each chapter follows the same rhythm:
 | 09 | [Alignment](09-alignment/README.md) | [Alignment playground](09-alignment/interactive/alignment.html?lang=en) | ✅ done |
 | 10 | [Reasoning models and test-time compute](10-reasoning/README.md) | [Reasoning playground](10-reasoning/interactive/reasoning.html?lang=en) | ✅ done |
 | 11 | [Decoding and sampling](11-decoding/README.md) | [Decoding playground](11-decoding/interactive/decoding.html?lang=en) | ✅ done |
-| 12–15 | Inference and deployment: inference optimisation, serving systems, long context, MoE | | 🚧 planned |
+| 12 | [Inference optimization](12-inference-optimization/README.md) | [Inference optimization playground](12-inference-optimization/interactive/inference.html?lang=en) | ✅ done |
+| 13–15 | Inference and deployment: serving systems, long context, MoE | | 🚧 planned |
 | 16–24 | Applications and frontiers: multimodal, code models, prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
