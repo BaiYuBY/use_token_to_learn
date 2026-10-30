@@ -32,7 +32,8 @@
 | 14 | [长上下文 Long context](14-long-context/README.md) | [RoPE 外推与注意力模式演示](14-long-context/interactive/long_context.html) | ✅ 已完成 |
 | 15 | [混合专家 MoE](15-moe/README.md) | [路由与负载均衡演示](15-moe/interactive/moe.html) | ✅ 已完成 |
 | 16 | [多模态模型](16-multimodal/README.md) | [切块、CLIP 与零样本、VLM 描述演示](16-multimodal/interactive/multimodal.html) | ✅ 已完成 |
-| 17–24 | 应用与前沿：代码模型、提示工程、RAG 与向量数据库、知识图谱与图数据库、Agent、MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
+| 17 | [代码模型](17-code-models/README.md) | [FIM、pass@k 与测试挑选演示](17-code-models/interactive/code_models.html) | ✅ 已完成 |
+| 18–24 | 应用与前沿：提示工程、RAG 与向量数据库、知识图谱与图数据库、Agent、MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
 
 ## 前沿问答
 

@@ -122,6 +122,15 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 视觉词元 | visual tokens | The vectors an encoded image hands to the language model; their number grows with resolution and frame count | [16](16-multimodal/README.en.md) |
 | 组合泛化 / 属性绑定 | compositional generalization / attribute binding | Recognizing new combinations of seen attributes and binding each attribute to the right object | [16](16-multimodal/README.en.md) |
 | 多模态幻觉 | multimodal hallucination | Describing objects or attributes not in the image, often a combination common in training | [16](16-multimodal/README.en.md) |
+| 中间填空 | FIM (fill-in-the-middle) | Cut a file into prefix, middle and suffix and move the middle to the end, so the model learns to fill gaps using both sides | [17](17-code-models/README.en.md) |
+| PSM / SPM | PSM / SPM | The two FIM orders: prefix-suffix-middle / suffix-prefix-middle | [17](17-code-models/README.en.md) |
+| 功能正确性 | functional correctness | Judging code by running unit tests rather than comparing text | [17](17-code-models/README.en.md) |
+| pass@k | pass@k | The chance that at least one of k sampled programs passes; estimated without bias by 1 − C(n−c,k)/C(n,k) | [17](17-code-models/README.en.md) |
+| 公开测试 / 隐藏测试 | public / hidden tests | The few example tests you can run while choosing / the unseen tests that decide the verdict | [17](17-code-models/README.en.md) |
+| 执行反馈 / 采样筛选 | execution feedback / sample-and-filter | Sample several programs, run the tests, keep the ones that pass | [17](17-code-models/README.en.md) |
+| 拒绝采样微调 | rejection-sampling fine-tuning (RFT, expert iteration) | Keep training only on the model's own samples that pass a check | [17](17-code-models/README.en.md) |
+| 奖励投机 | reward hacking | The model exploits loopholes in the reward, e.g. special-casing tests or editing them | [17](17-code-models/README.en.md) |
+| 数据污染 | data contamination | Benchmark problems appear in the training data, inflating scores | [17](17-code-models/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |
