@@ -106,7 +106,7 @@ def batch(rng, n, p_think=0.5, k_min=1, k_max=K_MAX):
     return x, y
 
 
-def train(steps=3000, batch_size=64, lr=2e-3, p_think=0.5, seed=0, log=None):
+def train(steps=3000, batch_size=64, lr=2e-3, p_think=0.5, k_max=K_MAX, seed=0, log=None):
     torch.manual_seed(seed)
     rng = random.Random(seed)
     model = GPT(len(VOCAB))
@@ -114,7 +114,7 @@ def train(steps=3000, batch_size=64, lr=2e-3, p_think=0.5, seed=0, log=None):
     for step in range(steps):
         for g in opt.param_groups:
             g["lr"] = lr * min(1, (step + 1) / 100) * (0.1 + 0.45 * (1 + math.cos(math.pi * step / steps)))
-        x, y = batch(rng, batch_size, p_think)
+        x, y = batch(rng, batch_size, p_think, k_max=k_max)
         loss = F.cross_entropy(model(x).flatten(0, 1), y.flatten(), ignore_index=-100)
         opt.zero_grad()
         loss.backward()
@@ -318,7 +318,7 @@ def main():
     print(f"group 1 (2 of 4 right): {adv[:4].numpy().round(2)};  group 2 (all right): {adv[4:].numpy()}  ✓")
 
     print("\n== one model, two modes (quick training) / 同一个模型的两种模式（快速训练） ==")
-    model = train(steps=1000)
+    model = train(steps=1500, k_max=4)  # problems of up to 4 steps only, to keep it quick / 只用 4 步以内的题
     test = [make_problem(rng, 4) for _ in range(200)]
     a_direct, a_cot = accuracy(model, test, False), accuracy(model, test, True)
     _, lengths, texts = solve(model, test[:1], True)

@@ -142,7 +142,7 @@ pass@1 明显提升，pass@16 几乎不变。也就是说，强化学习主要�
 
 ## 4. 最小代码实现
 
-完整代码：[`code/reasoning.py`](code/reasoning.py)，运行 `python docs/10-reasoning/code/reasoning.py`（约 1 分钟，包含 pass@k 估计的校验、GRPO 优势的计算和一个快速训练）。完整实验在 [`figures/reasoning_figures.py`](figures/reasoning_figures.py) 中，在笔记本 CPU 上约需 11 分钟。
+完整代码：[`code/reasoning.py`](code/reasoning.py)，运行 `python docs/10-reasoning/code/reasoning.py`（约 1.5 分钟，包含 pass@k 估计的校验、GRPO 优势的计算和一个快速训练）。完整实验在 [`figures/reasoning_figures.py`](figures/reasoning_figures.py) 中，在笔记本 CPU 上约需 11 分钟。
 
 两种模式的训练数据：
 
