@@ -68,6 +68,7 @@ plugins:
             推理优化: Inference Optimization
             推理服务系统: Serving Systems
             长上下文: Long Context
+            混合专家 MoE: Mixture of Experts
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -121,6 +122,7 @@ nav:
       - 推理优化: 12-inference-optimization/README.md
       - 推理服务系统: 13-serving/README.md
       - 长上下文: 14-long-context/README.md
+      - 混合专家 MoE: 15-moe/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

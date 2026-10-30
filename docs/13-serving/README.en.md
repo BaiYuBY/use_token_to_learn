@@ -167,7 +167,7 @@ When a model doesn't fit one GPU, or one GPU is too slow, it is split:
 | **Data parallelism (DP)** | Nothing; several full replicas | None (each serves different requests) | Scaling out when the model fits one GPU |
 | **Tensor parallelism (TP)** | Each layer's matrices, by rows or columns | 2 all-reduces per layer | Inside one machine (NVLink) |
 | **Pipeline parallelism (PP)** | Different layers on different GPUs | Activations between neighbouring stages | Across machines; has “bubbles” |
-| **Expert parallelism (EP)** | Different MoE experts on different GPUs | All-to-all token dispatch | MoE models; see 15 MoE (planned) |
+| **Expert parallelism (EP)** | Different MoE experts on different GPUs | All-to-all token dispatch | MoE models; see [15 MoE](../15-moe/README.en.md) |
 
 The classic tensor-parallel split (Megatron-LM, Shoeybi et al., 2019):
 

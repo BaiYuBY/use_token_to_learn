@@ -105,6 +105,13 @@
 | 稀疏注意力 | sparse attention | 只计算部分查询与 key 的分数，如块稀疏、Top-k 块选择（NSA、MoBA） | [14](14-long-context/README.md) |
 | 有效上下文 | effective context | 模型真正能用好的上下文长度，常短于标称长度 | [14](14-long-context/README.md) |
 | 大海捞针 | needle in a haystack | 在长文中插入一句事实再提问，测试长距离检索 | [14](14-long-context/README.md) |
+| 混合专家 | MoE (mixture of experts) | 把前馈层拆成多个专家，每个词元只由路由器选出的少数几个处理 | [15](15-moe/README.md) |
+| 路由器 / 门控 | router / gate | 给每个专家打分、选出 top-k，并给出它们输出的加权系数 | [15](15-moe/README.md) |
+| 总参数 / 激活参数 | total / active parameters | 模型存储的全部参数 / 每个词元实际用到的参数 | [15](15-moe/README.md) |
+| 负载均衡 | load balancing | 让各专家分到的词元大致相同；常用辅助损失或偏置调整 | [15](15-moe/README.md) |
+| 容量系数 | capacity factor | 每个专家最多接收“平均负载 × 系数”个词元，超出的被丢弃 | [15](15-moe/README.md) |
+| 共享专家 | shared expert | 每个词元都经过的专家，承担通用知识 | [15](15-moe/README.md) |
+| 全互换通信 | all-to-all | 专家并行时，把词元发往所选专家所在的卡、再收回结果的通信 | [15](15-moe/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

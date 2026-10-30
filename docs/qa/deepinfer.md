@@ -41,7 +41,7 @@ flowchart LR
 
 | 功能 | 作用 | 对应章节 |
 | --- | --- | --- |
-| 优化算子：FlashMLA、DeepGEMM、DeepEP、TileKernels 等 | 注意力、矩阵乘、专家并行通信的高性能实现 | [12 推理优化](../12-inference-optimization/README.md)、15 MoE（计划中） |
+| 优化算子：FlashMLA、DeepGEMM、DeepEP、TileKernels 等 | 注意力、矩阵乘、专家并行通信的高性能实现 | [12 推理优化](../12-inference-optimization/README.md)、[15 MoE](../15-moe/README.md) |
 | 并行：注意力数据并行 / 均衡的上下文并行，MoE 专家并行 + EPLB | 把模型和请求分布到多张卡上，并让每张卡负载均衡 | [13 推理服务系统](../13-serving/README.md) |
 | DSpark 投机解码 + 按置信度安排验证 | 先猜几个草稿词元再一起验证；按置信度决定验证几个，文档称每步验证的草稿数减少约 30%，接受长度基本不变 | [12 推理优化](../12-inference-optimization/README.md) |
 | 异步调度 | CPU 安排下一步时，GPU 同时在算这一步，消除空等 | [13 推理服务系统](../13-serving/README.md) |
@@ -82,7 +82,7 @@ README 明确列出，组成完整的推理服务还需要三样，这次没有�
 
 - **[13 推理服务系统](../13-serving/README.md)**（正是因为这个问题而新增的章节）：批处理、P/D 分离、并行策略、负载均衡，以 vLLM、SGLang、DeepInfer 为案例
 - **[12 推理优化](../12-inference-optimization/README.md)**：KV 缓存、量化、投机解码、FlashAttention / MLA
-- **15 混合专家 MoE**（计划中）：专家并行与负载均衡
+- **[15 混合专家 MoE](../15-moe/README.md)**：专家并行与负载均衡
 - [04 注意力机制](../04-attention/README.md)、[05 Transformer 结构](../05-transformer/README.md)：KV 缓存和 GQA 的来源
 
 ## 来源
