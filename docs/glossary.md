@@ -122,6 +122,15 @@
 | 视觉词元 | visual tokens | 图像编码后交给语言模型的向量；数量随分辨率和帧数增长 | [16](16-multimodal/README.md) |
 | 组合泛化 / 属性绑定 | compositional generalization / attribute binding | 认出由见过的属性组成的新组合，并把属性正确地对应到物体上 | [16](16-multimodal/README.md) |
 | 多模态幻觉 | multimodal hallucination | 描述图中不存在的物体或属性，常是训练中常见的组合 | [16](16-multimodal/README.md) |
+| 中间填空 | FIM (fill-in-the-middle) | 把文件切成前缀、中间、后缀，把中间挪到最后训练，让模型学会利用两侧填空 | [17](17-code-models/README.md) |
+| PSM / SPM | PSM / SPM | FIM 的两种排列顺序：前缀-后缀-中间 / 后缀-前缀-中间 | [17](17-code-models/README.md) |
+| 功能正确性 | functional correctness | 用单元测试运行代码来判断对错，而不是比较文本 | [17](17-code-models/README.md) |
+| pass@k | pass@k | 采样 k 个程序至少一个通过测试的概率；用 1 − C(n−c,k)/C(n,k) 无偏估计 | [17](17-code-models/README.md) |
+| 公开测试 / 隐藏测试 | public / hidden tests | 能在挑选时运行的少量示例测试 / 最终评判用的、看不到的测试 | [17](17-code-models/README.md) |
+| 执行反馈 / 采样筛选 | execution feedback / sample-and-filter | 多采样几个程序，运行测试，留下通过的 | [17](17-code-models/README.md) |
+| 拒绝采样微调 | rejection-sampling fine-tuning (RFT, expert iteration) | 只用模型自己生成且通过检验的样本继续训练 | [17](17-code-models/README.md) |
+| 奖励投机 | reward hacking | 模型钻奖励的漏洞，例如针对测试写特例或修改测试 | [17](17-code-models/README.md) |
+| 数据污染 | data contamination | 评测题出现在训练数据里，分数因此虚高 | [17](17-code-models/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

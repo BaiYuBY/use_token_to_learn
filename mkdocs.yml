@@ -71,6 +71,7 @@ plugins:
             混合专家 MoE: Mixture of Experts
             应用与前沿: Applications & Frontiers
             多模态模型: Multimodal Models
+            代码模型: Code Models
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -127,6 +128,7 @@ nav:
       - 混合专家 MoE: 15-moe/README.md
   - 应用与前沿:
       - 多模态模型: 16-multimodal/README.md
+      - 代码模型: 17-code-models/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md
