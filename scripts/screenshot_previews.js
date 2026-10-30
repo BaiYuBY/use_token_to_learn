@@ -13,14 +13,17 @@ const ROOT = path.resolve(__dirname, "..");
   for (const topic of fs.readdirSync(docs)) {
     const dir = path.join(docs, topic, "interactive");
     if (!fs.existsSync(dir)) continue;
-    const pages = fs.readdirSync(dir).filter(f => f.endsWith(".html"));
-    // The first page of a topic is its main playground / 每章第一个页面作为主演示
-    if (!pages.length) continue;
-    const file = path.join(dir, pages.sort()[0]);
-    for (const [lang, suffix] of [["zh", ""], ["en", ".en"]]) {
+    const pages = fs.readdirSync(dir).filter(f => f.endsWith(".html")).sort();
+    // A chapter's first page is its main playground; every Q&A page gets its own preview
+    // 每章第一个页面作为主演示；问答单元的每个页面各有一张预览
+    const shots = topic === "qa"
+      ? pages.map(f => [f, `${path.basename(f, ".html")}-preview`])
+      : pages.slice(0, 1).map(f => [f, "interactive-preview"]);
+    for (const [name, stem] of shots) for (const [lang, suffix] of [["zh", ""], ["en", ".en"]]) {
+      const file = path.join(dir, name);
       const page = await browser.newPage({ viewport: { width: 1100, height: 800 }, deviceScaleFactor: 1 });
       await page.goto(`file://${file}?lang=${lang}`);
-      const out = path.join(docs, topic, "assets", `interactive-preview${suffix}.png`);
+      const out = path.join(docs, topic, "assets", `${stem}${suffix}.png`);
       const top = await page.locator("main").boundingBox();
       const first = await page.locator("section").first().boundingBox();
       await page.screenshot({

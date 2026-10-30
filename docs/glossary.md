@@ -47,6 +47,18 @@
 | 算力最优 | compute-optimal | 在给定训练算力下损失最低的模型大小与数据量组合 | [07](07-scaling-laws/README.md) |
 | 等算力曲线 | isoFLOP curve | 算力相同、模型大小不同的一组实验的损失曲线 | [07](07-scaling-laws/README.md) |
 | 涌现 | emergent abilities | 在某个规模下看似突然出现的能力 | [07](07-scaling-laws/README.md) |
+| 微调 | fine-tuning | 在预训练模型的基础上，用较少的特定数据继续训练 | [08](08-finetuning/README.md) |
+| 监督微调 / 指令微调 | SFT / instruction tuning | 用“指令-回答”样本微调，让模型学会按指令作答 | [08](08-finetuning/README.md) |
+| 对话模板 | chat template / prompt template | 把指令和回答拼成固定格式文本的规则 | [08](08-finetuning/README.md) |
+| 损失掩码 | loss masking | 只在回答部分计算损失，提问部分不计 | [08](08-finetuning/README.md) |
+| 参数高效微调 | PEFT (parameter-efficient fine-tuning) | 只训练很少一部分参数的微调方法，如 LoRA | [08](08-finetuning/README.md) |
+| 低秩适配 | LoRA (low-rank adaptation) | 冻结 W，学习低秩更新 BA，可在训练后合并进 W | [08](08-finetuning/README.md) |
+| QLoRA | QLoRA | 把冻结的底座量化成 4 位 NF4，再在上面训练 LoRA | [08](08-finetuning/README.md) |
+| 量化 | quantization | 用更少的比特表示权重，如 INT8、INT4、NF4 | [08](08-finetuning/README.md) |
+| 灾难性遗忘 | catastrophic forgetting | 学新任务时把原有能力忘掉 | [08](08-finetuning/README.md) |
+| 回放 | replay | 微调时混入原来的训练数据，减轻遗忘 | [08](08-finetuning/README.md) |
+| 浮点运算次数 | FLOPs | 衡量计算量的单位；矩阵乘法 (m×k)(k×n) 约 2mkn 次 | [问答](qa/compute.md) |
+| 显存带宽 | memory bandwidth | 每秒能从显存读写的字节数，逐词元解码的主要瓶颈 | [问答](qa/compute.md) |
 | 推理强度 | reasoning effort | 控制推理模型回答前思考多久 | [问答](qa/reasoning-effort.md) |
 | 测试时计算 | test-time compute | 在使用模型时多花算力（如更长的思考）来提升效果 | [问答](qa/reasoning-effort.md) |
 | 推理引擎 / 推理框架 | inference engine / framework | 把模型高效地部署成服务的软件，如 vLLM、SGLang、DeepInfer | [问答](qa/deepinfer.md) |

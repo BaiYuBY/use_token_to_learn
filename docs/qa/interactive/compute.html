@@ -1,0 +1,453 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>算力计算器 · LLM Compute Calculator</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">大模型算力计算器</span><span lang="en">LLM Compute Calculator</span></h1>
+      <p class="sub">
+        <span lang="zh">训练要多少算力、多少卡、多少天？每个词元的计算花在哪里？推理为什么受显存带宽限制？和 RNN、KNN 比贵在哪？所有数字都由页面里的公式实时计算。</span>
+        <span lang="en">How much compute, how many GPUs and how many days does training take? Where does each token's compute go? Why is inference limited by memory bandwidth? How does this compare with RNNs and KNN? Every number is computed live from the formulas on this page.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. training -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">训练要多少算力：C ≈ 6ND</span><span lang="en">Training compute: C ≈ 6ND</span></h2>
+    <p class="hint">
+      <span lang="zh">每个参数处理每个训练词元，前向约 2 次运算、反向约 4 次，合计约 6 次。再除以 GPU 的峰值速度和实际利用率（MFU），就得到要用多少 GPU 小时。选一个真实模型，或者自己拖动。</span>
+      <span lang="en">Each parameter costs about 2 operations per training token in the forward pass and about 4 in the backward pass, about 6 in total. Divide by the GPU's peak speed and the fraction actually achieved (MFU) to get GPU-hours. Pick a real model, or drag the sliders yourself.</span>
+    </p>
+    <div class="controls" id="tr-presets"></div>
+    <div class="controls">
+      <label><span lang="zh">参数量</span><span lang="en">parameters</span> N <input id="tr-n" type="range" min="8" max="12.3" step="0.01" value="11.61"><span id="tr-n-v" class="mono"></span></label>
+      <label><span lang="zh">训练词元</span><span lang="en">training tokens</span> D <input id="tr-d" type="range" min="9" max="14" step="0.01" value="13.19"><span id="tr-d-v" class="mono"></span></label>
+    </div>
+    <div class="controls">
+      <label>GPU <select id="tr-gpu"></select></label>
+      <label>MFU <input id="tr-mfu" type="range" min="0.1" max="0.7" step="0.01" value="0.4"><span id="tr-mfu-v" class="mono"></span></label>
+      <label><span lang="zh">卡数</span><span lang="en">GPUs</span> <input id="tr-g" type="range" min="0" max="15" step="1" value="14"><span id="tr-g-v" class="mono"></span></label>
+      <label><span lang="zh">单价</span><span lang="en">price</span> $/GPU·h <input id="tr-p" type="range" min="0.5" max="6" step="0.1" value="2"><span id="tr-p-v" class="mono"></span></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="kv" id="tr-stats"></div></div>
+      <div class="col"><div class="callout" id="tr-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 2. breakdown -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">每个词元的计算花在哪里</span><span lang="en">Where each token's compute goes</span></h2>
+    <p class="hint">
+      <span lang="zh">前向计算中，每个权重做一次乘加（2 次运算）。前馈网络和注意力的投影都与上下文长度无关；注意力打分（q·k）和加权求和（·v）则要看前面所有词元，随上下文变长而增长。拖动上下文长度看看构成如何变化。</span>
+      <span lang="en">In the forward pass every weight does one multiply-add (2 operations). The feed-forward network and the attention projections do not depend on the context length; attention scores (q·k) and the weighted sum (·v) look at every earlier token, so they grow with the context. Drag the context length and watch the mix change.</span>
+    </p>
+    <div class="controls" id="bd-presets"></div>
+    <div class="controls">
+      <label><span lang="zh">上下文长度</span><span lang="en">context length</span> <input id="bd-ctx" type="range" min="9" max="20" step="0.1" value="13"><span id="bd-ctx-v" class="mono"></span></label>
+    </div>
+    <svg class="chart" id="bd-chart" viewBox="0 0 640 80"></svg>
+    <p class="hint" id="bd-total"></p>
+    <div class="legend" id="bd-legend"></div>
+    <div class="callout" id="bd-note"></div>
+  </section>
+
+  <!-- 3. decode -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">推理：受算力还是受显存带宽限制？</span><span lang="en">Inference: limited by compute or by memory bandwidth?</span></h2>
+    <p class="hint">
+      <span lang="zh">逐词元生成时，每一步都要把全部权重和每个请求的 KV 缓存从显存读一遍。一步所需时间 ≈ max(运算量 ÷ 算力, 读取字节数 ÷ 带宽)。批越大，同一份权重被越多请求共用。模型结构沿用第 2 节的选择。</span>
+      <span lang="en">When generating token by token, every step reads all the weights, plus each request's KV cache, from GPU memory. Step time ≈ max(FLOPs ÷ compute speed, bytes read ÷ bandwidth). A larger batch shares the same weights across more requests. The model architecture is the one chosen in part 2.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">批大小</span><span lang="en">batch</span> <input id="dc-b" type="range" min="0" max="11" step="0.1" value="0"><span id="dc-b-v" class="mono"></span></label>
+      <label><span lang="zh">上下文</span><span lang="en">context</span> <input id="dc-ctx" type="range" min="9" max="17" step="0.1" value="12"><span id="dc-ctx-v" class="mono"></span></label>
+      <label><span lang="zh">权重精度</span><span lang="en">weights</span> <select id="dc-prec"><option value="2">BF16 (2 B)</option><option value="1">FP8 (1 B)</option><option value="0.5">INT4 (0.5 B)</option></select></label>
+      <label>GPU <select id="dc-gpu"></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><svg class="chart" id="dc-chart" viewBox="0 0 420 240"></svg>
+        <div class="legend"><span><span class="dot" style="background:var(--primary)"></span><span lang="zh">整卡吞吐</span><span lang="en">total tokens/s</span></span><span><span class="dot" style="background:var(--accent)"></span><span lang="zh">每个请求的速度</span><span lang="en">tokens/s per request</span></span></div>
+      </div>
+      <div class="col"><div class="kv" id="dc-stats"></div><div class="callout" id="dc-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 4. compare -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">和 RNN、KNN 比：贵在哪里</span><span lang="en">Compared with RNNs and KNN: what costs more</span></h2>
+    <p class="hint">
+      <span lang="zh">假设一个 Transformer 和一个 RNN 的参数量相同（都用第 2 节的模型），处理一段长度为 T 的序列。两者每个词元的权重计算都是 2N，差别在于注意力、能否并行，以及生成时要保存的状态。KNN 不训练，每次查询都要与全部 n 个样本比较。</span>
+      <span lang="en">Suppose a Transformer and an RNN have the same number of parameters (the model from part 2) and process a sequence of length T. Both spend 2N per token on their weights; they differ in attention, in parallelism and in the state kept while generating. KNN does no training, but every query is compared with all n stored examples.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">序列长度</span><span lang="en">sequence length</span> T <input id="cp-t" type="range" min="9" max="20" step="0.1" value="13"><span id="cp-t-v" class="mono"></span></label>
+    </div>
+    <div class="scroll"><table class="t" id="cp-table"></table></div>
+    <h3><span lang="zh">KNN：成本随数据量增长</span><span lang="en">KNN: cost grows with the data</span></h3>
+    <div class="controls">
+      <label><span lang="zh">样本数</span><span lang="en">stored examples</span> n <input id="kn-n" type="range" min="3" max="10" step="0.1" value="7"><span id="kn-n-v" class="mono"></span></label>
+      <label><span lang="zh">向量维度</span><span lang="en">dimension</span> d <select id="kn-d"><option>128</option><option selected>768</option><option>4096</option></select></label>
+    </div>
+    <div class="kv" id="kn-stats"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../compute.html">前沿问答 · Q&amp;A</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const sci = v => { const e = Math.floor(Math.log10(v)); const m = v / 10 ** e; return `${m.toFixed(m < 9.95 ? 2 : 0).replace(/\.?0+$/, "")}e${e}`; };
+  const human = v => v >= 1e12 ? +(v / 1e12).toPrecision(3) + "T" : v >= 1e9 ? +(v / 1e9).toPrecision(3) + "B" : v >= 1e6 ? +(v / 1e6).toPrecision(3) + "M" : v >= 1e3 ? +(v / 1e3).toPrecision(3) + "K" : +v.toPrecision(3) + "";
+  const bytes = v => v >= 1e12 ? +(v / 1e12).toPrecision(3) + " TB" : v >= 1e9 ? +(v / 1e9).toPrecision(3) + " GB" : v >= 1e6 ? +(v / 1e6).toPrecision(3) + " MB" : +(v / 1e3).toPrecision(3) + " KB";
+  const dur = s => s < 1e-3 ? +(s * 1e6).toPrecision(3) + " µs" : s < 1 ? +(s * 1e3).toPrecision(3) + " ms" : s < 120 ? +s.toPrecision(3) + " s" : s < 7200 ? +(s / 60).toPrecision(3) + tr(" 分钟", " min") : s < 3 * 86400 ? +(s / 3600).toPrecision(3) + tr(" 小时", " h") : +(s / 86400).toPrecision(3) + tr(" 天", " days");
+  const kv = rows => rows.map(([k, v]) => `<span>${k}</span><b>${v}</b>`).join("");
+
+  // Peak dense BF16 FLOP/s and HBM bandwidth from NVIDIA datasheets (SXM versions)
+  // NVIDIA 官方规格（SXM 版本）：BF16 稠密峰值与显存带宽
+  const GPUS = {
+    a100: { name: "A100 80GB", flops: 312e12, bw: 2.039e12, mem: 80e9 },
+    h100: { name: "H100 80GB", flops: 989e12, bw: 3.35e12, mem: 80e9 },
+  };
+  ["tr-gpu", "dc-gpu"].forEach(id => { $(id).innerHTML = Object.entries(GPUS).map(([k, g]) => `<option value="${k}">${g.name}</option>`).join(""); $(id).value = "h100"; });
+
+  // ================= 1. training =================
+  // N and D from each paper or model card / 参数量与训练词元数来自各自的论文或模型卡
+  const TRAIN = [
+    { name: "GPT-3 175B", n: 175e9, d: 300e9 },
+    { name: "Chinchilla 70B", n: 70e9, d: 1.4e12 },
+    { name: "Llama 3 8B", n: 8e9, d: 15e12 },
+    { name: "Llama 3 70B", n: 70e9, d: 15e12 },
+    { name: "Llama 3 405B", n: 405e9, d: 15.6e12, actual: 30.84e6 },
+  ];
+  // exact values of the chosen preset; the sliders only move in steps / 预设的精确值（滑块有步长）
+  let trPreset = 4, trN = TRAIN[4].n, trD = TRAIN[4].d;
+  $("tr-presets").innerHTML = TRAIN.map((m, i) => `<button data-i="${i}">${m.name}</button>`).join("");
+  $("tr-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    trPreset = +b.dataset.i; trN = TRAIN[trPreset].n; trD = TRAIN[trPreset].d;
+    $("tr-n").value = Math.log10(trN); $("tr-d").value = Math.log10(trD); renderTr();
+  }));
+  ["tr-n", "tr-d"].forEach(id => $(id).addEventListener("input", () => {
+    trPreset = null; trN = 10 ** +$("tr-n").value; trD = 10 ** +$("tr-d").value;
+  }));
+  function renderTr() {
+    const n = trN, d = trD, g = GPUS[$("tr-gpu").value];
+    const mfu = +$("tr-mfu").value, gpus = 2 ** +$("tr-g").value, price = +$("tr-p").value;
+    const p = TRAIN[trPreset];
+    $("tr-presets").querySelectorAll("button").forEach(b => b.classList.toggle("on", +b.dataset.i === trPreset));
+    $("tr-n-v").textContent = human(n); $("tr-d-v").textContent = human(d);
+    $("tr-mfu-v").textContent = Math.round(mfu * 100) + "%"; $("tr-g-v").textContent = gpus.toLocaleString(); $("tr-p-v").textContent = "$" + price.toFixed(1);
+    const C = 6 * n * d, gpuSeconds = C / (g.flops * mfu), hours = gpuSeconds / 3600;
+    $("tr-stats").innerHTML = kv([
+      [tr("训练算力 C = 6ND", "training compute C = 6ND"), sci(C) + " FLOPs"],
+      [tr("词元/参数", "tokens per parameter"), (d / n).toFixed(d / n < 10 ? 1 : 0)],
+      [tr("GPU 小时", "GPU-hours"), human(hours)],
+      [tr(`${gpus.toLocaleString()} 张卡需要`, `on ${gpus.toLocaleString()} GPUs`), dur(gpuSeconds / gpus)],
+      [tr("算力费用（按假设单价）", "compute cost (assumed price)"), "$" + human(hours * price)],
+      [tr("训练时显存（16 字节/参数）", "training memory (16 B/param)"), bytes(16 * n) + tr(`，至少 ${Math.ceil(16 * n / g.mem)} 张卡`, `, at least ${Math.ceil(16 * n / g.mem)} GPUs`)],
+    ]);
+    let note = tr("C = 6ND 只计权重的矩阵乘法；注意力打分、重算激活值、通信和故障重启都会让真实耗时更长。",
+                  "C = 6ND counts only the weights' matrix multiplies; attention scores, activation recomputation, communication and restarts all make the real time longer.");
+    if (trPreset === 4) {
+      const eff = C / (p.actual * 3600 * GPUS.h100.flops);
+      note = tr(`Meta 的模型卡写明 405B 实际用了 <b>3084 万</b> H100 GPU 小时，对应的有效利用率约为 <b>${(eff * 100).toFixed(0)}%</b>。论文报告训练时的 MFU 为 38%–43%，差距可能来自故障重启、检查点等时间。`,
+                `Meta's model card says the 405B model actually used <b>30.84M</b> H100 GPU-hours, an effective utilization of about <b>${(eff * 100).toFixed(0)}%</b>. The paper reports an MFU of 38%–43% while training; the gap may come from restarts, checkpointing and similar time.`);
+    }
+    $("tr-note").innerHTML = note;
+  }
+
+  // ================= 2. breakdown =================
+  // Llama 2 configurations (Touvron et al., 2023): 70B uses grouped-query attention with 8 KV heads
+  // Llama 2 的结构：70B 使用 8 个 KV 头的分组查询注意力
+  const ARCH = [
+    { name: "Llama 2 7B", L: 32, d: 4096, heads: 32, kv: 32, ffn: 11008, V: 32000 },
+    { name: "Llama 2 70B", L: 80, d: 8192, heads: 64, kv: 8, ffn: 28672, V: 32000 },
+  ];
+  let arch = ARCH[0];
+  $("bd-presets").innerHTML = ARCH.map((a, i) => `<button data-i="${i}" class="${i ? "" : "on"}">${a.name}</button>`).join("");
+  $("bd-presets").querySelectorAll("button").forEach(b => b.addEventListener("click", () => {
+    arch = ARCH[+b.dataset.i]; $("bd-presets").querySelectorAll("button").forEach(x => x.classList.toggle("on", x === b)); renderAll();
+  }));
+  function parts(a, ctx) {
+    const dh = a.d / a.heads;
+    return {
+      ffn: 2 * a.L * 3 * a.d * a.ffn,
+      proj: 2 * a.L * (2 * a.d * a.d + 2 * a.d * a.kv * dh),
+      scores: 2 * a.L * ctx * a.d,  // causal: ctx/2 tokens on average, q·k and ·v / 因果：平均看 ctx/2 个词元
+      head: 2 * a.d * a.V,
+    };
+  }
+  const matmulParams = a => (parts(a, 0).ffn + parts(a, 0).proj + parts(a, 0).head) / 2;
+  const kvBytesPerToken = (a, b = 2) => 2 * a.L * a.kv * (a.d / a.heads) * b;
+  const PART = {
+    ffn: { zh: "前馈网络 FFN", en: "feed-forward network", c: "--b3" },
+    proj: { zh: "注意力投影 q k v o", en: "attention projections q k v o", c: "--b1" },
+    scores: { zh: "注意力打分与加权", en: "attention scores and weighted sum", c: "--b4" },
+    head: { zh: "输出层", en: "output layer", c: "--muted" },
+  };
+  function renderBd() {
+    const ctx = Math.round(2 ** +$("bd-ctx").value);
+    $("bd-ctx-v").textContent = ctx.toLocaleString();
+    const p = parts(arch, ctx), total = Object.values(p).reduce((a, b) => a + b, 0);
+    const svg = $("bd-chart"), W = 640;
+    let x = 10, s = "";
+    for (const [k, v] of Object.entries(p)) {
+      const w = (W - 20) * v / total;
+      s += `<rect x="${x}" y="10" width="${w}" height="60" fill="${css(PART[k].c)}"/>`;
+      if (w > 46) s += `<text x="${x + w / 2}" y="46" text-anchor="middle" style="fill:${css("--bg")};font-size:15px;font-weight:700">${(100 * v / total).toFixed(0)}%</text>`;
+      x += w;
+    }
+    svg.innerHTML = s;
+    $("bd-total").innerHTML = `${tr("每个词元的前向计算量", "forward FLOPs per token")}: <b>${(total / 1e9).toFixed(1)} GFLOPs</b> · 2N = ${(2 * matmulParams(arch) / 1e9).toFixed(1)} GFLOPs<br>` +
+      `${tr("整段序列的注意力打分随长度平方增长", "attention over a whole sequence grows with the square of its length")}: <b>${sci(p.scores * ctx)} FLOPs</b>`;
+    $("bd-legend").innerHTML = Object.entries(PART).map(([k, v]) => `<span><span class="dot" style="background:var(${v.c})"></span>${tr(v.zh, v.en)}: ${(p[k] / 1e9).toFixed(2)} G</span>`).join("");
+    const share = p.scores / total;
+    $("bd-note").innerHTML = share < 0.1
+      ? tr(`上下文 ${ctx.toLocaleString()} 时，注意力打分只占 ${(share * 100).toFixed(1)}%，“每个词元 2N”是很好的近似。`, `At ${ctx.toLocaleString()} tokens of context, attention scores are only ${(share * 100).toFixed(1)}%, so “2N per token” is a good approximation.`)
+      : tr(`上下文 ${ctx.toLocaleString()} 时，注意力打分已占 ${(share * 100).toFixed(0)}%。长上下文的计算量主要来自这里，这也是 FlashAttention、稀疏注意力和滑动窗口等技术的动机。`, `At ${ctx.toLocaleString()} tokens of context, attention scores already take ${(share * 100).toFixed(0)}%. This is where long contexts spend their compute, and why FlashAttention, sparse attention and sliding windows exist.`);
+  }
+
+  // ================= 3. decode =================
+  function step(a, g, batch, ctx, wb) {
+    const n = matmulParams(a);
+    const flops = batch * (2 * n + 4 * a.L * ctx * a.d);  // a decoding token attends to all ctx tokens / 解码的词元要看全部 ctx 个词元
+    const read = n * wb + batch * ctx * kvBytesPerToken(a);
+    const tc = flops / g.flops, tm = read / g.bw;
+    return { t: Math.max(tc, tm), tc, tm, read };
+  }
+  function renderDc() {
+    const g = GPUS[$("dc-gpu").value], wb = +$("dc-prec").value;
+    const batch = Math.round(2 ** +$("dc-b").value), ctx = Math.round(2 ** +$("dc-ctx").value);
+    $("dc-b-v").textContent = batch; $("dc-ctx-v").textContent = ctx.toLocaleString();
+    const xs = [], tot = [], per = [];
+    for (let e = 0; e <= 11; e += 0.05) { const b = 2 ** e, st = step(arch, g, b, ctx, wb); xs.push(b); tot.push(b / st.t); per.push(1 / st.t); }
+    const st = step(arch, g, batch, ctx, wb);
+    const y0 = Math.min(...per) / 2, y1 = Math.max(...tot) * 2;
+    const yt = []; for (let e = Math.ceil(Math.log10(y0)); e <= Math.floor(Math.log10(y1)); e++) yt.push(10 ** e);
+    chart($("dc-chart"), [
+      { x: xs, y: tot, color: css("--primary"), line: true },
+      { x: xs, y: per, color: css("--accent"), line: true },
+    ], { xlog: true, ylog: true, x0: 1, x1: 2048, y0, y1, xticks: [1, 8, 64, 512], yticks: yt, yfmt: human, xlabel: tr("批大小", "batch size"),
+         marks: [{ x: batch, y: batch / st.t, color: css("--primary") }, { x: batch, y: 1 / st.t, color: css("--accent") }] });
+    const weights = matmulParams(arch) * wb, cache = batch * ctx * kvBytesPerToken(arch);
+    const fits = weights + cache <= g.mem;
+    $("dc-stats").innerHTML = kv([
+      [tr("每步：计算需要", "per step: compute"), dur(st.tc)],
+      [tr("每步：读取显存需要", "per step: memory reads"), dur(st.tm)],
+      [tr("整卡吞吐", "total throughput"), human(batch / st.t) + tr(" 词元/秒", " tokens/s")],
+      [tr("每个请求的速度", "per request"), human(1 / st.t) + tr(" 词元/秒", " tokens/s")],
+      [tr("权重", "weights"), bytes(weights)],
+      [tr("KV 缓存（BF16）", "KV cache (BF16)"), `${bytes(cache)} <span class="hint">(${bytes(kvBytesPerToken(arch))}/${tr("词元", "token")})</span>`],
+      [tr("显存够吗？", "fits in memory?"), fits ? `<span class="good">${tr("够", "yes")}</span>` : `<span class="bad">${tr(`不够，超过 ${bytes(g.mem)}`, `no, over ${bytes(g.mem)}`)}</span>`],
+    ]);
+    $("dc-note").innerHTML = st.tm > st.tc
+      ? tr(`现在<b>受显存带宽限制</b>：读数据比计算慢 ${(st.tm / st.tc).toFixed(0)} 倍，计算单元大部分时间在等数据。加大批次可以让更多请求共用一次权重读取。`, `Now <b>memory-bound</b>: reading data is ${(st.tm / st.tc).toFixed(0)}× slower than computing, so the compute units mostly wait. A bigger batch lets more requests share one read of the weights.`)
+      : tr("现在<b>受算力限制</b>：批已经足够大，再加大批次只会让每个请求变慢，整卡吞吐不再增加。", "Now <b>compute-bound</b>: the batch is large enough; making it bigger only slows each request without raising total throughput.");
+    if (!fits) $("dc-note").innerHTML += tr(" 显存放不下时，需要多卡并行、量化，或减少批大小与上下文。", " When it does not fit, you need several GPUs, quantization, or a smaller batch or context.");
+  }
+
+  // ================= 4. compare =================
+  function renderCp() {
+    const T = Math.round(2 ** +$("cp-t").value), n = matmulParams(arch);
+    $("cp-t-v").textContent = T.toLocaleString();
+    const tf = 2 * n * T + 2 * arch.L * T * T * arch.d, rnn = 2 * n * T;
+    const rows = [
+      [tr("每段序列的前向计算量", "forward FLOPs per sequence"), sci(tf), sci(rnn)],
+      [tr("其中注意力占比", "share from attention"), (100 * (tf - rnn) / tf).toFixed(1) + "%", "0%"],
+      [tr("训练时必须串行的步数", "sequential steps in training"), "1", T.toLocaleString()],
+      [tr("生成时必须串行的步数", "sequential steps when generating"), T.toLocaleString(), T.toLocaleString()],
+      [tr("生成到最后要保存的状态", "state kept at the end of generation"), bytes(T * kvBytesPerToken(arch)) + tr("（KV 缓存）", " (KV cache)"), bytes(2 * arch.L * arch.d * 2) + tr("（固定）", " (fixed)")],
+    ];
+    $("cp-table").innerHTML = `<tr><th></th><th>Transformer</th><th>${tr("RNN（参数量相同）", "RNN (same size)")}</th></tr>` + rows.map(r => `<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td></tr>`).join("");
+
+    const nk = 10 ** +$("kn-n").value, dk = +$("kn-d").value, store = nk * dk * 4;
+    const g = GPUS.h100;
+    $("kn-n-v").textContent = human(nk);
+    $("kn-stats").innerHTML = kv([
+      [tr("训练", "training"), tr("不需要：把数据存下来即可", "none: just store the data")],
+      [tr("每次查询的计算量 ≈ 3nd", "FLOPs per query ≈ 3nd"), sci(3 * nk * dk)],
+      [tr("要存下的数据（FP32）", "data to store (FP32)"), bytes(store)],
+      [tr("一张 H100 暴力搜索一次（读完全部数据）", "one brute-force query on an H100 (read everything)"), dur(store / g.bw) + (store > g.mem ? tr("，且放不进一张卡", ", and it does not fit on one GPU") : "")],
+      [tr("对比：Transformer 处理一个词元", "for comparison: a Transformer token"), tr(`约 ${sci(2 * n)} FLOPs，与训练数据多少无关`, `about ${sci(2 * n)} FLOPs, whatever the size of the training data`)],
+    ]);
+  }
+
+  // ================= chart helper =================
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 56, R = 12, T = 12, B = 40;
+    const tx = v => o.xlog ? Math.log10(v) : v, ty = v => o.ylog ? Math.log10(v) : v;
+    const fx = v => L + (W - L - R) * (tx(v) - tx(o.x0)) / (tx(o.x1) - tx(o.x0));
+    const fy = v => T + (H - T - B) * (1 - (ty(Math.min(o.y1, Math.max(o.y0, v))) - ty(o.y0)) / (ty(o.y1) - ty(o.y0)));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<line class="grid" x1="${fx(v)}" x2="${fx(v)}" y1="${T}" y2="${H - B}"/><text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    series.forEach(se => { s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`; });
+    (o.marks || []).forEach(m => { s += `<circle cx="${fx(m.x)}" cy="${fy(m.y)}" r="6" fill="${m.color}" stroke="${css("--bg")}" stroke-width="2"/>`; });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 6}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["一个 7B 模型用 2 万亿词元训练，训练算力大约是多少？", "A 7B model trained on 2 trillion tokens needs roughly how much compute?"],
+      opts: [["约 1.4 × 10²² FLOPs", "About 1.4 × 10²² FLOPs"], ["约 8.4 × 10²² FLOPs", "About 8.4 × 10²² FLOPs"], ["约 8.4 × 10²⁵ FLOPs", "About 8.4 × 10²⁵ FLOPs"]],
+      a: 1, ex: ["6 × 7×10⁹ × 2×10¹² = 8.4×10²²。2ND 只是前向，训练还要反向传播。", "6 × 7×10⁹ × 2×10¹² = 8.4×10²². 2ND would be the forward pass only; training also needs backpropagation."] },
+    { q: ["一次只服务一个用户时，GPU 生成词元的速度主要受什么限制？", "When serving a single user, what mainly limits how fast the GPU generates tokens?"],
+      opts: [["算力（FLOP/s）", "Compute (FLOP/s)"], ["显存带宽：每一步都要读一遍全部权重", "Memory bandwidth: every step reads all the weights"], ["网络速度", "Network speed"]],
+      a: 1, ex: ["batch 为 1 时，每读 1 字节权重只做约 1 次运算，远低于 H100 约 295 次/字节的平衡点。", "With a batch of 1, each byte of weights read supports only about 1 operation, far below the H100's balance point of about 295 per byte."] },
+    { q: ["和参数量相同的 LSTM 相比，Transformer 每个词元的权重计算量：", "Compared with an LSTM of the same size, a Transformer's per-token compute on its weights is:"],
+      opts: [["多很多", "much higher"], ["差不多，都约为 2N；区别在注意力、并行性和 KV 缓存", "about the same, roughly 2N; the differences are attention, parallelism and the KV cache"], ["少很多", "much lower"]],
+      a: 1, ex: ["每个权重每个词元都做一次乘加。Transformer 训练时可以并行处理整个序列，这正是它能用上海量算力的原因。", "Every weight does one multiply-add per token. A Transformer can process a whole sequence in parallel during training, which is exactly why it can use huge amounts of compute."] },
+    { q: ["一个 MoE 模型总参数 671B、每个词元激活 37B，每个词元的前向计算量约为：", "An MoE model with 671B parameters in total and 37B active per token costs about this per token in the forward pass:"],
+      opts: [["2 × 671B", "2 × 671B"], ["2 × 37B", "2 × 37B"], ["671B × 37B", "671B × 37B"]],
+      a: 1, ex: ["计算量看激活参数；但全部参数都要放在显存里，所以显存看总参数。", "Compute follows the active parameters, but all parameters must sit in memory, so memory follows the total."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderTr(); renderBd(); renderDc(); renderCp(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  ["tr-n", "tr-d", "tr-mfu", "tr-g", "tr-p", "tr-gpu"].forEach(id => $(id).addEventListener("input", renderTr));
+  $("bd-ctx").addEventListener("input", () => { renderBd(); });
+  ["dc-b", "dc-ctx", "dc-prec", "dc-gpu"].forEach(id => $(id).addEventListener("input", renderDc));
+  ["cp-t", "kn-n", "kn-d"].forEach(id => $(id).addEventListener("input", renderCp));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>
