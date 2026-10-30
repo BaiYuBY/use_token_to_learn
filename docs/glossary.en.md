@@ -98,6 +98,13 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 首词元延迟 / 每词元延迟 | TTFT / TPOT | Time from arrival to the first token / average gap between later tokens | [13](13-serving/README.en.md) |
 | 有效吞吐 | goodput | Throughput of requests that meet their latency targets | [13](13-serving/README.en.md) |
 | 张量并行 / 流水线并行 | TP / PP (tensor / pipeline parallelism) | Split each layer's matrices across GPUs / put different layers on different GPUs | [13](13-serving/README.en.md) |
+| 位置插值 | position interpolation (PI) | Slows all RoPE frequencies so longer positions fall back into the trained range; needs a little fine-tuning | [14](14-long-context/README.en.md) |
+| NTK 缩放 / YaRN | NTK-aware scaling / YaRN | RoPE extensions that stretch the slow dimension pairs while keeping the fast ones | [14](14-long-context/README.en.md) |
+| 滑动窗口注意力 | sliding-window attention | Each token attends only to the last w tokens; cost grows linearly with length | [14](14-long-context/README.en.md) |
+| 注意力汇聚点 | attention sink | Models park much attention on the first few tokens, which must be kept when streaming | [14](14-long-context/README.en.md) |
+| 稀疏注意力 | sparse attention | Computes only some query-key scores, e.g. block-sparse or top-k block selection (NSA, MoBA) | [14](14-long-context/README.en.md) |
+| 有效上下文 | effective context | The context length a model actually uses well, often shorter than advertised | [14](14-long-context/README.en.md) |
+| 大海捞针 | needle in a haystack | Hide a fact in a long text and ask about it, testing long-range retrieval | [14](14-long-context/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

@@ -45,7 +45,7 @@ Key design points (figures from DeepSeek's deployment Q&A):
 | Parallelism: attention data parallelism / balanced context parallelism, MoE expert parallelism + EPLB | Spread the model and requests over many accelerators and keep their load balanced | [13 Serving systems](../13-serving/README.en.md) |
 | DSpark speculative decoding with confidence-scheduled verification | Guess a few draft tokens and verify them together, choosing how many to verify by confidence; the document reports about 30% fewer draft tokens verified per step with essentially the same accepted length | [12 Inference optimization](../12-inference-optimization/README.en.md) |
 | Asynchronous scheduling | The CPU schedules the next step while the GPU computes this one, removing idle time | [13 Serving systems](../13-serving/README.en.md) |
-| SWA bounded replay | On a cache hit, recompute only a short tail, working with sliding-window attention to cut prefill work | 14 Long context (planned) |
+| SWA bounded replay | On a cache hit, recompute only a short tail, working with sliding-window attention to cut prefill work | [14 Long context](../14-long-context/README.en.md) |
 | Batch-invariant inference, deterministic sampling | The same request gives exactly the same result whatever it is batched with and however often it runs | [13 Serving systems](../13-serving/README.en.md) |
 | Structured outputs | Force output to match a JSON schema, regex or grammar | 11 Decoding and sampling (planned) |
 

@@ -98,6 +98,13 @@
 | 首词元延迟 / 每词元延迟 | TTFT / TPOT | 从请求到达到第一个词元的时间 / 之后每个词元的平均间隔 | [13](13-serving/README.md) |
 | 有效吞吐 | goodput | 满足延迟要求的请求的吞吐 | [13](13-serving/README.md) |
 | 张量并行 / 流水线并行 | TP / PP (tensor / pipeline parallelism) | 把每层的矩阵切到多张卡上 / 把不同的层放到不同的卡上 | [13](13-serving/README.md) |
+| 位置插值 | position interpolation (PI) | 把 RoPE 的所有频率按比例调慢，让更长的位置落回训练范围；需要少量微调 | [14](14-long-context/README.md) |
+| NTK 缩放 / YaRN | NTK-aware scaling / YaRN | 主要拉伸转得慢的 RoPE 维度、保留快的维度的外推方法 | [14](14-long-context/README.md) |
+| 滑动窗口注意力 | sliding-window attention | 每个词元只看最近 w 个词元，成本与长度成线性 | [14](14-long-context/README.md) |
+| 注意力汇聚点 | attention sink | 模型把大量注意力放在开头几个词元上；流式生成时要保留它们 | [14](14-long-context/README.md) |
+| 稀疏注意力 | sparse attention | 只计算部分查询与 key 的分数，如块稀疏、Top-k 块选择（NSA、MoBA） | [14](14-long-context/README.md) |
+| 有效上下文 | effective context | 模型真正能用好的上下文长度，常短于标称长度 | [14](14-long-context/README.md) |
+| 大海捞针 | needle in a haystack | 在长文中插入一句事实再提问，测试长距离检索 | [14](14-long-context/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

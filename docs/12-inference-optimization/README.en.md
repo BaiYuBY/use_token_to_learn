@@ -102,7 +102,7 @@ For Llama-2-7B (32 layers, 32 heads, head dimension 128, FP16), each token takes
 | **MQA** multi-query attention | All query heads share one K, V | 16 KiB (if applied to Llama-3-8B) | PaLM, Falcon |
 | **MLA** multi-head latent attention | Cache one low-dimensional compressed vector, expand it when used | ~69 KiB (61 layers) | DeepSeek-V2 / V3 |
 
-GQA is today's most common compromise: nearly MHA quality with a fraction of the KV cache (Ainslie et al., 2023). MLA caches only a 512-dimensional compressed vector plus a 64-dimensional position vector per layer (DeepSeek-AI, 2024). So DeepSeek-V3, with 671B parameters and 61 layers, needs only ~69 KiB of KV cache per token, much less than Llama-2-7B. Some models also use **sliding-window attention** in some layers, caching only the most recent tokens; see 14 Long context (planned).
+GQA is today's most common compromise: nearly MHA quality with a fraction of the KV cache (Ainslie et al., 2023). MLA caches only a 512-dimensional compressed vector plus a 64-dimensional position vector per layer (DeepSeek-AI, 2024). So DeepSeek-V3, with 671B parameters and 61 layers, needs only ~69 KiB of KV cache per token, much less than Llama-2-7B. Some models also use **sliding-window attention** in some layers, caching only the most recent tokens; see [14 Long context](../14-long-context/README.en.md).
 
 ### 3.3 Quantization
 

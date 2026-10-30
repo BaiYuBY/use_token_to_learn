@@ -29,7 +29,8 @@ Each chapter follows the same rhythm:
 | 11 | [Decoding and sampling](11-decoding/README.md) | [Decoding playground](11-decoding/interactive/decoding.html?lang=en) | ✅ done |
 | 12 | [Inference optimization](12-inference-optimization/README.md) | [Inference optimization playground](12-inference-optimization/interactive/inference.html?lang=en) | ✅ done |
 | 13 | [Serving systems](13-serving/README.md) | [Scheduling and memory playground](13-serving/interactive/serving.html?lang=en) | ✅ done |
-| 14–15 | Inference and deployment: long context, MoE | | 🚧 planned |
+| 14 | [Long context](14-long-context/README.md) | [RoPE extrapolation and attention patterns](14-long-context/interactive/long_context.html?lang=en) | ✅ done |
+| 15 | Inference and deployment: mixture of experts (MoE) | | 🚧 planned |
 | 16–24 | Applications and frontiers: multimodal, code models, prompt engineering, RAG and vector databases, knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
