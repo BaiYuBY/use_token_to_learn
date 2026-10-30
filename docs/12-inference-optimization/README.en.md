@@ -37,7 +37,7 @@ So the GPU mostly waits for data: decoding is **memory-bound**. That suggests se
 | Store and read less | Fewer bits for weights and KV | Quantization (§3.3) |
 | Get several tokens per read | Let the big model verify several guesses at once | Speculative decoding (§3.4) |
 | Move fewer intermediates | Compute attention in tiles; never store T × T | FlashAttention (§3.5) |
-| Read weights once for many requests | Batch many requests together | 13 Serving systems (planned) |
+| Read weights once for many requests | Batch many requests together | [13 Serving systems](../13-serving/README.en.md) |
 
 ## 2. Pictures
 

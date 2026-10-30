@@ -90,6 +90,14 @@
 | FP8 | FP8 (E4M3 / E5M2) | 8 位浮点数格式，新 GPU 原生支持，用于推理甚至训练 | [12](12-inference-optimization/README.md) |
 | FlashAttention / 在线 softmax | FlashAttention / online softmax | 分块计算注意力、边算边合并 softmax，不存 T × T 矩阵，结果精确 | [12](12-inference-optimization/README.md) |
 | 受带宽限制 | memory-bound | 速度由读写显存的快慢决定，而不是算力；逐词元解码就是典型 | [12](12-inference-optimization/README.md) |
+| 连续批处理 | continuous batching | 以每一轮前向为单位调度：完成的请求立即离开，新请求随时加入 | [13](13-serving/README.md) |
+| 分页注意力 | PagedAttention | 把 KV 缓存切成固定大小的块，用块表管理，按需分配 | [13](13-serving/README.md) |
+| 前缀缓存 | prefix caching | 相同前缀（如系统提示词）的 KV 只算一次、多个请求共享 | [13](13-serving/README.md) |
+| 分块预填充 | chunked prefill | 把长提示词分成几轮处理，与解码混合，避免卡住其他用户 | [13](13-serving/README.md) |
+| 预填充/解码分离 | prefill/decode disaggregation | 预填充和解码放在不同的 GPU 上，互不干扰，KV 缓存在两者之间传输 | [13](13-serving/README.md) |
+| 首词元延迟 / 每词元延迟 | TTFT / TPOT | 从请求到达到第一个词元的时间 / 之后每个词元的平均间隔 | [13](13-serving/README.md) |
+| 有效吞吐 | goodput | 满足延迟要求的请求的吞吐 | [13](13-serving/README.md) |
+| 张量并行 / 流水线并行 | TP / PP (tensor / pipeline parallelism) | 把每层的矩阵切到多张卡上 / 把不同的层放到不同的卡上 | [13](13-serving/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

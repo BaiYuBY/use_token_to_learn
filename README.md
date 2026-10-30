@@ -28,6 +28,7 @@
 | 10 推理模型与测试时计算 Reasoning | [中文](docs/10-reasoning/README.md) · [EN](docs/10-reasoning/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/10-reasoning/interactive/reasoning.html) | [reasoning.py](docs/10-reasoning/code/reasoning.py) |
 | 11 解码与采样 Decoding | [中文](docs/11-decoding/README.md) · [EN](docs/11-decoding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/11-decoding/interactive/decoding.html) | [decoding.py](docs/11-decoding/code/decoding.py) |
 | 12 推理优化 Inference Optimization | [中文](docs/12-inference-optimization/README.md) · [EN](docs/12-inference-optimization/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/12-inference-optimization/interactive/inference.html) | [inference.py](docs/12-inference-optimization/code/inference.py) |
+| 13 推理服务系统 Serving Systems | [中文](docs/13-serving/README.md) · [EN](docs/13-serving/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/13-serving/interactive/serving.html) | [serving.py](docs/13-serving/code/serving.py) |
 
 ## 前沿问答
 

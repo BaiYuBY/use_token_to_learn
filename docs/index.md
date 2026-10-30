@@ -28,7 +28,8 @@
 | 10 | [推理模型与测试时计算 Reasoning](10-reasoning/README.md) | [推理模型演示](10-reasoning/interactive/reasoning.html) | ✅ 已完成 |
 | 11 | [解码与采样 Decoding](11-decoding/README.md) | [解码演示](11-decoding/interactive/decoding.html) | ✅ 已完成 |
 | 12 | [推理优化 Inference optimization](12-inference-optimization/README.md) | [推理优化演示](12-inference-optimization/interactive/inference.html) | ✅ 已完成 |
-| 13–15 | 推理与部署：推理服务系统、长上下文、MoE | | 🚧 计划中 |
+| 13 | [推理服务系统 Serving systems](13-serving/README.md) | [调度与显存演示](13-serving/interactive/serving.html) | ✅ 已完成 |
+| 14–15 | 推理与部署：长上下文、MoE | | 🚧 计划中 |
 | 16–24 | 应用与前沿：多模态、代码模型、提示工程、RAG 与向量数据库、知识图谱与图数据库、Agent、MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
 
 ## 前沿问答

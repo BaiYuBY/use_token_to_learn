@@ -66,6 +66,7 @@ plugins:
             推理与部署: Inference & Deployment
             解码与采样: Decoding & Sampling
             推理优化: Inference Optimization
+            推理服务系统: Serving Systems
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -117,6 +118,7 @@ nav:
   - 推理与部署:
       - 解码与采样: 11-decoding/README.md
       - 推理优化: 12-inference-optimization/README.md
+      - 推理服务系统: 13-serving/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

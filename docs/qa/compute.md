@@ -149,7 +149,7 @@ assert counter.get_total_flops() == gpt_forward_flops(n, n_layers, d, t)
 - [06 预训练](../06-pretraining/README.md)：训练循环、MFU
 - [07 规模定律](../07-scaling-laws/README.md)：$C \approx 6ND$ 与算力最优分配
 - [08 微调](../08-finetuning/README.md)：训练时的显存账，以及 LoRA、QLoRA 如何省显存
-- **[12 推理优化](../12-inference-optimization/README.md)**、**13 推理服务系统**（计划中）：KV 缓存、量化、批处理
+- **[12 推理优化](../12-inference-optimization/README.md)**、**[13 推理服务系统](../13-serving/README.md)**：KV 缓存、量化、批处理
 
 ## 来源
 
