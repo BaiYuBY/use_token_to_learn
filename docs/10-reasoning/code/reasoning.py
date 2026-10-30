@@ -318,7 +318,7 @@ def main():
     print(f"group 1 (2 of 4 right): {adv[:4].numpy().round(2)};  group 2 (all right): {adv[4:].numpy()}  ✓")
 
     print("\n== one model, two modes (quick training) / 同一个模型的两种模式（快速训练） ==")
-    model = train(steps=1500, k_max=4)  # problems of up to 4 steps only, to keep it quick / 只用 4 步以内的题
+    model = train(steps=1500, batch_size=128, k_max=4)  # up to 4 steps only, to keep it quick / 只用 4 步以内的题
     test = [make_problem(rng, 4) for _ in range(200)]
     a_direct, a_cot = accuracy(model, test, False), accuracy(model, test, True)
     _, lengths, texts = solve(model, test[:1], True)

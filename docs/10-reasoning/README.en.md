@@ -142,7 +142,7 @@ The reasoning a model writes is not necessarily its real “thought process”. 
 
 ## 4. Minimal code
 
-Full code: [`code/reasoning.py`](code/reasoning.py); run `python docs/10-reasoning/code/reasoning.py` (about a minute and a half, including a check of the pass@k estimator, the GRPO advantage, and a quick training run). The full experiment is in [`figures/reasoning_figures.py`](figures/reasoning_figures.py) and takes about 11 minutes on a laptop CPU.
+Full code: [`code/reasoning.py`](code/reasoning.py); run `python docs/10-reasoning/code/reasoning.py` (about two minutes, including a check of the pass@k estimator, the GRPO advantage, and a quick training run). The full experiment is in [`figures/reasoning_figures.py`](figures/reasoning_figures.py) and takes about 11 minutes on a laptop CPU.
 
 Training data for the two modes:
 
