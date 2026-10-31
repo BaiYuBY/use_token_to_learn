@@ -1,0 +1,466 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>知识图谱交互演示 · Knowledge Graph Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .sent { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .trip { display: grid; gap: 3px; font-family: ui-monospace, monospace; font-size: .8rem; }
+  .trip div { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; }
+  .trip div.fixed { border-color: var(--good); }
+  .trip div.wrong { border-color: var(--bad); }
+  .trip b { color: var(--primary); font-weight: 600; }
+  textarea { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .82rem; width: 100%; min-height: 4.5em; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 8px; padding: 6px 8px; }
+  #gq-svg { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  #gq-svg text { font-size: 11px; fill: var(--ink); }
+  .res { display: grid; gap: 4px; }
+  .res div { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; font-size: .8rem; }
+  .res div.hit { border-color: var(--good); background: rgba(24,128,56,.10); }
+  .res small { color: var(--muted); display: block; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">知识图谱与图数据库 · 交互演示</span><span lang="en">Knowledge Graphs &amp; Graph Databases · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">一个由 600 个人、40 家公司、25 个城市组成的虚构世界，写成了 665 篇短文档。这一页在浏览器里实时完成：从文字抽取三元组、实体消解、类 Cypher 图查询，以及与关键词检索的对比。</span>
+        <span lang="en">A made-up world of 600 people, 40 companies and 25 cities, written as 665 short documents. This page does it all live in your browser: extract triples from text, resolve entities, run Cypher-like graph queries, and compare with keyword retrieval.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. extraction -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">从文字到三元组</span><span lang="en">From text to triples</span></h2>
+    <p class="hint">
+      <span lang="zh">知识图谱的基本单位是三元组：（主语，关系，宾语）。这里用句式规则抽取（实际中多由大模型完成）；代词 She / He / It 指向文档开头的主语。人物档案常把公司写成简称（Gasel），公司文档却写全称（Gasel Bank Ltd.），所以还要做<b>实体消解</b>，把同一实体的不同叫法合成一个节点。</span>
+      <span lang="en">The basic unit of a knowledge graph is a triple: (subject, relation, object). Here sentence patterns do the extraction (in practice usually an LLM); the pronouns She / He / It refer to the document's first subject. People's profiles often shorten a company's name (Gasel) while company documents use the full one (Gasel Bank Ltd.), so <b>entity resolution</b> must merge different names of the same entity into one node.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">文档</span><span lang="en">document</span> <select id="ex-doc"></select></label>
+    </div>
+    <div class="sent" id="ex-text"></div>
+    <div class="row" style="margin-top:8px">
+      <div class="col"><h3><span lang="zh">抽取结果</span><span lang="en">extracted</span></h3><div class="trip" id="ex-raw"></div></div>
+      <div class="col"><h3><span lang="zh">实体消解后</span><span lang="en">after entity resolution</span></h3><div class="trip" id="ex-res"></div></div>
+    </div>
+    <div class="stats" id="ex-stats"></div>
+  </section>
+
+  <!-- 2. graph + cypher -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">图查询：沿着关系走</span><span lang="en">Graph queries: follow the relations</span></h2>
+    <p class="hint">
+      <span lang="zh">Cypher 是图数据库（如 Neo4j）的查询语言：用 <code>(节点)-[:关系]->(节点)</code> 画出要找的模式。选一个人和一个查询模板，或者直接改下面的查询再运行。本页的引擎只支持一条链式模式、名字过滤和 <code>RETURN x.name</code> / <code>count(DISTINCT x)</code>。</span>
+      <span lang="en">Cypher is the query language of graph databases such as Neo4j: you draw the pattern you want as <code>(node)-[:REL]->(node)</code>. Pick a person and a query template, or edit the query below and run it. This page's engine supports one chain pattern, a name filter and <code>RETURN x.name</code> / <code>count(DISTINCT x)</code>.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">人物</span><span lang="en">person</span> <select id="gq-person"></select></label>
+      <label><span lang="zh">查询</span><span lang="en">query</span> <select id="gq-tmpl"></select></label>
+    </div>
+    <textarea id="gq-cypher" spellcheck="false"></textarea>
+    <div class="controls"><button id="gq-run">▶ <span lang="zh">运行</span><span lang="en">run</span></button><span id="gq-result" class="mono"></span></div>
+    <svg id="gq-svg" viewBox="0 0 760 380"></svg>
+    <p class="hint" id="gq-cap"></p>
+  </section>
+
+  <!-- 3. multi-hop retrieval -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">多跳问题：检索 vs 图</span><span lang="en">Multi-hop questions: retrieval vs. the graph</span></h2>
+    <p class="hint">
+      <span lang="zh">同一个人，问 1–3 跳的问题。左：一次 BM25 检索的前 5 篇；中：逐跳检索（读第一篇、抽出下一个实体、再检索）；右：图查询。绿色是回答需要的文档。</span>
+      <span lang="en">Same person, questions of 1–3 hops. Left: the top 5 of one BM25 search; middle: hop-by-hop search (read the top hit, extract the next entity, search again); right: the graph query. Green marks documents the answer needs.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">跳数</span><span lang="en">hops</span> <select id="mh-hops"><option>1</option><option selected>2</option><option>3</option></select></label>
+    </div>
+    <p class="mono" id="mh-q"></p>
+    <div class="row">
+      <div class="col"><h3><span lang="zh">一次检索</span><span lang="en">one search</span></h3><div class="res" id="mh-single"></div><p id="mh-single-ok"></p></div>
+      <div class="col"><h3><span lang="zh">逐跳检索</span><span lang="en">hop by hop</span></h3><div class="res" id="mh-iter"></div><p id="mh-iter-ok"></p></div>
+      <div class="col"><h3><span lang="zh">图查询</span><span lang="en">graph query</span></h3><div class="res" id="mh-graph"></div></div>
+    </div>
+    <div class="stats" id="mh-stats"></div>
+    <div class="callout" id="mh-note"></div>
+  </section>
+
+  <!-- 4. global questions -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">全局问题与 GraphRAG</span><span lang="en">Global questions and GraphRAG</span></h2>
+    <p class="hint">
+      <span lang="zh">“哪家公司员工最多？”这类问题要看完整个语料：检索前 k 篇只能数到 k 个。图数据库可以直接计数。GraphRAG（微软，2024）的做法是先在图上找出<b>社区</b>（连接紧密的群体），为每个社区预先写好摘要；全局问题来了，就对所有社区摘要做 map-reduce。</span>
+      <span lang="en">Questions like “which company employs the most people?” need the whole corpus: retrieving the top k can count at most k. A graph database counts directly. GraphRAG (Microsoft, 2024) finds <b>communities</b> (densely linked groups) in the graph and writes a summary for each in advance; a global question is then answered by map-reduce over all the community summaries.</span>
+    </p>
+    <div class="row">
+      <div class="col"><div class="legend" id="gl-leg"></div><svg class="chart" id="gl-chart" viewBox="0 0 640 260"></svg></div>
+      <div class="col"><div class="res" id="gl-comm"></div></div>
+    </div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与 PyTorch 代码：</span><span lang="en">Write-up and PyTorch code: </span>
+    <a href="../README.html">20 知识图谱与图数据库 · Knowledge Graphs</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+
+<script src="knowledge_graph_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.KG_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  // ================= the same algorithms as code/knowledge_graph.py =================
+  const PATTERNS = [[/^(.+?) was born in ([A-Z]\w+)\.$/, "BORN_IN"], [/^(She|He) works at (.+?)\.$/, "WORKS_AT"], [/^(She|He) is a friend of (.+?)\.$/, "KNOWS"],
+    [/^(.+?) is headquartered in ([A-Z]\w+)\.$/, "LOCATED_IN"], [/^(It) was founded in \d+ by (.+?)\.$/, "FOUNDED_BY"], [/^(.+?) is a city in ([A-Z]\w+)\.$/, "IN_COUNTRY"]];
+  function extract(text) {
+    const out = []; let subject = null;
+    for (const sent of text.split(/(?<=\.)\s+(?=[A-Z])/)) {
+      for (const [re, rel] of PATTERNS) {
+        const m = sent.match(re); if (!m) continue;
+        let s = ["She", "He", "It"].includes(m[1]) ? subject : m[1];
+        subject = subject || s;
+        (rel === "KNOWS" ? m[2].split(" and ") : [m[2]]).forEach(o => out.push([s, rel, o]));
+        break;
+      }
+    }
+    return out;
+  }
+  const strip = n => n.replace(/\s+(Ltd|Inc|Group)\.?$/, "");
+  const FULL = new Set(D.triples.filter(t => t[1] === "LOCATED_IN").map(t => t[0]));
+  const BY_FIRST = {}; FULL.forEach(f => { const k = f.split(" ")[0]; (BY_FIRST[k] = BY_FIRST[k] || []).push(f); });
+  const canon = n => { n = strip(n); return !FULL.has(n) && (BY_FIRST[n] || []).length === 1 ? BY_FIRST[n][0] : n; };
+  const LABELS = { BORN_IN: ["Person", "City"], WORKS_AT: ["Person", "Company"], KNOWS: ["Person", "Person"], LOCATED_IN: ["Company", "City"], FOUNDED_BY: ["Company", "Person"], IN_COUNTRY: ["City", "Country"] };
+  const OUT = new Map(), INC = new Map(), LABEL = new Map();
+  const add = (m, k, v) => { if (!m.has(k)) m.set(k, new Set()); m.get(k).add(v); };
+  D.triples.forEach(([s, r, o]) => { add(OUT, s + "|" + r, o); add(INC, o + "|" + r, s); if (!LABEL.has(s)) LABEL.set(s, LABELS[r][0]); if (!LABEL.has(o)) LABEL.set(o, LABELS[r][1]); });
+  const step = (n, r, fwd) => [...((fwd ? OUT : INC).get(n + "|" + r) || [])];
+  function query(cypher) {
+    const m = cypher.match(/^\s*MATCH\s+([\s\S]+?)\s+RETURN\s+([\s\S]+?)\s*$/);
+    if (!m) throw new Error("MATCH ... RETURN ...");
+    const nodes = [...m[1].matchAll(/\((\w*)(?::(\w+))?(?:\s*\{name:\s*"([^"]+)"\})?\)/g)].map(x => ({ v: x[1], l: x[2] || null, n: x[3] || null }));
+    const rels = [...m[1].matchAll(/-\[:(\w+)\]->|<-\[:(\w+)\]-/g)].map(x => [x[1] || x[2], !!x[1]]);
+    let rows = [...LABEL.keys()].filter(n => (!nodes[0].l || LABEL.get(n) === nodes[0].l) && (!nodes[0].n || nodes[0].n === n)).map(n => ({ [nodes[0].v]: n }));
+    rels.forEach(([rel, fwd], i) => {
+      const spec = nodes[i + 1], prev = nodes[i].v, next = [];
+      rows.forEach(row => step(row[prev], rel, fwd).forEach(n => { if ((!spec.l || LABEL.get(n) === spec.l) && (!spec.n || spec.n === n)) next.push({ ...row, [spec.v]: n }); }));
+      rows = next;
+    });
+    const c = m[2].match(/count\((?:DISTINCT\s+)?(\w+)\)/i);
+    if (c) return { count: new Set(rows.map(r => r[c[1]])).size, rows };
+    const v = m[2].split(".")[0];
+    return { values: [...new Set(rows.map(r => r[v]))].sort(), rows };
+  }
+  const tokens = t => t.toLowerCase().match(/[a-z0-9]+/g) || [];
+  const BM = (() => {
+    const bags = D.docs.map(([, t]) => { const m = new Map(); tokens(t).forEach(w => m.set(w, (m.get(w) || 0) + 1)); return m; });
+    const len = bags.map(m => [...m.values()].reduce((a, c) => a + c, 0)), avg = len.reduce((a, c) => a + c, 0) / len.length;
+    const df = new Map(); bags.forEach(m => m.forEach((_, w) => df.set(w, (df.get(w) || 0) + 1)));
+    const N = bags.length;
+    return (q, k) => {
+      const ws = [...new Set(tokens(q))];
+      const sc = bags.map((m, i) => ws.reduce((s, w) => { const tf = m.get(w) || 0; if (!tf) return s; const idf = Math.log(1 + (N - df.get(w) + 0.5) / (df.get(w) + 0.5)); return s + idf * tf * 2.2 / (tf + 1.2 * (0.25 + 0.75 * len[i] / avg)); }, 0));
+      return sc.map((v, i) => [v, i]).sort((a, b) => b[0] - a[0]).slice(0, k).map(p => p[1]);
+    };
+  })();
+  const PEOPLE = [...LABEL.keys()].filter(n => LABEL.get(n) === "Person").sort();
+
+  // ================= 1. extraction =================
+  function renderEx() {
+    const i = +$("ex-doc").value, [, text] = D.docs[i];
+    $("ex-text").textContent = text;
+    const raw = extract(text), truth = new Set(D.triples.map(t => t.join("|")));
+    const fmt = t => `(${esc(t[0])}, <b>${t[1]}</b>, ${esc(t[2])})`;
+    $("ex-raw").innerHTML = raw.map(t => `<div class="${truth.has(t.join("|")) ? "" : "wrong"}">${fmt(t)}</div>`).join("");
+    $("ex-res").innerHTML = raw.map(t => { const r = [canon(t[0]), t[1], canon(t[2])]; return `<div class="${r.join("|") !== t.join("|") ? "fixed" : ""}">${fmt(r)}</div>`; }).join("");
+    $("ex-stats").innerHTML = stat(tr("全部文档：消解前精确率", "all documents: precision before"), pct(D.raw_pr[0]), css("--bad")) + stat(tr("消解后", "after"), pct(D.pr[0]), css("--good")) +
+      stat(tr("节点数：消解前 → 后", "nodes: before → after"), `${D.raw_nodes} → ${D.nodes}`) + stat(tr("三元组（边）", "triples (edges)"), D.triples.length.toLocaleString("en-US"));
+  }
+
+  // ================= 2. graph + cypher =================
+  const TEMPLATES = [
+    ["born", ["出生城市（1 跳）", "birthplace (1 hop)"], p => `MATCH (p:Person {name: "${p}"})-[:BORN_IN]->(c:City) RETURN c.name`],
+    ["city", ["雇主所在城市（2 跳）", "employer's city (2 hops)"], p => `MATCH (p:Person {name: "${p}"})-[:WORKS_AT]->(co:Company)-[:LOCATED_IN]->(c:City) RETURN c.name`],
+    ["country", ["雇主所在国家（3 跳）", "employer's country (3 hops)"], p => `MATCH (p:Person {name: "${p}"})-[:WORKS_AT]->(co:Company)-[:LOCATED_IN]->(c:City)-[:IN_COUNTRY]->(k:Country) RETURN k.name`],
+    ["colleagues", ["同事人数", "number of colleagues"], p => `MATCH (p:Person {name: "${p}"})-[:WORKS_AT]->(co:Company)<-[:WORKS_AT]-(q:Person) RETURN count(DISTINCT q)`],
+    ["friends", ["朋友的雇主", "friends' employers"], p => `MATCH (p:Person {name: "${p}"})-[:KNOWS]->(f:Person)-[:WORKS_AT]->(co:Company) RETURN co.name`],
+    ["founder", ["雇主的创始人", "employer's founder"], p => `MATCH (p:Person {name: "${p}"})-[:WORKS_AT]->(co:Company)-[:FOUNDED_BY]->(f:Person) RETURN f.name`],
+  ];
+  function drawGraph(person, highlight) {
+    const svg = $("gq-svg"), W = 760, H = 380, cx = W / 2, cy = H / 2;
+    const ring = new Map([[person, 0]]), edges = [];
+    const nbr = (n) => Object.keys(LABELS).flatMap(r => [...step(n, r, true).map(o => [n, r, o]), ...(r === "WORKS_AT" && LABEL.get(n) === "Company" ? [] : step(n, r, false).map(s => [s, r, n]))]);
+    nbr(person).forEach(e => { const o = e[0] === person ? e[2] : e[0]; if (!ring.has(o)) ring.set(o, 1); edges.push(e); });
+    [...ring.keys()].filter(n => ring.get(n) === 1 && LABEL.get(n) !== "Person").forEach(n => nbr(n).filter(e => e[1] !== "FOUNDED_BY" || e[0] === n).forEach(e => {
+      const o = e[0] === n ? e[2] : e[0]; if (LABEL.get(o) === "Person" && e[1] !== "FOUNDED_BY") return; if (!ring.has(o)) ring.set(o, 2); edges.push(e); }));
+    [...ring.keys()].filter(n => ring.get(n) === 2 && LABEL.get(n) === "City").forEach(n => step(n, "IN_COUNTRY", true).forEach(o => { if (!ring.has(o)) ring.set(o, 3); edges.push([n, "IN_COUNTRY", o]); }));
+    const pos = new Map(), byRing = [0, 1, 2, 3].map(r => [...ring.keys()].filter(n => ring.get(n) === r));
+    byRing.forEach((ns, r) => ns.forEach((n, i) => { const a = (i + 0.5) / ns.length * 2 * Math.PI + r * 0.35; const rad = [0, 120, 230, 330][r]; pos.set(n, [cx + rad * Math.cos(a) * 1.05, cy + rad * Math.sin(a) * 0.5]); }));
+    const col = { Person: css("--primary"), Company: css("--accent"), City: "#188038", Country: "#8e24aa" };
+    const hi = new Set(highlight.map(e => e.join("|")));
+    let s = "";
+    edges.forEach(e => { const a = pos.get(e[0]), b = pos.get(e[2]); if (!a || !b) return; const h = hi.has(e.join("|")); s += `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${h ? css("--bad") : css("--line")}" stroke-width="${h ? 3 : 1.2}"/>`; if (h) s += `<text x="${(a[0] + b[0]) / 2}" y="${(a[1] + b[1]) / 2 - 3}" text-anchor="middle" style="fill:${css("--bad")};font-size:10px">${e[1]}</text>`; });
+    pos.forEach((p, n) => { const hN = highlight.some(e => e[0] === n || e[2] === n); s += `<circle cx="${p[0]}" cy="${p[1]}" r="${n === person ? 9 : 6}" fill="${col[LABEL.get(n)]}" stroke="${hN ? css("--bad") : "none"}" stroke-width="2"/><text x="${p[0]}" y="${p[1] - 10}" text-anchor="middle">${esc(n)}</text>`; });
+    svg.innerHTML = s;
+  }
+  function runQuery() {
+    const person = $("gq-person").value;
+    try {
+      const r = query($("gq-cypher").value);
+      $("gq-result").innerHTML = "→ " + esc(r.count !== undefined ? r.count : r.values.join(", ") || tr("（无结果）", "(no result)"));
+      const vars = [...$("gq-cypher").value.matchAll(/\((\w*)/g)].map(x => x[1]);
+      const rels = [...$("gq-cypher").value.matchAll(/-\[:(\w+)\]->|<-\[:(\w+)\]-/g)].map(x => [x[1] || x[2], !!x[1]]);
+      const hl = [];
+      r.rows.slice(0, 12).forEach(row => rels.forEach(([rel, fwd], i) => { const a = row[vars[i]], b = row[vars[i + 1]]; hl.push(fwd ? [a, rel, b] : [b, rel, a]); }));
+      drawGraph(person, hl);
+    } catch (e) { $("gq-result").textContent = "⚠ " + e.message; drawGraph(person, []); }
+    $("gq-cap").innerHTML = tr("图中只画出所选人物附近的节点：蓝 = 人，橙 = 公司，绿 = 城市，紫 = 国家。红线是查询匹配到的路径（同事查询只画出前 12 条）。", "Only nodes near the chosen person are drawn: blue = person, orange = company, green = city, purple = country. Red lines are the paths the query matched (the colleagues query draws only the first 12).");
+  }
+  function loadTemplate() {
+    const t = TEMPLATES.find(t => t[0] === $("gq-tmpl").value);
+    $("gq-cypher").value = t[2]($("gq-person").value);
+    runQuery(); renderMh();
+  }
+
+  // ================= 3. multi-hop =================
+  function renderMh() {
+    const p = $("gq-person").value, hops = +$("mh-hops").value;
+    const co = step(p, "WORKS_AT", true)[0], city = step(co, "LOCATED_IN", true)[0], country = step(city, "IN_COUNTRY", true)[0];
+    const chain = [p, co, city].slice(0, hops);
+    const q = [`Where was ${p} born?`, `In which city is the company that ${p} works for headquartered?`, `In which country is the company that ${p} works for headquartered?`][hops - 1];
+    const answer = [step(p, "BORN_IN", true)[0], city, country][hops - 1];
+    $("mh-q").textContent = "Q: " + q;
+    const show = ids => ids.map(i => `<div class="${chain.includes(D.docs[i][0]) ? "hit" : ""}">${esc(D.docs[i][0])}<small>${esc(D.docs[i][1].slice(0, 90))}…</small></div>`).join("");
+    const single = BM(q, 5), singleOk = chain.every(c => single.some(i => D.docs[i][0] === c));
+    $("mh-single").innerHTML = show(single);
+    $("mh-single-ok").innerHTML = singleOk ? `<span class="ok">✓ ${tr("证据齐全", "all evidence found")}</span>` : `<span class="no">✗ ${tr("缺少", "missing")}: ${esc(chain.filter(c => !single.some(i => D.docs[i][0] === c)).join(", "))}</span>`;
+    let html = "", found = [], query_ = q;
+    for (let h = 0; h < hops; h++) {
+      const hits = BM(query_, 5); found = found.concat(hits);
+      html += `<p class="hint">${tr("第", "hop ")}${h + 1}${tr(" 跳，检索", ": search")} “${esc(query_.slice(0, 50))}”</p>` + show(hits.slice(0, 3));
+      if (h === hops - 1) break;
+      const rel = ["WORKS_AT", "LOCATED_IN"][h];
+      const nxt = hits.flatMap(i => extract(D.docs[i][1]).filter(t => t[1] === rel).map(t => canon(t[2])));
+      if (!nxt.length) break;
+      query_ = nxt[0];
+    }
+    const iterOk = chain.every(c => found.some(i => D.docs[i][0] === c));
+    $("mh-iter").innerHTML = html;
+    $("mh-iter-ok").innerHTML = iterOk ? `<span class="ok">✓ ${tr("证据齐全", "all evidence found")}</span>` : `<span class="no">✗ ${tr("没跟上链条", "lost the chain")}</span>`;
+    const path = [p, co, city, country].slice(0, hops + 1), rels = ["WORKS_AT", "LOCATED_IN", "IN_COUNTRY"];
+    $("mh-graph").innerHTML = hops === 1 ? `<div class="hit">${esc(p)} —BORN_IN→ ${esc(answer)}</div>` : path.slice(0, -1).map((n, i) => `<div class="hit">${esc(n)} —${rels[i]}→ ${esc(path[i + 1])}</div>`).join("") + `<p class="ok">→ ${esc(answer)}</p>`;
+    const M = D.multihop[String(hops)];
+    $("mh-stats").innerHTML = stat(tr(`${hops} 跳，200 个问题：一次检索`, `${hops} hop(s), 200 questions: one search`), pct(M.single), css("--muted")) + stat(tr("逐跳检索", "hop by hop"), pct(M.iterative), css("--accent")) +
+      stat(tr("图查询", "graph query"), pct(M.graph), css("--primary")) + stat(tr("图查询，未消解", "graph, unresolved"), pct(M.raw), css("--bad"));
+    $("mh-note").innerHTML = tr(
+      `问题里只有人名。公司的文档里没有这个人名，所以一次检索根本搜不到它（2 跳、3 跳几乎 0%）。逐跳检索每一步只需要找“和当前实体相关”的文档，所以能跟上；但每一步都可能出错，错误会累积。图查询直接沿着边走，前提是图建得对：不做实体消解，人物连到的是“Gasel”这个孤立节点，后面的路就断了（0%）。`,
+      `The question contains only the person's name. The company's document doesn't mention that person, so one search can't reach it (almost 0% at 2 and 3 hops). Hop-by-hop search only needs documents related to the current entity at each step, so it keeps up, but every step can fail and errors add up. A graph query just follows edges, provided the graph is right: without entity resolution the person links to an isolated node “Gasel” and the path breaks (0%).`);
+  }
+
+  // ================= 4. global =================
+  function renderGl() {
+    const rows = D.employees, W = 640, H = 260, L = 40, B = 70, T = 10, max = Math.max(...rows.map(r => r[1]));
+    const bw = (W - L - 10) / rows.length;
+    let s = "";
+    [0, 25, 50, 75, 100].filter(v => v <= max * 1.05).forEach(v => { const y = T + (H - T - B) * (1 - v / max); s += `<line class="grid" x1="${L}" x2="${W - 10}" y1="${y}" y2="${y}"/><text x="${L - 5}" y="${y + 4}" text-anchor="end">${v}</text>`; });
+    rows.forEach((r, i) => {
+      const x = L + i * bw, h1 = (H - T - B) * r[1] / max, h2 = (H - T - B) * r[2] / max;
+      s += `<rect x="${x + bw * .1}" y="${H - B - h1}" width="${bw * .38}" height="${h1}" fill="${css("--primary")}"/><rect x="${x + bw * .5}" y="${H - B - h2}" width="${bw * .38}" height="${h2}" fill="${css("--muted")}"/>`;
+      s += `<text transform="translate(${x + bw / 2},${H - B + 8}) rotate(40)" font-size="10">${esc(r[0])}</text>`;
+    });
+    $("gl-chart").innerHTML = s;
+    $("gl-leg").innerHTML = `<span class="hint"><span class="dot" style="background:${css("--primary")}"></span>${tr("真实员工数（= 图查询 count）", "true employees (= graph count)")}</span><span class="hint"><span class="dot" style="background:${css("--muted")}"></span>${tr("在检索到的前 10 篇里数", "counted in the top 10 retrieved")}</span>`;
+    $("gl-comm").innerHTML = `<p class="hint">${tr(`标签传播在图上找出 ${D.n_communities} 个社区，下面是最大的几个及其“摘要”（GraphRAG 让大模型写，这里直接从图里填）：`, `Label propagation finds ${D.n_communities} communities; the largest ones and their “summaries” (GraphRAG has an LLM write them; here they are filled in from the graph):`)}</p>` +
+      D.communities.slice(0, 8).map((c, i) => `<div><b>#${i + 1}</b> ${esc(c.text)}</div>`).join("");
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["“X 的雇主总部在哪个城市？”为什么一次向量或关键词检索常常答不出来？", "Why does one vector or keyword search often fail on “in which city is X's employer headquartered?”"],
+      opts: [["检索模型太小", "The retrieval model is too small"], ["答案在公司的文档里，而那篇文档里没有 X 的名字，和问题不像", "The answer is in the company's document, which doesn't mention X and doesn't look like the question"], ["城市名太罕见", "City names are too rare"]],
+      a: 1, ex: ["这是多跳问题：要先找到 X 的雇主，再查这家公司。逐跳检索或图查询才能跟上这条链。", "It is a multi-hop question: first find X's employer, then look up that company. Hop-by-hop retrieval or a graph query can follow the chain."] },
+    { q: ["不做实体消解，会发生什么？", "What happens without entity resolution?"],
+      opts: [["没有影响", "Nothing"], ["同一家公司变成几个互不相连的节点（Gasel、Gasel Bank Ltd.），沿着边走的路就断了", "One company becomes several unconnected nodes (Gasel, Gasel Bank Ltd.), and paths along the edges break"], ["节点数变少", "There are fewer nodes"]],
+      a: 1, ex: ["本章中，不消解时 2 跳和 3 跳的图查询全部失败（0%），消解后 100%。实体消解是建图中最费力、也最关键的一步。", "In this chapter, without resolution every 2- and 3-hop graph query fails (0%); with it, 100%. Entity resolution is the hardest and most important step in building a graph."] },
+    { q: ["Cypher 里 (a)-[:WORKS_AT]->(c)<-[:WORKS_AT]-(b) 表示什么？", "In Cypher, what does (a)-[:WORKS_AT]->(c)<-[:WORKS_AT]-(b) mean?"],
+      opts: [["a 和 b 是朋友", "a and b are friends"], ["a 和 b 在同一家公司 c 工作", "a and b work at the same company c"], ["c 雇用了 a 但没雇用 b", "c employs a but not b"]],
+      a: 1, ex: ["箭头方向就是关系方向；同一个变量 c 出现两次，表示两条边连到同一个节点。", "The arrow shows the relation's direction; the same variable c used twice means both edges reach the same node."] },
+    { q: ["GraphRAG 的“社区摘要”是为了解决什么问题？", "What problem do GraphRAG's community summaries address?"],
+      opts: [["让检索更快", "Faster retrieval"], ["需要综合整个语料的全局问题，比如“主要有哪些主题”，检索前 k 篇做不到", "Global questions that need the whole corpus, such as “what are the main themes”, which the top k can't answer"], ["减少向量的维度", "Fewer vector dimensions"]],
+      a: 1, ex: ["预先给每个社区写摘要（离线、用大模型，成本不低），问全局问题时对所有摘要做 map-reduce。", "Summaries are written per community in advance (offline, with an LLM, at real cost), and a global question is answered by map-reduce over all of them."] },
+    { q: ["什么时候值得用知识图谱，而不是只用向量检索？", "When is a knowledge graph worth it, rather than vector retrieval alone?"],
+      opts: [["任何时候", "Always"], ["问题常常涉及多跳关系、计数或聚合，而且实体和关系能比较可靠地抽取出来", "When questions often involve multi-hop relations, counting or aggregation, and entities and relations can be extracted reliably"], ["文档很短的时候", "When documents are short"]],
+      a: 1, ex: ["建图和维护图的成本不低，抽取错误还会被查询放大。很多系统把两者结合：图负责关系和聚合，向量负责语义匹配。", "Building and maintaining a graph is costly, and extraction errors are amplified by queries. Many systems combine both: the graph for relations and aggregation, vectors for semantic matching."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fillSelects() {
+    const dv = $("ex-doc").value;
+    const picks = D.docs.map((d, i) => [d, i]).filter(([d], j) => j < 40 || d[1].includes(" Ltd.") && j < 640 || /city in/.test(d[1]) && j < 650);
+    $("ex-doc").innerHTML = picks.map(([d, i]) => `<option value="${i}">${esc(d[0])}${/ works at \w+\./.test(d[1]) ? tr("（简称）", " (short name)") : ""}</option>`).join("");
+    $("ex-doc").value = dv || picks[0][1];
+    const pv = $("gq-person").value || PEOPLE[0];
+    $("gq-person").innerHTML = PEOPLE.slice(0, 200).map(p => `<option>${esc(p)}</option>`).join("");
+    $("gq-person").value = pv;
+    const tv = $("gq-tmpl").value || "city";
+    $("gq-tmpl").innerHTML = TEMPLATES.map(t => `<option value="${t[0]}">${tr(...t[1])}</option>`).join("");
+    $("gq-tmpl").value = tv;
+  }
+  function renderAll() { fillSelects(); renderEx(); loadTemplate(); renderGl(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("ex-doc").addEventListener("input", renderEx);
+  ["gq-person", "gq-tmpl"].forEach(id => $(id).addEventListener("input", loadTemplate));
+  $("gq-run").addEventListener("click", runQuery);
+  $("mh-hops").addEventListener("input", renderMh);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

@@ -150,6 +150,16 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | HNSW | HNSW (hierarchical navigable small world) | A layered neighbour graph searched greedily from the top layer, then with width ef at the bottom | [19](19-rag/README.en.md) |
 | 乘积量化 | PQ (product quantization) | Split vectors into pieces and store each as a centroid id, shrinking memory at the price of approximate distances | [19](19-rag/README.en.md) |
 | 向量数据库 | vector database | A database storing vectors with ANN indexes, filtering and updates, such as FAISS, Milvus, Qdrant, pgvector | [19](19-rag/README.en.md) |
+| 知识图谱 / 三元组 | knowledge graph / triple | Knowledge stored as a network of (subject, relation, object) triples | [20](20-knowledge-graphs/README.en.md) |
+| 属性图 / RDF | property graph / RDF | A graph model whose nodes and edges carry labels and properties (queried with Cypher) / the W3C standard naming everything by URI (queried with SPARQL) | [20](20-knowledge-graphs/README.en.md) |
+| 图数据库 | graph database | A database that stores adjacency directly and queries along edges, such as Neo4j | [20](20-knowledge-graphs/README.en.md) |
+| Cypher | Cypher | A graph query language that draws patterns as (node)-[:REL]->(node); the ISO standard GQL builds on it | [20](20-knowledge-graphs/README.en.md) |
+| 实体消解 | entity resolution | Merging different names of the same entity into one node | [20](20-knowledge-graphs/README.en.md) |
+| 指代消解 | coreference resolution | Working out which entity a pronoun or short form refers to | [20](20-knowledge-graphs/README.en.md) |
+| 多跳问答 | multi-hop question answering | Questions that need several facts chained together (several documents or edges) | [20](20-knowledge-graphs/README.en.md) |
+| 逐跳检索 | iterative / hop-by-hop retrieval | Retrieve, read off the next entity, retrieve again, as in self-ask or IRCoT | [20](20-knowledge-graphs/README.en.md) |
+| 社区发现 | community detection | Finding densely linked groups in a graph, e.g. Leiden or label propagation | [20](20-knowledge-graphs/README.en.md) |
+| GraphRAG | GraphRAG | Build a graph with an LLM, write a report per community, answer global questions by map-reduce over the reports | [20](20-knowledge-graphs/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |
