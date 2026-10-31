@@ -168,7 +168,7 @@ Using tests as rewards has risks too:
 
 - **Function level**: HumanEval and MBPP (about 1,000 entry-level Python problems): given a description, write one function. Strong models are now close to perfect here.
 - **Competition level**: Codeforces, LiveCodeBench. LiveCodeBench keeps collecting newly published problems and evaluates a model only on those released after its training cutoff, to avoid **contamination**: if test problems appear in the training data, the model is reciting answers.
-- **Repository level**: SWE-bench collects 2,294 real GitHub issues from 12 popular Python repositories. The model must understand the repository, change the code, and pass the repository's own tests. SWE-bench Verified is a human-validated subset of 500. Such tasks require repeatedly reading code, editing it, running tests and reading errors, which is how agents work (chapter 21, planned).
+- **Repository level**: SWE-bench collects 2,294 real GitHub issues from 12 popular Python repositories. The model must understand the repository, change the code, and pass the repository's own tests. SWE-bench Verified is a human-validated subset of 500. Such tasks require repeatedly reading code, editing it, running tests and reading errors, which is how [agents](../21-agents/README.en.md) work.
 
 ## 4. Minimal code
 

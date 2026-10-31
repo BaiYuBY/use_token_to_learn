@@ -125,7 +125,7 @@ The chapter asks 1-, 2- and 3-hop questions about 200 people and checks whether 
 | Graph query, no entity resolution | 100% | 0% | 0% |
 
 - **One retrieval round** only finds documents that look like the question. The question contains just the person's name, and the company and city documents don't, so from 2 hops on it nearly always fails.
-- **Hop-by-hop search** imitates self-ask and IRCoT: retrieve, read the top document, extract the next entity (the company name), and search again with it. Each step only needs documents related to the current entity, so it keeps up with the chain. But every step can fail (searching with the short name “Fesel” may rank other profiles that mention Fesel first), and errors add up. In real systems this is agentic retrieval (chapter 21, planned): the model decides what to search for next.
+- **Hop-by-hop search** imitates self-ask and IRCoT: retrieve, read the top document, extract the next entity (the company name), and search again with it. Each step only needs documents related to the current entity, so it keeps up with the chain. But every step can fail (searching with the short name “Fesel” may rank other profiles that mention Fesel first), and errors add up. In real systems this is [agentic retrieval](../21-agents/README.en.md): the model decides what to search for next.
 - **A graph query** simply follows edges, provided the graph is right. Without entity resolution, the person links to an isolated “Fesel” node while the company's edges hang off “Fesel Labs Ltd.”, so the path breaks at the first step.
 
 ### 3.5 Global questions and GraphRAG

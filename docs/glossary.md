@@ -160,6 +160,17 @@
 | 逐跳检索 | iterative / hop-by-hop retrieval | 检索、读出下一个实体、再检索，如 self-ask、IRCoT | [20](20-knowledge-graphs/README.md) |
 | 社区发现 | community detection | 在图中找出内部连接紧密的群体，如 Leiden、标签传播 | [20](20-knowledge-graphs/README.md) |
 | GraphRAG | GraphRAG | 用大模型建图、为社区写报告，再对报告做 map-reduce 回答全局问题 | [20](20-knowledge-graphs/README.md) |
+| Agent / agent loop | agent / agent loop | 把模型放进循环：模型决定调用哪个工具，程序执行并把结果追加进对话，直到给出答案 | [21](21-agents/README.md) |
+| 工具调用 | tool calling / function calling | 模型按工具的 JSON schema 输出结构化的调用（工具名 + 参数），由程序校验并执行 | [21](21-agents/README.md) |
+| ReAct | ReAct | 交替进行“思考 → 行动（调用工具）→ 观察（读结果）”的 agent 模式 | [21](21-agents/README.md) |
+| 并行工具调用 | parallel tool calls | 一次模型回复里发出多个互不依赖的工具调用，减少往返次数 | [21](21-agents/README.md) |
+| 步数上限 | step budget / max iterations | agent 最多调用模型的次数；要比无错时需要的步数留出余量 | [21](21-agents/README.md) |
+| 反思 | reflection (Reflexion) | 失败后让模型总结原因、写成教训，放进下一次尝试的上下文 | [21](21-agents/README.md) |
+| 多 agent | multi-agent system | 调度者把子任务分给多个各有上下文和工具的工作者 agent | [21](21-agents/README.md) |
+| LangChain / LCEL | LangChain / LCEL | 为模型、工具、检索器等提供统一接口的框架；LCEL 用管道运算符串联组件 | [21](21-agents/README.md) |
+| LangGraph / 状态图 | LangGraph / StateGraph | 把 agent 写成由状态、节点和（条件）边组成的图的框架 | [21](21-agents/README.md) |
+| 检查点 | checkpointer | 在图的每一步之后保存状态，用于查看历史、崩溃后恢复和人工介入 | [21](21-agents/README.md) |
+| 人工介入 | human-in-the-loop / interrupt | 在危险操作前暂停、等人批准后再继续（LangGraph 中用 interrupt 与 Command(resume=...)） | [21](21-agents/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

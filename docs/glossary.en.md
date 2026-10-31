@@ -160,6 +160,17 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 逐跳检索 | iterative / hop-by-hop retrieval | Retrieve, read off the next entity, retrieve again, as in self-ask or IRCoT | [20](20-knowledge-graphs/README.en.md) |
 | 社区发现 | community detection | Finding densely linked groups in a graph, e.g. Leiden or label propagation | [20](20-knowledge-graphs/README.en.md) |
 | GraphRAG | GraphRAG | Build a graph with an LLM, write a report per community, answer global questions by map-reduce over the reports | [20](20-knowledge-graphs/README.en.md) |
+| Agent / agent loop | agent / agent loop | Putting a model in a loop: the model picks a tool, the program runs it and appends the result, until there is an answer | [21](21-agents/README.en.md) |
+| 工具调用 | tool calling / function calling | The model emits a structured call (tool name + arguments) following the tool's JSON schema; the program validates and runs it | [21](21-agents/README.en.md) |
+| ReAct | ReAct | An agent pattern alternating “thought → action (a tool call) → observation (the result)” | [21](21-agents/README.en.md) |
+| 并行工具调用 | parallel tool calls | Several independent tool calls in one model reply, saving round trips | [21](21-agents/README.en.md) |
+| 步数上限 | step budget / max iterations | The most model calls an agent may make; leave room beyond what a mistake-free run needs | [21](21-agents/README.en.md) |
+| 反思 | reflection (Reflexion) | After a failure, the model writes down why as a lesson for the next attempt's context | [21](21-agents/README.en.md) |
+| 多 agent | multi-agent system | An orchestrator hands subtasks to several worker agents, each with its own context and tools | [21](21-agents/README.en.md) |
+| LangChain / LCEL | LangChain / LCEL | A framework with common interfaces for models, tools, retrievers and more; LCEL chains components with the pipe operator | [21](21-agents/README.en.md) |
+| LangGraph / 状态图 | LangGraph / StateGraph | A framework that writes an agent as a graph of state, nodes and (conditional) edges | [21](21-agents/README.en.md) |
+| 检查点 | checkpointer | Saves the state after every step of the graph, for history, crash recovery and human-in-the-loop | [21](21-agents/README.en.md) |
+| 人工介入 | human-in-the-loop / interrupt | Pause before a risky action and continue only after a person approves (interrupt and Command(resume=...) in LangGraph) | [21](21-agents/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

@@ -128,7 +128,7 @@ Prompts have limits: knowledge the model lacks can't be written into a prompt by
 **Prompt injection** is when instructions hidden in user input or external data steer the model away from the developer's intent.
 
 - **Direct injection**: the user writes “Ignore all previous instructions…” (Perez & Ribeiro, 2022).
-- **Indirect injection**: the instructions sit in a web page, email or document the model reads, possibly without the user knowing (Greshake et al., 2023). This is especially dangerous for agents that browse and call tools; see chapter 21 (planned).
+- **Indirect injection**: the instructions sit in a web page, email or document the model reads, possibly without the user knowing (Greshake et al., 2023). This is especially dangerous for agents that browse and call tools; see [chapter 21](../21-agents/README.en.md).
 
 This chapter's experiment: the system turn says “do `kind?`”, but the user turn contains “dangerous?”.
 

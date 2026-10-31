@@ -36,6 +36,7 @@
 | 18 提示工程 Prompt Engineering | [中文](docs/18-prompt-engineering/README.md) · [EN](docs/18-prompt-engineering/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/18-prompt-engineering/interactive/prompting.html) | [prompting.py](docs/18-prompt-engineering/code/prompting.py) |
 | 19 RAG 与向量数据库 RAG & Vector Databases | [中文](docs/19-rag/README.md) · [EN](docs/19-rag/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/19-rag/interactive/rag.html) | [rag.py](docs/19-rag/code/rag.py) |
 | 20 知识图谱与图数据库 Knowledge Graphs | [中文](docs/20-knowledge-graphs/README.md) · [EN](docs/20-knowledge-graphs/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/20-knowledge-graphs/interactive/knowledge_graph.html) | [knowledge_graph.py](docs/20-knowledge-graphs/code/knowledge_graph.py) |
+| 21 Agent 与 agent loop Agents & the Agent Loop | [中文](docs/21-agents/README.md) · [EN](docs/21-agents/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/21-agents/interactive/agents.html) | [agent_loop.py](docs/21-agents/code/agent_loop.py) · [langgraph_agent.py](docs/21-agents/code/langgraph_agent.py) |
 
 ## 前沿问答
 

@@ -36,7 +36,8 @@
 | 18 | [提示工程](18-prompt-engineering/README.md) | [提示实验台：两个模型实时作答](18-prompt-engineering/interactive/prompting.html) | ✅ 已完成 |
 | 19 | [RAG 与向量数据库](19-rag/README.md) | [检索实验台与 HNSW / IVF 搜索演示](19-rag/interactive/rag.html) | ✅ 已完成 |
 | 20 | [知识图谱与图数据库](20-knowledge-graphs/README.md) | [抽取、Cypher 查询与多跳检索演示](20-knowledge-graphs/interactive/knowledge_graph.html) | ✅ 已完成 |
-| 21–24 | 应用与前沿：Agent、MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
+| 21 | [Agent 与 agent loop](21-agents/README.md) | [逐步运行的 agent loop 与 LangGraph 节点演示](21-agents/interactive/agents.html) | ✅ 已完成 |
+| 22–24 | 应用与前沿：MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
 
 ## 前沿问答
 

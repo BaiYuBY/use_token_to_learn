@@ -76,6 +76,17 @@ if ROOT is None:
 CODE = ROOT / "docs" / CHAPTER / "code"
 sys.path.insert(0, str(CODE))
 print("code:", CODE)'''
+    # extra packages a chapter names in its "pip install x==1.2" hints (not preinstalled in Colab)
+    # 本章代码在提示里写明的额外依赖（Colab 默认没有）
+    extras = sorted({m for f in sorted((chapter_dir / "code").glob("*.py"))
+                     for m in re.findall(r"pip install ([a-z][\w-]*==[\d.]+)", f.read_text(encoding="utf-8"))})
+    for pkg in extras:
+        name = pkg.split("==")[0].replace("-", "_")
+        setup += f'''
+try:
+    import {name}  # noqa: F401
+except ImportError:  # e.g. in Colab / 例如在 Colab 中
+    subprocess.run([sys.executable, "-m", "pip", "install", "-q", "{pkg}"], check=True)'''
     return [md(intro), code(setup)]
 
 
