@@ -37,7 +37,8 @@
 | 19 | [RAG 与向量数据库](19-rag/README.md) | [检索实验台与 HNSW / IVF 搜索演示](19-rag/interactive/rag.html) | ✅ 已完成 |
 | 20 | [知识图谱与图数据库](20-knowledge-graphs/README.md) | [抽取、Cypher 查询与多跳检索演示](20-knowledge-graphs/interactive/knowledge_graph.html) | ✅ 已完成 |
 | 21 | [Agent 与 agent loop](21-agents/README.md) | [逐步运行的 agent loop 与 LangGraph 节点演示](21-agents/interactive/agents.html) | ✅ 已完成 |
-| 22–24 | 应用与前沿：MCP / Skills / SOP、评测、安全与可解释性 | | 🚧 计划中 |
+| 22 | [MCP、Skills 与 SOP](22-mcp-skills-sop/README.md) | [MCP 消息、skill 渐进式披露与 SOP 流水线演示](22-mcp-skills-sop/interactive/mcp.html) | ✅ 已完成 |
+| 23–24 | 应用与前沿：评测、安全与可解释性 | | 🚧 计划中 |
 
 ## 前沿问答
 

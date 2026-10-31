@@ -80,7 +80,7 @@ def to_plain(messages):
     return out
 
 
-def build_agent(model, check=True, checkpointer=None):
+def build_agent(model, check=True, checkpointer=None, tools=None):
     """START -> agent -> (tool calls? -> tools -> agent) -> (final answer -> check -> END or back to agent).
     The prebuilt ToolNode runs the tools; the routing functions are the loop's if-statements.
     预置的 ToolNode 负责执行工具；路由函数就是循环里的 if 判断。"""
@@ -114,7 +114,7 @@ def build_agent(model, check=True, checkpointer=None):
 
     graph = StateGraph(MessagesState)
     graph.add_node("agent", agent)
-    graph.add_node("tools", ToolNode(TOOLS))
+    graph.add_node("tools", ToolNode(tools or TOOLS))  # any LangChain tools, e.g. from MCP (ch. 22)
     graph.add_node("check", check_answer)
     graph.add_edge(START, "agent")
     graph.add_conditional_edges("agent", route_after_agent, ["tools", "check", END])

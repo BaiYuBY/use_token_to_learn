@@ -11,3 +11,5 @@ numpy>=1.26
 
 # Chapter 21 runs a LangGraph agent (no API key needed) / 第 21 章运行一个 LangGraph agent（不需要 API key）
 langgraph==1.2.19
+# Chapter 22 runs the official MCP SDK (no API key needed) / 第 22 章运行官方 MCP SDK（不需要 API key）
+mcp==2.3.0
