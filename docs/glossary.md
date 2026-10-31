@@ -171,6 +171,17 @@
 | LangGraph / 状态图 | LangGraph / StateGraph | 把 agent 写成由状态、节点和（条件）边组成的图的框架 | [21](21-agents/README.md) |
 | 检查点 | checkpointer | 在图的每一步之后保存状态，用于查看历史、崩溃后恢复和人工介入 | [21](21-agents/README.md) |
 | 人工介入 | human-in-the-loop / interrupt | 在危险操作前暂停、等人批准后再继续（LangGraph 中用 interrupt 与 Command(resume=...)） | [21](21-agents/README.md) |
+| MCP（模型上下文协议） | MCP (Model Context Protocol) | 让 AI 应用（宿主）通过 JSON-RPC 连接外部工具和数据（服务器）的开放协议 | [22](22-mcp-skills-sop/README.md) |
+| 宿主 / 客户端 / 服务器 | host / client / server | MCP 的三个角色：AI 应用；应用里连接一个服务器的部分；包装外部系统的程序 | [22](22-mcp-skills-sop/README.md) |
+| 工具 / 资源 / 提示 | tools / resources / prompts | MCP 服务器的三种能力，分别由模型、应用、用户决定使用 | [22](22-mcp-skills-sop/README.md) |
+| JSON-RPC | JSON-RPC 2.0 | 用 JSON 表示请求（带 id）、响应和通知（不带 id）的远程调用格式 | [22](22-mcp-skills-sop/README.md) |
+| stdio / Streamable HTTP | stdio / Streamable HTTP | MCP 的两种传输：本地子进程每行一条消息；远程服务器用 HTTP | [22](22-mcp-skills-sop/README.md) |
+| 无状态协议 | stateless protocol (MCP 2026-07-28) | 去掉握手与会话，每个请求在 _meta 里自带协议版本和客户端能力 | [22](22-mcp-skills-sop/README.md) |
+| 工具投毒 | tool poisoning | 在工具描述里藏入给模型的指令，诱导它做用户不知道的事 | [22](22-mcp-skills-sop/README.md) |
+| Agent Skills / SKILL.md | Agent Skills / SKILL.md | 由 SKILL.md（name、description + 说明）和可选脚本、参考文件组成的能力包 | [22](22-mcp-skills-sop/README.md) |
+| 渐进式披露 | progressive disclosure | 只把 skill 的名字和描述常驻上下文，用到时才加载正文和文件 | [22](22-mcp-skills-sop/README.md) |
+| SOP（标准作业程序） | SOP (standard operating procedure) | 规定每个角色的输入、输出格式和检查项的流程，如 MetaGPT | [22](22-mcp-skills-sop/README.md) |
+| 结构化产物 | structured artifact | 角色之间交接的固定格式文档，可以按 schema 校验 | [22](22-mcp-skills-sop/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

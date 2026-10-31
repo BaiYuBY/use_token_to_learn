@@ -37,7 +37,8 @@ Each chapter follows the same rhythm:
 | 19 | [RAG and vector databases](19-rag/README.md) | [Retrieval bench and HNSW / IVF search playground](19-rag/interactive/rag.html?lang=en) | ✅ done |
 | 20 | [Knowledge graphs and graph databases](20-knowledge-graphs/README.md) | [Extraction, Cypher queries and multi-hop retrieval playground](20-knowledge-graphs/interactive/knowledge_graph.html?lang=en) | ✅ done |
 | 21 | [Agents and the agent loop](21-agents/README.md) | [Step-through agent loop with LangGraph nodes](21-agents/interactive/agents.html?lang=en) | ✅ done |
-| 22–24 | Applications and frontiers: MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
+| 22 | [MCP, Skills and SOPs](22-mcp-skills-sop/README.md) | [MCP messages, skill progressive disclosure and an SOP pipeline](22-mcp-skills-sop/interactive/mcp.html?lang=en) | ✅ done |
+| 23–24 | Applications and frontiers: evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 

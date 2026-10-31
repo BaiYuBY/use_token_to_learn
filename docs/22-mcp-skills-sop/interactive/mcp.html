@@ -1,0 +1,526 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP、Skills 与 SOP 交互演示 · MCP, Skills &amp; SOPs Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .lanes { display: grid; gap: 6px; max-height: 460px; overflow-y: auto; padding: 4px; }
+  .bub { max-width: 82%; border: 1px solid var(--line); border-radius: 10px; padding: 4px 10px; background: var(--bg); font-size: .82rem; cursor: pointer; }
+  .bub small { display: block; color: var(--muted); font-size: .72rem; }
+  .bub.c { justify-self: start; border-left: 4px solid var(--primary); }
+  .bub.s { justify-self: end; border-right: 4px solid var(--accent); }
+  .bub.m { justify-self: center; border-top: 3px solid var(--good); }
+  .bub.err { border-color: var(--bad); }
+  .bub.cur { outline: 2px solid var(--accent); }
+  .bub.future { display: none; }
+  pre.json { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: .76rem; max-height: 360px; overflow: auto; white-space: pre; margin: 6px 0; }
+  #sk-view { white-space: pre-wrap; overflow-wrap: anywhere; }
+  pre.json .k { color: var(--primary); } pre.json .meta { background: rgba(232,113,10,.18); border-radius: 3px; }
+  .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 8px 0; }
+  .barrow { display: grid; grid-template-columns: minmax(0, 11em) 1fr; gap: 6px; align-items: center; font-size: .82rem; margin: 4px 0; }
+  .barrow .track { display: flex; height: 22px; background: var(--bg); border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .barrow .track span { height: 100%; }
+  .sk { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tl { display: grid; gap: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .78rem; }
+  .tl div { background: var(--bg); border: 1px solid var(--line); border-left-width: 4px; border-radius: 6px; padding: 3px 8px; overflow-wrap: anywhere; white-space: pre-wrap; }
+  .tl .assistant { border-left-color: var(--primary); } .tl .tool { border-left-color: var(--accent); } .tl .user { border-left-color: var(--muted); }
+  .badge { display: inline-block; font-size: .7rem; border-radius: 999px; padding: 0 7px; margin-left: 6px; color: var(--bg); }
+  .pipe { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin: 8px 0; }
+  .pipe .role { border: 2px solid var(--line); border-radius: 8px; padding: 3px 8px; font-size: .82rem; background: var(--bg); }
+  .pipe .role.on { border-color: var(--accent); }
+  .pipe .role small { display: block; color: var(--muted); font-size: .7rem; }
+  .hand { display: grid; gap: 4px; font-size: .8rem; }
+  .hand div { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; overflow-wrap: anywhere; }
+  .hand b { color: var(--primary); }
+  .hand .bad { color: var(--bad); font-weight: 600; } .hand .fix { color: var(--good); font-weight: 600; }
+  input[type=text] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px; width: min(100%, 30em); }
+  table.map td, table.map th { text-align: left !important; white-space: normal !important; vertical-align: top; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">MCP、Skills 与 SOP · 交互演示</span><span lang="en">MCP, Skills &amp; SOPs · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">三种把 agent 的能力“标准化”的办法：MCP 让工具和数据跨程序、跨语言可复用；Skills 把操作说明和脚本打包，需要时才加载；SOP 规定多个 agent 之间交接什么、怎么检查。下面的 MCP 消息都是真实录下来的：手写的服务器和官方 SDK 的服务器。</span>
+        <span lang="en">Three ways to standardize what an agent can do: MCP makes tools and data reusable across programs and languages; Skills package instructions and scripts that load only when needed; SOPs fix what agents hand to each other and how it is checked. The MCP messages below were recorded for real, from a hand-written server and from the official SDK's server.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. MCP messages -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">MCP：一条一条看消息</span><span lang="en">MCP, message by message</span></h2>
+    <p class="hint">
+      <span lang="zh">MCP 是 JSON-RPC 2.0：客户端发请求（带 id），服务器回结果或错误；通知没有 id，也没有回复。本地服务器通过 stdio（每行一条消息）连接，远程服务器通过 HTTP。2026-07-28 版是无状态的：没有握手，每个请求都在 <code>_meta</code> 里带上协议版本和客户端能力（橙色高亮）。对比旧版的 <code>initialize</code> 握手。</span>
+      <span lang="en">MCP is JSON-RPC 2.0: the client sends requests (with an id), the server returns a result or an error; notifications have no id and get no reply. Local servers connect over stdio (one message per line), remote ones over HTTP. The 2026-07-28 revision is stateless: no handshake, and every request carries the protocol version and client capabilities in <code>_meta</code> (highlighted in orange). Compare the older <code>initialize</code> handshake.</span>
+    </p>
+    <div class="tabs" id="mc-tabs"></div>
+    <div class="controls">
+      <button id="mc-next">▶ <span lang="zh">下一条</span><span lang="en">next message</span></button>
+      <button id="mc-all">⏭ <span lang="zh">全部显示</span><span lang="en">show all</span></button>
+      <button id="mc-reset">↺ <span lang="zh">重来</span><span lang="en">reset</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><div class="hint" id="mc-lanes-h"></div><div class="lanes" id="mc-lanes"></div></div>
+      <div class="col"><div class="callout" id="mc-explain"></div><pre class="json" id="mc-json"></pre></div>
+    </div>
+  </section>
+
+  <!-- 2. context budget -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">上下文预算：工具说明与 skill 放在哪里</span><span lang="en">Context budget: where tool descriptions and skills go</span></h2>
+    <p class="hint">
+      <span lang="zh">连接的每个 MCP 工具，说明都要放进每一次模型调用。skill 的正文往往很长（几百到几千词），如果全放进系统提示，很快就撑满上下文；渐进式披露只放每个 skill 的名字和描述，任务需要时再加载正文。拖动滑块看每次调用和整个任务要读多少词。</span>
+      <span lang="en">Every connected MCP tool's description goes into every model call. Skill bodies are often long (hundreds to thousands of words); put them all in the system prompt and the context fills up fast. Progressive disclosure keeps only each skill's name and description, and loads a body when a task needs it. Drag the sliders to see the words per call and per task.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">MCP 工具数</span><span lang="en">MCP tools</span> <input type="range" id="cb-tools" min="0" max="300" value="40"> <b id="cb-tools-v" class="mono"></b></label>
+      <label><span lang="zh">每个工具说明的词数</span><span lang="en">words per tool</span> <input type="range" id="cb-tw" min="10" max="200" value="60"> <b id="cb-tw-v" class="mono"></b></label>
+      <label><span lang="zh">skill 数</span><span lang="en">skills</span> <input type="range" id="cb-skills" min="0" max="200" value="30"> <b id="cb-skills-v" class="mono"></b></label>
+      <label><span lang="zh">skill 正文词数</span><span lang="en">words per skill body</span> <input type="range" id="cb-body" min="50" max="4000" step="50" value="800"> <b id="cb-body-v" class="mono"></b></label>
+      <label><span lang="zh">每个任务的模型调用次数</span><span lang="en">model calls per task</span> <input type="range" id="cb-calls" min="1" max="40" value="10"> <b id="cb-calls-v" class="mono"></b></label>
+    </div>
+    <div id="cb-bars"></div>
+    <div class="stats" id="cb-stats"></div>
+    <div class="callout" id="cb-note"></div>
+  </section>
+
+  <!-- 3. skills -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">Skills：三层渐进式披露</span><span lang="en">Skills: three levels of progressive disclosure</span></h2>
+    <p class="hint">
+      <span lang="zh">一个 skill 就是一个文件夹：<code>SKILL.md</code> 开头的 YAML 写 <code>name</code> 和 <code>description</code>（第 1 层，始终在提示里），后面是说明（第 2 层，用到时加载），文件夹里还可以有脚本和参考文件（第 3 层，某一步需要时才读取或运行；脚本的代码不进入上下文，只有输出进入）。点开本章的 4 个真实 skill：</span>
+      <span lang="en">A skill is a folder: the YAML at the top of <code>SKILL.md</code> gives a <code>name</code> and <code>description</code> (level 1, always in the prompt); the instructions follow (level 2, loaded when used); the folder may also hold scripts and reference files (level 3, read or run only when a step needs them; a script's code never enters the context, only its output). Open this chapter's 4 real skills:</span>
+    </p>
+    <div class="sk" id="sk-list"></div>
+    <div class="tabs" id="sk-levels"></div>
+    <pre class="json" id="sk-view"></pre>
+    <h3><span lang="zh">一次运行：agent 加载 skill 并按步骤执行</span><span lang="en">One run: an agent loads a skill and follows its steps</span></h3>
+    <div class="tl" id="sk-run"></div>
+    <h3><span lang="zh">选 skill 时只看得到描述</span><span lang="en">Choosing a skill sees only the descriptions</span></h3>
+    <p class="hint">
+      <span lang="zh">128 个合成 skill（16 种对象 × 8 种操作），三种写法的描述。用户的说法往往和描述不一样（“condense this error trace” 对 “Summarize server logs”）。这里用关键词匹配代替模型做选择。输入一个请求试试：</span>
+      <span lang="en">128 synthetic skills (16 objects × 8 actions) with descriptions written three ways. Users rarely use the description's words (“condense this error trace” vs “Summarize server logs”). A keyword matcher stands in for the model here. Type a request:</span>
+    </p>
+    <div class="controls">
+      <input type="text" id="sl-q" value="Can you condense this error trace for me?">
+      <label><span lang="zh">skill 数</span><span lang="en">skills</span> <select id="sl-k"><option>8</option><option>32</option><option selected>128</option></select></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="scroll"><table class="t" id="sl-table"></table></div></div>
+      <div class="col"><div class="legend" id="sl-leg"></div><svg class="chart" id="sl-chart" viewBox="0 0 520 250"></svg></div>
+    </div>
+  </section>
+
+  <!-- 4. SOP -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">SOP：多个 agent 之间交接什么、怎么检查</span><span lang="en">SOPs: what agents hand over, and how it is checked</span></h2>
+    <p class="hint">
+      <span lang="zh">MetaGPT 的思路：像公司的标准作业程序一样，给每个角色规定输入、输出的格式和检查项，角色之间通过共享的消息池交接结构化产物，而不是互相聊天。这里 6 个角色依次处理一份公司报告；每次交接，每个事实都有一定概率被漏掉或改错。</span>
+      <span lang="en">MetaGPT's idea: as in a company's standard operating procedures, give each role a fixed input, output format and checklist, and have roles hand structured artifacts to each other through a shared message pool instead of chatting. Here 6 roles work on a company report in turn; at every handoff each fact may be dropped or altered.</span>
+    </p>
+    <div class="pipe" id="sp-pipe"></div>
+    <div class="controls">
+      <label><span lang="zh">角色数</span><span lang="en">roles</span> <input type="range" id="sp-k" min="1" max="6" value="6"> <b id="sp-k-v" class="mono"></b></label>
+      <label><span lang="zh">每次交接、每个事实漏掉 / 改错的概率</span><span lang="en">drop / alter chance per fact per handoff</span> <select id="sp-p"><option value="0.01">1% + 1%</option><option value="0.02" selected>2% + 2%</option><option value="0.05">5% + 5%</option></select></label>
+      <button id="sp-run">▶ <span lang="zh">跑一次</span><span lang="en">run once</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><h3><span lang="zh">自由文本交接</span><span lang="en">free-form text</span></h3><div class="hand" id="sp-free"></div></div>
+      <div class="col"><h3><span lang="zh">SOP：结构化产物 + schema 校验 + 审阅</span><span lang="en">SOP: artifacts + schema check + review</span></h3><div class="hand" id="sp-sop"></div></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div class="col"><div class="legend" id="sp-leg"></div><svg class="chart" id="sp-chart" viewBox="0 0 520 250"></svg></div>
+      <div class="col"><div class="stats" id="sp-stats"></div><div class="callout" id="sp-note"></div></div>
+    </div>
+  </section>
+
+  <!-- 5. comparison -->
+  <section>
+    <h2><span class="step">5</span><span lang="zh">对照：LangChain 工具、MCP、Skills、SOP</span><span lang="en">Side by side: LangChain tools, MCP, Skills, SOPs</span></h2>
+    <div class="scroll"><table class="t map" id="cmp"></table></div>
+  </section>
+
+  <!-- 6. quiz -->
+  <section class="quiz">
+    <h2><span class="step">6</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与代码：</span><span lang="en">Write-up and code: </span>
+    <a href="../README.html">22 MCP、Skills 与 SOP · MCP, Skills &amp; SOPs</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+<script src="mcp_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.MCP_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const fmt = n => Math.round(n).toLocaleString("en-US");
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 46, R = 12, T = 10, B = 34;
+    const lx = v => o.logx ? Math.log(v) : v;
+    const fx = v => L + (W - L - R) * (lx(v) - lx(o.x0)) / (lx(o.x1) - lx(o.x0)), fy = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    if (o.vline) s += `<line x1="${fx(o.vline)}" x2="${fx(o.vline)}" y1="${T}" y2="${H - B}" stroke="${css("--accent")}" stroke-dasharray="3 3"/>`;
+    series.forEach(se => {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="3" fill="${se.color}"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 3}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+
+  // ================= 1. MCP messages =================
+  const TRACES = {
+    modern: () => D.modern.map(([d, m]) => ({ side: d === "→" ? "c" : "s", msg: m })),
+    handshake: () => D.handshake.map(([d, m]) => ({ side: d === "→" ? "c" : "s", msg: m })),
+    agent: () => D.agent.events.map(e => e.lane === "model" ? { side: "m", calls: e.calls, words: e.context_words } : { side: e.dir === "→" ? "c" : "s", msg: e.msg }),
+  };
+  let mcTab = "modern", mcShown = 1, mcCur = 0;
+  const methodOf = (items, i) => { const it = items[i]; if (it.msg && it.msg.method) return it.msg.method; for (let j = i - 1; j >= 0; j--) if (items[j].msg && items[j].msg.id === (it.msg || {}).id && items[j].msg.method) return items[j].msg.method; return null; };
+  function explain(items, i) {
+    const it = items[i];
+    if (it.side === "m") return tr(`<b>模型</b>读了 ${it.words} 个词（系统提示 + 工具说明 + 到目前为止的对话），决定调用 <code>${esc(it.calls.map(c => c.name).join(", "))}</code>。宿主把它翻译成 MCP 的 <code>tools/call</code>；最终答案是宿主自己的工具，不经过服务器。`,
+      `<b>The model</b> read ${it.words} words (system prompt + tool descriptions + the conversation so far) and chose <code>${esc(it.calls.map(c => c.name).join(", "))}</code>. The host turns that into an MCP <code>tools/call</code>; the final answer is the host's own tool and never reaches the server.`);
+    const m = it.msg, method = methodOf(items, i), req = it.side === "c";
+    if (m.error) return tr(`<b>协议层错误</b>（code ${m.error.code}）：方法不存在、参数不合法等。它和工具返回的 <code>isError</code> 不同：后者是工具执行出了问题，会作为结果交给模型，让它改正。`, `<b>A protocol error</b> (code ${m.error.code}): unknown method, invalid params and so on. It differs from a tool result with <code>isError</code>, which reports a problem running the tool and goes back to the model so it can fix it.`);
+    const E = {
+      "server/discover": [tr("可选的探测：服务器支持哪些协议版本、有哪些能力？和 2026-07-28 版的每个请求一样，它在 <code>_meta</code> 里带着 protocolVersion、clientCapabilities 和 clientInfo，所以服务器不需要记住任何连接状态。", "An optional probe: which protocol versions and capabilities does the server have? Like every 2026-07-28 request it carries protocolVersion, clientCapabilities and clientInfo in <code>_meta</code>, so the server needs to remember nothing about the connection."),
+        tr("回复：supportedVersions、capabilities、instructions（宿主可以放进系统提示），以及缓存提示 ttlMs / cacheScope：结果在多长时间内、能否跨用户复用。", "Reply: supportedVersions, capabilities, instructions (the host may put them in the system prompt), and cache hints ttlMs / cacheScope: how long the result stays fresh and whether it can be shared across users.")],
+      "initialize": [tr("旧版（2025-11-25 及以前）的第一步：协商协议版本、交换双方能力。服务器要为这个连接记住这些信息，这就是“有状态”。", "The first step in older revisions (2025-11-25 and earlier): negotiate the version and exchange capabilities. The server has to remember them for this connection: that is the state."),
+        tr("服务器回复它选定的 protocolVersion、能力和 serverInfo。之后的请求都不再带版本信息，依赖这次握手。", "The server replies with the protocolVersion it chose, its capabilities and serverInfo. Later requests carry no version; they rely on this handshake.")],
+      "notifications/initialized": [tr("通知：没有 id，服务器不回复。旧版用它表示握手完成。2026-07-28 版把握手和会话 ID 都删掉了，任何一个服务器实例都能处理任何请求，可以放在普通的负载均衡后面。", "A notification: no id, no reply. Older revisions use it to finish the handshake. 2026-07-28 removes the handshake and the session ID, so any server instance can handle any request behind a plain load balancer."), ""],
+      "tools/list": [tr("列出工具。", "List the tools."), tr("每个工具：name、description、inputSchema（JSON Schema）和 annotations（如 readOnlyHint，只是提示，不能当作安全保证）。宿主把这些放进模型的提示，和 21 章的工具说明一样。", "Each tool: name, description, inputSchema (JSON Schema) and annotations (hints such as readOnlyHint, never a security guarantee). The host puts them into the model's prompt, just like chapter 21's tool descriptions.")],
+      "tools/call": [tr("调用工具：name + arguments。工具是<b>模型</b>决定调用的。", "Call a tool: name + arguments. Tools are what the <b>model</b> decides to call."),
+        m.result && m.result.isError ? tr("<code>isError: true</code>：工具执行出错（这里是参数类型不对），错误信息作为结果交给模型，模型下一步可以改正。", "<code>isError: true</code>: the tool failed (here, a wrong argument type); the message goes back to the model as the result so it can correct itself next step.") : tr("结果是内容块列表（文本、图片、资源链接……），还可以有 structuredContent。", "The result is a list of content blocks (text, images, resource links…), optionally with structuredContent.")],
+      "resources/read": [tr("读取资源：用 URI 标识的数据。资源通常由<b>应用或用户</b>选择放进上下文，而不是模型主动调用。", "Read a resource: data identified by a URI. Resources are usually chosen by the <b>application or the user</b> to put into context, rather than called by the model."), tr("返回内容和 mimeType，同样带缓存提示。", "Returns the contents and mimeType, again with cache hints.")],
+      "prompts/get": [tr("获取提示模板：通常由<b>用户</b>选择，比如在聊天框里输入斜杠命令。", "Get a prompt template: usually picked by the <b>user</b>, e.g. as a slash command in the chat box."), tr("返回填好参数的消息列表，宿主把它们放进对话。", "Returns the messages with the arguments filled in; the host adds them to the conversation.")],
+    };
+    const e = E[method] || ["", ""];
+    return (req ? "→ " : "← ") + (req ? e[0] : e[1] || e[0]);
+  }
+  function highlight(json) {
+    return esc(JSON.stringify(json, null, 2)).replace(/"(io\.modelcontextprotocol\/[^"]+|_meta|protocolVersion|capabilities)"(?=:)/g, '<span class="meta">"$1"</span>').replace(/^(\s*)"([^"]+)":/gm, '$1<span class="k">"$2"</span>:');
+  }
+  function renderMc() {
+    const items = TRACES[mcTab]();
+    $("mc-tabs").innerHTML = [["modern", tr("2026-07-28：无状态", "2026-07-28: stateless")], ["handshake", tr("2025-11-25：握手（官方 SDK 服务器）", "2025-11-25: handshake (official SDK server)")], ["agent", tr("一个 agent 任务", "an agent task")]]
+      .map(([k, t]) => `<button class="${k === mcTab ? "on" : ""}" data-k="${k}">${t}</button>`).join("");
+    $("mc-tabs").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { mcTab = b.dataset.k; mcShown = 1; mcCur = 0; renderMc(); }));
+    $("mc-lanes-h").innerHTML = mcTab === "agent" ? tr(`问题：${esc(D.agent.question)}　左：宿主（MCP 客户端），中：模型，右：服务器`, `Question: ${esc(D.agent.question)}　Left: host (MCP client), middle: model, right: server`) : tr("左：客户端，右：服务器。点任意一条查看 JSON。", "Left: client, right: server. Click any message to see its JSON.");
+    $("mc-lanes").innerHTML = items.map((it, i) => {
+      const label = it.side === "m" ? `🧠 ${esc(it.calls.map(c => `${c.name}(${JSON.stringify(c.args)})`).join(", "))}` : it.msg.method ? `${esc(it.msg.method)}${it.msg.id === undefined ? tr("（通知）", " (notification)") : ` #${it.msg.id}`}` : it.msg.error ? `error ${it.msg.error.code}` : `result #${it.msg.id}${it.msg.result && it.msg.result.isError ? " isError" : ""}`;
+      const sub = it.side === "m" ? tr(`模型读了 ${it.words} 词`, `model read ${it.words} words`) : it.msg.params && it.msg.params.name ? esc(it.msg.params.name + " " + JSON.stringify(it.msg.params.arguments || {})) : it.msg.result && it.msg.result.content ? esc(it.msg.result.content[0].text.slice(0, 60)) : "";
+      return `<div class="bub ${it.side} ${i === mcCur ? "cur" : ""} ${i >= mcShown ? "future" : ""} ${it.msg && (it.msg.error || (it.msg.result && it.msg.result.isError)) ? "err" : ""}" data-i="${i}">${label}<small>${sub}</small></div>`;
+    }).join("");
+    $("mc-lanes").querySelectorAll(".bub").forEach(b => b.addEventListener("click", () => { mcCur = +b.dataset.i; renderMc(); }));
+    const it = items[mcCur];
+    $("mc-explain").innerHTML = explain(items, mcCur);
+    $("mc-json").innerHTML = it.side === "m" ? highlight(it.calls) : highlight(it.msg);
+    $("mc-next").disabled = $("mc-all").disabled = mcShown >= items.length;
+  }
+
+  // ================= 2. context budget =================
+  const META_WORDS = D.skills.reduce((a, s) => a + s.meta_words, 0) / D.skills.length;
+  function renderCb() {
+    const v = id => +$(id).value;
+    const tools = v("cb-tools"), tw = v("cb-tw"), sk = v("cb-skills"), body = v("cb-body"), calls = v("cb-calls");
+    ["cb-tools", "cb-tw", "cb-skills", "cb-body", "cb-calls"].forEach(id => $(id + "-v").textContent = v(id));
+    const T = tools * tw, inline = sk * body, cat = sk * META_WORDS, one = sk ? body : 0;
+    const rowsA = [[css("--primary"), T, tr("工具说明", "tool descriptions")], [css("--muted"), inline, tr("所有 skill 正文", "every skill body")]];
+    const rowsB = [[css("--primary"), T, tr("工具说明", "tool descriptions")], [css("--good"), cat, tr("skill 目录", "skill catalog")], [css("--accent"), one, tr("加载的一个正文", "the one loaded body")]];
+    const max = Math.max(T + inline, T + cat + one, 1);
+    const bar = (rows, label) => `<div class="barrow"><span>${label}<br><b class="mono">${fmt(rows.reduce((a, r) => a + r[1], 0))}</b> ${tr("词/次", "words/call")}</span><div class="track">${rows.map(([c, w, t]) => `<span title="${t}: ${fmt(w)}" style="width:${100 * w / max}%;background:${c}"></span>`).join("")}</div></div>`;
+    $("cb-bars").innerHTML = bar(rowsA, tr("全部放进提示", "everything inline")) + bar(rowsB, tr("渐进式披露", "progressive disclosure")) +
+      `<div class="legend">${[[css("--primary"), tr("工具说明", "tool descriptions")], [css("--muted"), tr("skill 正文（全部）", "skill bodies (all)")], [css("--good"), tr("skill 目录", "skill catalog")], [css("--accent"), tr("加载的一个正文", "one loaded body")]].map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join("")}</div>`;
+    const perTaskA = calls * (T + inline), perTaskB = calls * (T + cat) + Math.max(0, calls - 1) * one;
+    $("cb-stats").innerHTML = stat(tr("每个任务：全部放进提示", "per task: everything inline"), fmt(perTaskA), css("--muted")) + stat(tr("每个任务：渐进式披露", "per task: progressive disclosure"), fmt(perTaskB), css("--accent")) +
+      stat(tr("节省", "saved"), perTaskA ? pct(1 - perTaskB / perTaskA) : "–", css("--good")) + stat(tr("其中工具说明占（渐进式）", "tool descriptions' share (progressive)"), perTaskB ? pct(calls * T / perTaskB) : "–", css("--primary"));
+    $("cb-note").innerHTML = tr(`每条 skill 目录约 ${META_WORDS.toFixed(0)} 词（本章 4 个 skill 的平均），比一个工具说明（本章约 ${D.tool_words.toFixed(0)} 词）还长一点：skill 省的不是“每一项”，而是把长长的操作说明挪出了提示。工具多了以后，工具说明本身也会成为大头；办法包括只连接需要的服务器、按任务筛选工具（“工具搜索”），以及提示缓存（13 章）。`,
+      `Each catalog entry is about ${META_WORDS.toFixed(0)} words (the average of this chapter's 4 skills), a bit longer than a tool description (about ${D.tool_words.toFixed(0)} words here): skills don't save on each item, they move long instructions out of the prompt. With many tools, the tool descriptions themselves become the bulk; remedies include connecting only the servers you need, picking tools per task (“tool search”) and prompt caching (chapter 13).`);
+  }
+
+  // ================= 3. skills =================
+  let skSel = 1, skLevel = 1;
+  function renderSk() {
+    $("sk-list").innerHTML = D.skills.map((s, i) => `<button class="${i === skSel ? "on" : ""}" data-i="${i}">${esc(s.name)}</button>`).join("");
+    $("sk-list").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { skSel = +b.dataset.i; renderSk(); }));
+    const s = D.skills[skSel];
+    $("sk-levels").innerHTML = [[1, tr(`第 1 层：目录（${s.meta_words} 词，始终在提示里）`, `Level 1: catalog (${s.meta_words} words, always in the prompt)`)], [2, tr(`第 2 层：正文（${s.body_words} 词，加载时）`, `Level 2: body (${s.body_words} words, when loaded)`)], [3, tr(`第 3 层：文件（${Object.keys(s.files).length} 个，用到时）`, `Level 3: files (${Object.keys(s.files).length}, when needed)`)]]
+      .map(([k, t]) => `<button class="${k === skLevel ? "on" : ""}" data-k="${k}">${t}</button>`).join("");
+    $("sk-levels").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { skLevel = +b.dataset.k; renderSk(); }));
+    $("sk-view").textContent = skLevel === 1 ? D.catalog : skLevel === 2 ? s.body : (Object.entries(s.files).map(([f, t]) => `── ${f} ──\n${t}`).join("\n") || tr("（这个 skill 没有附加文件）", "(this skill has no extra files)"));
+    const lv = m => m.role === "assistant" ? (m.content.includes("load_skill") ? 2 : /read_skill_file|run_skill_script/.test(m.content) ? 3 : 0) : 0;
+    const col = [null, css("--good"), css("--accent"), "#8e24aa"];
+    $("sk-run").innerHTML = `<div class="user"><b>system</b> ${esc(D.catalog)}</div>` + D.skill_run.messages.map(m => { const l = lv(m); return `<div class="${m.role}"><b>${m.role}</b>${l ? `<span class="badge" style="background:${col[l]}">${tr("第", "level ")}${l}${tr(" 层", "")}</span>` : ""} ${esc(m.content.length > 400 ? m.content.slice(0, 400) + " …" : m.content)}</div>`; }).join("");
+  }
+  // the same synthetic library and keyword matcher as code/skills.py
+  const OBJECTS = { csv: ["csv file", "spreadsheet", "table"], pdf: ["pdf", "pdf document", "scanned form"], slides: ["slide deck", "presentation", "slides"], sql: ["sql query", "database query", "select statement"], git: ["git commit", "commit history", "repository log"], invoice: ["invoice", "bill", "receipt"], email: ["email", "inbox message", "mail thread"], test: ["unit test", "test suite", "pytest file"], docker: ["dockerfile", "container image", "docker setup"], log: ["server log", "log file", "error trace"], contract: ["contract", "agreement", "terms of service"], resume: ["resume", "cv", "job application"], api: ["api spec", "openapi schema", "endpoint docs"], image: ["image", "photo", "screenshot"], chart: ["chart", "plot", "graph"], notes: ["meeting notes", "minutes", "call transcript"] };
+  const ACTIONS = { summarize: ["summarize", "condense", "give the gist of"], convert: ["convert", "export", "change the format of"], validate: ["validate", "lint", "check for errors in"], generate: ["generate", "draft", "create"], translate: ["translate", "localize", "put into another language"], clean: ["clean up", "tidy", "fix the formatting of"], compare: ["compare", "diff", "find the differences between"], extract: ["extract fields from", "parse", "pull data out of"] };
+  const cap = s => s[0].toUpperCase() + s.slice(1);
+  const LIB = Object.entries(ACTIONS).flatMap(([a, acts]) => Object.entries(OBJECTS).map(([o, objs]) => ({ name: `${o}-${a}`, good: `${cap(acts[0])} ${objs[0]}s. Use when the user wants to ${acts[1]} or ${acts[2]} one; also called ${objs[1]} or ${objs[2]}.`, terse: `${cap(acts[0])} ${objs[0]}s.`, vague: `Helps with ${objs[0]}s.` })));
+  const STOP = new Set("a an the of to and or is in for with what how many when use user asks it its from".split(" "));
+  const toks = s => s.toLowerCase().match(/[a-z0-9]+/g) || [];
+  function bm25(q, descs) {
+    const docs = descs.map(d => { const m = new Map(); toks(d).forEach(w => m.set(w, (m.get(w) || 0) + 1)); return m; });
+    const lens = docs.map(m => [...m.values()].reduce((a, b) => a + b, 0)), avg = lens.reduce((a, b) => a + b, 0) / lens.length;
+    const df = new Map(); docs.forEach(m => m.forEach((_, w) => df.set(w, (df.get(w) || 0) + 1)));
+    const qs = [...new Set(toks(q))].filter(w => !STOP.has(w));
+    return docs.map((m, i) => qs.reduce((s, w) => { const tf = m.get(w) || 0; if (!tf) return s; const idf = Math.log(1 + (docs.length - df.get(w) + 0.5) / (df.get(w) + 0.5)); return s + idf * tf * 2.2 / (tf + 1.2 * (0.25 + 0.75 * lens[i] / avg)); }, 0));
+  }
+  function renderSl() {
+    const k = +$("sl-k").value, q = $("sl-q").value;
+    // a fixed subset of k skills that always contains log-summarize / 固定的 k 个 skill，总包含 log-summarize
+    const lib2 = k === 128 ? LIB : [LIB.find(s => s.name === "log-summarize"), ...LIB.filter(s => s.name !== "log-summarize").filter((_, i) => i % (128 / k) === 1)].slice(0, k);
+    const cols = ["good", "terse", "vague"].map(style => {
+      const sc = bm25(q, lib2.map(s => s[style])), best = Math.max(...sc);
+      const top = sc.map((v, i) => [v, i]).filter(x => x[0] > 0).sort((a, b) => b[0] - a[0]).slice(0, 3);
+      const ties = sc.filter(v => v === best).length;
+      return { style, top, ties, best };
+    });
+    $("sl-table").innerHTML = `<tr><th>${tr("描述写法", "descriptions")}</th><th>${tr("得分最高的 3 个", "top 3")}</th></tr>` + cols.map(c => `<tr><td>${c.style}</td><td>${c.best === 0 ? `<span class="no">${tr(`没有一个词匹配：只能在 ${lib2.length} 个里随便猜`, `no word matches: a blind guess among ${lib2.length}`)}</span>` : c.top.map(([v, i]) => `${esc(lib2[i].name)} <span class="hint">${v.toFixed(1)}</span>`).join("<br>") + (c.ties > 1 ? `<br><span class="no">${tr(`${c.ties} 个并列第一`, `${c.ties}-way tie for first`)}</span>` : "")}</td></tr>`).join("");
+    const colors = { good: css("--accent"), terse: css("--primary"), vague: css("--muted") };
+    chart($("sl-chart"), ["good", "terse", "vague"].map(s => ({ x: D.sizes, y: D.selection[s], color: colors[s] })), { x0: 4, x1: 128, logx: true, y0: 0, y1: 1.02, xticks: D.sizes, yticks: [0, .25, .5, .75, 1], yfmt: v => pct(v), xlabel: tr("skill 的数量（400 个请求，各用自己的说法）", "number of skills (400 requests in the users' own words)"), vline: k });
+    legend($("sl-leg"), [[colors.good, tr("好：做什么 + 何时用 + 同义词", "good: what + when + synonyms")], [colors.terse, tr("简短：只说做什么", "terse: what only")], [colors.vague, tr("含糊", "vague")]]);
+  }
+
+  // ================= 4. SOP =================
+  const FIELDS = ["person", "company", "city", "founded", "age"];
+  let spRun = null;
+  function rng(seed) { let a = seed >>> 0 || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  let seed = 7;
+  function simulate(k, p) {
+    const r = rng(seed++), T = D.names.facts;
+    const alter = (f, v) => f === "founded" || f === "age" ? String(+v + [-10, -1, 1, 10][Math.floor(r() * 4)]) : (() => { const pool = f === "company" ? D.names.companies : f === "city" ? D.names.cities : ["Rirun Rorolen", "Sivik Sasatar", "Mifis Sisimin"]; let x; do { x = pool[Math.floor(r() * pool.length)]; } while (x === v); return x; })();
+    const write = facts => { const out = {}, ev = []; Object.entries(facts).forEach(([f, v]) => { const u = r(); if (u < p) { ev.push(["drop", f]); return; } if (u < 2 * p) { const a = alter(f, v); ev.push(["alter", f, v, a]); out[f] = a; } else out[f] = v; }); return [out, ev]; };
+    const prose = f => [f.person || f.company ? `${f.person || "Someone"} works at ${f.company || "a company"}` : null, f.city ? `headquartered in ${f.city}` : null, f.founded ? `founded in ${f.founded}` : null, f.age ? `${f.age} years old` : null].filter(Boolean).join(", ") + ".";
+    const free = [], sop = [];
+    let ff = { ...T }, sf = { ...T }, msgs = 0;
+    D.sop.slice(0, k).forEach((role, i) => {
+      if (i === 0) { delete ff.age; delete sf.age; }
+      if (role.role === "Analyst") { if (ff.founded) ff.age = String(2026 - +ff.founded); if (sf.founded) sf.age = String(2026 - +sf.founded); }
+      let [o1, e1] = write(ff); ff = o1; free.push({ role: role.role, ev: e1, text: prose(ff) });
+      let [o2, e2] = write(sf);
+      const expected = role.fields.filter(f => f in sf), resent = [];
+      for (let t = 0; t < 3; t++) { const miss = expected.filter(f => !(f in o2)); if (!miss.length) break; resent.push(...miss); msgs += 2; const [o3, e3] = write(Object.fromEntries(miss.map(f => [f, sf[f]]))); Object.assign(o2, o3); e2 = e2.concat(e3.filter(e => e[0] === "alter")); }
+      sf = o2; sop.push({ role: role.role, ev: e2, resent, json: { ...sf } });
+    });
+    const wrong = FIELDS.filter(f => (k > 1 || f !== "age") && sf[f] !== T[f]);
+    return { free, sop, freeOk: FIELDS.every(f => (k === 1 && f === "age") || ff[f] === T[f]), wrong, msgs };
+  }
+  function renderSp() {
+    const k = +$("sp-k").value, p = +$("sp-p").value;
+    $("sp-k-v").textContent = k;
+    $("sp-pipe").innerHTML = D.sop.map((r, i) => `<span class="role ${i < k ? "on" : ""}">${r.role}<small>${r.subscribes} → ${r.publishes}</small></span>${i < D.sop.length - 1 ? "→" : ""}`).join("") + `→<span class="role on">${tr("审阅（仅 SOP）", "Review (SOP only)")}<small>${tr("对照来源", "against sources")}</small></span>`;
+    if (!spRun || spRun.k !== k || spRun.p !== p) spRun = { ...simulate(k, p), k, p };
+    const evs = ev => ev.map(e => e[0] === "drop" ? `<span class="bad">${tr("漏掉", "dropped")} ${e[1]}</span>` : `<span class="bad">${e[1]}: ${esc(e[2])} → ${esc(e[3])}</span>`).join(" ");
+    $("sp-free").innerHTML = spRun.free.map(s => `<div><b>${s.role}</b> ${esc(s.text)} ${evs(s.ev)}</div>`).join("") + `<div>${spRun.freeOk ? `<span class="ok">✓ ${tr("报告正确", "report correct")}</span>` : `<span class="no">✗ ${tr("报告有误，而且没人发现", "the report is wrong, and nobody noticed")}</span>`}</div>`;
+    $("sp-sop").innerHTML = spRun.sop.map(s => `<div><b>${s.role}</b> <span class="mono">${esc(JSON.stringify(s.json))}</span> ${evs(s.ev.filter(e => e[0] === "alter"))} ${s.resent.length ? `<span class="fix">${tr("schema 校验发现缺少", "schema check: missing")} ${s.resent.join(", ")} → ${tr("退回重发", "sent back")}</span>` : ""}</div>`).join("") +
+      `<div>${spRun.wrong.length ? `<span class="fix">${tr("审阅：重读来源，改正", "review: re-read the sources, corrected")} ${spRun.wrong.join(", ")}</span>` : `<span class="fix">${tr("审阅：重读来源，全部一致", "review: re-read the sources, all match")}</span>`} <span class="ok">✓ ${tr("报告正确", "report correct")}</span></div>`;
+    const R = D.sop_results[String(p)], cols = { free: css("--muted"), schema: css("--primary"), "schema+review": css("--accent") };
+    chart($("sp-chart"), Object.keys(cols).map(m => ({ x: D.roles, y: R[m].map(v => v[0]), color: cols[m] })), { x0: 0.7, x1: 6.3, y0: 0, y1: 1.02, xticks: D.roles, yticks: [0, .25, .5, .75, 1], yfmt: v => pct(v), xlabel: tr("角色数（300 次运行）", "roles (300 runs)"), vline: k });
+    legend($("sp-leg"), [[cols.free, tr("自由文本", "free-form")], [cols.schema, tr("产物 + schema 校验", "artifacts + schema")], [cols["schema+review"], tr("再加审阅", "+ review")]]);
+    const row = m => R[m][k - 1];
+    $("sp-stats").innerHTML = stat(tr(`${k} 个角色：自由文本`, `${k} roles: free-form`), pct(row("free")[0]), cols.free) + stat("schema", pct(row("schema")[0]), cols.schema) + stat("+ review", pct(row("schema+review")[0]), cols["schema+review"]) +
+      stat(tr("工具调用：自由文本 → 审阅", "tool calls: free-form → review"), `${row("free")[2].toFixed(0)} → ${row("schema+review")[2].toFixed(0)}`);
+    $("sp-note").innerHTML = tr("自由文本交接时，漏掉和改错的事实都悄无声息地传下去，角色越多错得越多。schema 校验能发现<b>缺了什么</b>（退回重发），但发现不了<b>错了什么</b>；对照来源的审阅两者都能发现，代价是把查找再做一遍。审阅必须从最初的任务出发，而不是相信上一条消息。",
+      "With free-form handoffs, dropped and altered facts pass silently down the chain, and more roles mean more errors. A schema check catches <b>what is missing</b> (send it back) but not <b>what is wrong</b>; a review against the sources catches both, at the cost of doing the lookups again. The review must start from the original task, not trust the last message.");
+  }
+
+  // ================= 5. comparison =================
+  const CMP = [
+    [["是什么", "What it is"], ["框架里的 Python 对象：函数 + schema", "A Python object in a framework: function + schema"], ["一个开放协议：客户端 ↔ 服务器的 JSON-RPC 消息", "An open protocol: JSON-RPC messages between client and server"], ["一个文件夹：SKILL.md 说明 + 脚本 + 参考文件", "A folder: SKILL.md instructions + scripts + references"], ["写成文档或数据的流程：角色、产物、检查", "A procedure as a document or data: roles, artifacts, checks"]],
+    [["给谁用", "Who uses it"], ["同一个程序、同一个框架", "The same program and framework"], ["任何支持 MCP 的宿主，任何语言", "Any MCP host, in any language"], ["任何支持 Skills 的 agent", "Any agent that supports Skills"], ["一组 agent（以及人）", "A team of agents (and people)"]],
+    [["在哪里运行", "Where it runs"], ["程序进程内", "Inside the program's process"], ["独立的服务器进程，本地（stdio）或远程（HTTP）", "A separate server process, local (stdio) or remote (HTTP)"], ["agent 自己的环境里（读文件、运行脚本）", "In the agent's own environment (read files, run scripts)"], ["编排程序里", "In the orchestration code"]],
+    [["给模型提供什么", "What it gives the model"], ["能调用的动作", "Actions it can call"], ["工具（模型调用）、资源（应用选择）、提示（用户选择）", "Tools (model-chosen), resources (app-chosen), prompts (user-chosen)"], ["怎么做一件事的知识，按需加载", "Know-how for a task, loaded on demand"], ["每个角色该做什么、交出什么", "What each role does and hands over"]],
+    [["上下文成本", "Context cost"], ["每个工具的说明每次都在", "Every tool's description, every call"], ["同左：连接的每个工具都在", "Same: every connected tool, every call"], ["每个 skill 只有一行目录，正文用到才加载", "One catalog line per skill; the body only when used"], ["每个角色只看自己需要的产物", "Each role sees only the artifacts it needs"]],
+    [["相互关系", "How they fit together"], ["用适配器可以把 MCP 工具变成 LangChain 工具", "An adapter turns MCP tools into LangChain tools"], ["skill 的步骤可以调用 MCP 工具", "A skill's steps can call MCP tools"], ["SOP 中的每个角色可以带自己的 skills", "Each role in an SOP can carry its own skills"], ["MetaGPT：Code = SOP(Team)", "MetaGPT: Code = SOP(Team)"]],
+  ];
+  function renderCmp() {
+    $("cmp").innerHTML = `<tr><th></th><th>${tr("LangChain 工具", "LangChain tools")}</th><th>MCP</th><th>Skills</th><th>SOP</th></tr>` + CMP.map(r => `<tr><td><b>${tr(...r[0])}</b></td>${r.slice(1).map(c => `<td>${tr(...c)}</td>`).join("")}</tr>`).join("");
+  }
+
+  // ================= 6. quiz =================
+  const QUIZ = [
+    { q: ["MCP 2026-07-28 版去掉 initialize 握手以后，协议版本和客户端能力放在哪里？", "With the initialize handshake gone in MCP 2026-07-28, where do the protocol version and client capabilities go?"],
+      opts: [["不再需要了", "They are no longer needed"], ["每个请求的 params._meta 里", "In params._meta of every request"], ["HTTP cookie 里", "In an HTTP cookie"]],
+      a: 1, ex: ["每个请求都自带版本、能力和客户端信息，服务器不用记住任何连接状态，任何实例都能处理任何请求。server/discover 用来提前查询服务器支持什么。", "Every request carries the version, capabilities and client info, so the server keeps no connection state and any instance can serve any request. server/discover lets the client ask up front what the server supports."] },
+    { q: ["工具执行出错（比如参数类型不对）时，MCP 服务器应该怎样返回？", "When a tool fails (say, an argument has the wrong type), how should an MCP server reply?"],
+      opts: [["返回 JSON-RPC 错误", "A JSON-RPC error"], ["返回结果，带 isError: true 和错误说明，让模型看到并改正", "A result with isError: true and the message, so the model sees it and corrects itself"], ["什么也不返回", "Nothing"]],
+      a: 1, ex: ["协议层错误（方法不存在、请求格式不对）用 JSON-RPC 错误；工具层面的错误作为结果返回给模型，这和 21 章“把校验错误交给模型重试”是一回事。", "Protocol errors (unknown method, malformed request) use JSON-RPC errors; tool-level failures go back to the model as a result, the same idea as chapter 21's “return the validation error so the model retries”."] },
+    { q: ["MCP 的工具、资源、提示，通常分别由谁决定使用？", "Who usually decides to use MCP tools, resources and prompts?"],
+      opts: [["都由模型决定", "The model, for all three"], ["工具：模型；资源：应用；提示：用户", "Tools: the model; resources: the application; prompts: the user"], ["都由服务器决定", "The server, for all three"]],
+      a: 1, ex: ["这是 MCP 的三种“控制方”：模型调用工具，应用把资源放进上下文，用户选择提示模板（比如斜杠命令）。", "These are MCP's three control points: the model calls tools, the application puts resources into context, the user picks prompt templates (e.g. slash commands)."] },
+    { q: ["Skills 的“渐进式披露”指什么？", "What is progressive disclosure in Skills?"],
+      opts: [["skill 的内容逐渐变长", "Skills grow longer over time"], ["提示里只放名字和描述，用到时才加载正文，脚本和文件在某一步需要时才读取或运行", "Only names and descriptions sit in the prompt; the body loads when used; scripts and files are read or run only when a step needs them"], ["每次只能用一个 skill", "Only one skill can be used at a time"]],
+      a: 1, ex: ["这样可以装很多 skill 而不撑满上下文。代价是：选择时模型只看得到描述，所以描述要写清楚“做什么”和“什么时候用”。", "That way an agent can have many skills without filling its context. The price: when choosing, the model sees only the descriptions, so they must say what the skill does and when to use it."] },
+    { q: ["本章中，schema 校验能发现哪类交接错误？", "In this chapter, which handoff errors does a schema check catch?"],
+      opts: [["缺失的字段", "Missing fields"], ["被改错的值", "Altered values"], ["两者都能", "Both"]],
+      a: 0, ex: ["改错的值格式仍然合法，schema 看不出来；要发现它，得对照来源（重读文档、重新计算）。这就是 SOP 里“审阅”这一步的作用，代价是更多的工具调用。", "An altered value still has a valid format, so the schema can't tell; catching it needs a check against the sources (re-read, recompute). That is the job of the review step in an SOP, at the cost of more tool calls."] },
+    { q: ["LangChain 工具和 MCP 工具是什么关系？", "How do LangChain tools relate to MCP tools?"],
+      opts: [["MCP 取代了 LangChain", "MCP replaces LangChain"], ["互补：LangChain 工具是框架内的调用接口，MCP 是跨进程、跨语言的协议；适配器可以把 MCP 工具包装成 LangChain 工具", "Complementary: LangChain tools are the in-framework interface, MCP is a cross-process, cross-language protocol; an adapter wraps MCP tools as LangChain tools"], ["完全一样", "They are the same thing"]],
+      a: 1, ex: ["本章代码把 MCP 服务器的工具包装成 StructuredTool，21 章的 LangGraph agent 原样运行，工具调用完全相同。", "This chapter's code wraps an MCP server's tools as StructuredTools, and chapter 21's LangGraph agent runs on them unchanged, with identical tool calls."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function renderAll() { renderMc(); renderCb(); renderSk(); renderSl(); renderSp(); renderCmp(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("mc-next").addEventListener("click", () => { const n = TRACES[mcTab]().length; mcShown = Math.min(mcShown + 1, n); mcCur = mcShown - 1; renderMc(); $("mc-lanes").scrollTop = $("mc-lanes").scrollHeight; });
+  $("mc-all").addEventListener("click", () => { mcShown = TRACES[mcTab]().length; renderMc(); });
+  $("mc-reset").addEventListener("click", () => { mcShown = 1; mcCur = 0; renderMc(); });
+  ["cb-tools", "cb-tw", "cb-skills", "cb-body", "cb-calls"].forEach(id => $(id).addEventListener("input", renderCb));
+  $("sl-q").addEventListener("input", renderSl);
+  $("sl-k").addEventListener("input", renderSl);
+  ["sp-k", "sp-p"].forEach(id => $(id).addEventListener("input", renderSp));
+  $("sp-run").addEventListener("click", () => { spRun = null; renderSp(); });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

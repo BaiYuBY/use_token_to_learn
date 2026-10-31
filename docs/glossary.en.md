@@ -171,6 +171,17 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | LangGraph / 状态图 | LangGraph / StateGraph | A framework that writes an agent as a graph of state, nodes and (conditional) edges | [21](21-agents/README.en.md) |
 | 检查点 | checkpointer | Saves the state after every step of the graph, for history, crash recovery and human-in-the-loop | [21](21-agents/README.en.md) |
 | 人工介入 | human-in-the-loop / interrupt | Pause before a risky action and continue only after a person approves (interrupt and Command(resume=...) in LangGraph) | [21](21-agents/README.en.md) |
+| MCP（模型上下文协议） | MCP (Model Context Protocol) | An open protocol connecting AI applications (hosts) to external tools and data (servers) over JSON-RPC | [22](22-mcp-skills-sop/README.en.md) |
+| 宿主 / 客户端 / 服务器 | host / client / server | MCP's three roles: the AI application; the part of it that talks to one server; the program wrapping an external system | [22](22-mcp-skills-sop/README.en.md) |
+| 工具 / 资源 / 提示 | tools / resources / prompts | The three things an MCP server offers, chosen respectively by the model, the application and the user | [22](22-mcp-skills-sop/README.en.md) |
+| JSON-RPC | JSON-RPC 2.0 | A remote-call format in JSON with requests (with an id), responses and notifications (without an id) | [22](22-mcp-skills-sop/README.en.md) |
+| stdio / Streamable HTTP | stdio / Streamable HTTP | MCP's two transports: a local subprocess with one message per line, or HTTP for remote servers | [22](22-mcp-skills-sop/README.en.md) |
+| 无状态协议 | stateless protocol (MCP 2026-07-28) | No handshake or session; every request carries the protocol version and client capabilities in _meta | [22](22-mcp-skills-sop/README.en.md) |
+| 工具投毒 | tool poisoning | Hiding instructions for the model inside a tool's description to make it do things the user doesn't know about | [22](22-mcp-skills-sop/README.en.md) |
+| Agent Skills / SKILL.md | Agent Skills / SKILL.md | A capability package: SKILL.md (name, description + instructions) with optional scripts and reference files | [22](22-mcp-skills-sop/README.en.md) |
+| 渐进式披露 | progressive disclosure | Keep only skills' names and descriptions in context; load the body and files when they are used | [22](22-mcp-skills-sop/README.en.md) |
+| SOP（标准作业程序） | SOP (standard operating procedure) | A procedure fixing each role's inputs, output formats and checks, as in MetaGPT | [22](22-mcp-skills-sop/README.en.md) |
+| 结构化产物 | structured artifact | A fixed-format document handed between roles, which can be checked against a schema | [22](22-mcp-skills-sop/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

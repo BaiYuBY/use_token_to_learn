@@ -70,12 +70,12 @@ TOOLS = [  # what the model is told about each tool / 告诉模型的工具说�
 SCHEMA = {t["name"]: t["parameters"] for t in TOOLS}
 
 
-def validate(call):
+def validate(call, schema=SCHEMA):
     """Check a tool call against its JSON schema; return an error message or None.
     按 JSON schema 检查工具调用；返回错误信息或 None。"""
-    if not isinstance(call, dict) or call.get("name") not in SCHEMA:
+    if not isinstance(call, dict) or call.get("name") not in schema:
         return f"unknown tool {call.get('name') if isinstance(call, dict) else call!r}"
-    spec, args = SCHEMA[call["name"]], call.get("args")
+    spec, args = schema[call["name"]], call.get("args")
     if not isinstance(args, dict):
         return "args must be a JSON object"
     missing = [k for k in spec["required"] if k not in args]
@@ -187,12 +187,15 @@ def supported(answer, messages):
     return any(m["role"] == "tool" and answer in m["content"] for m in messages)
 
 
-def agent_loop(model, world, question, max_steps=10, check=False, summarize=False):
+def agent_loop(model, world, question, max_steps=10, check=False, summarize=False, tools=TOOLS, call_tool=None):
     """The whole agent: ask the model, run the tools it calls, feed the results back, stop at
     final_answer or after max_steps model calls. Returns the answer (or None), the steps used, the
     words the model had to read in total, and the transcript.
-    整个 agent：问模型、执行它调用的工具、把结果喂回去，遇到 final_answer 或模型调用达到 max_steps 次时停止。"""
-    messages = [{"role": "system", "content": "You answer questions using the tools. " + json.dumps(TOOLS)},
+    整个 agent：问模型、执行它调用的工具、把结果喂回去，遇到 final_answer 或模型调用达到 max_steps 次时停止。
+    tools / call_tool let the tools come from elsewhere, e.g. an MCP server (chapter 22).
+    tools / call_tool 让工具可以来自别处，例如 MCP 服务器（22 章）。"""
+    schema = {t["name"]: t["parameters"] for t in tools}
+    messages = [{"role": "system", "content": "You answer questions using the tools. " + json.dumps(tools)},
                 {"role": "user", "content": question}]
     read_words = 0
     for step in range(1, max_steps + 1):
@@ -201,7 +204,7 @@ def agent_loop(model, world, question, max_steps=10, check=False, summarize=Fals
         calls = model(context)
         messages.append({"role": "assistant", "content": json.dumps(calls)})
         for call in calls:
-            err = validate(call)
+            err = validate(call, schema)
             if err:
                 messages.append({"role": "tool", "content": f"Error: {err}. Call the tool again with valid arguments."})
                 continue
@@ -211,8 +214,8 @@ def agent_loop(model, world, question, max_steps=10, check=False, summarize=Fals
                     messages.append({"role": "tool", "content": "Check failed: that answer is not in any tool result. Keep working."})
                     continue
                 return answer, step, read_words, messages
-            out = run_tool(world, call["name"], call["args"])
-            if call["name"] == "calculator":
+            out = call_tool(call["name"], call["args"]) if call_tool else run_tool(world, call["name"], call["args"])
+            if call["name"] == "calculator" and not out.startswith(call["args"]["expression"] + " ="):  # MCP servers already format it
                 out = f"{call['args']['expression']} = {out}"
             messages.append({"role": "tool", "content": out})
     return None, max_steps, read_words, messages

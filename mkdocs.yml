@@ -9,6 +9,9 @@ docs_dir: docs
 # Plain .html URLs so the built site also works when opened from disk
 # 使用 .html 地址，构建出的网站可直接双击打开
 use_directory_urls: false
+# Skill folders are code (SKILL.md files read by agents), not pages / skill 文件夹是代码，不是网页
+exclude_docs: |
+  /22-mcp-skills-sop/code/skills/
 
 hooks:
   - scripts/mkdocs_hooks.py
@@ -76,6 +79,7 @@ plugins:
             RAG 与向量数据库: RAG & Vector Databases
             知识图谱与图数据库: Knowledge Graphs & Graph Databases
             Agent 与 agent loop: Agents & the Agent Loop
+            MCP、Skills 与 SOP: MCP, Skills & SOPs
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -137,6 +141,7 @@ nav:
       - RAG 与向量数据库: 19-rag/README.md
       - 知识图谱与图数据库: 20-knowledge-graphs/README.md
       - Agent 与 agent loop: 21-agents/README.md
+      - MCP、Skills 与 SOP: 22-mcp-skills-sop/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md
