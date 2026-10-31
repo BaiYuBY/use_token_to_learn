@@ -180,7 +180,8 @@ use_token_to_learn/
 - [x] 18 提示工程（指令与示例、上下文学习的覆盖面、提示注入与指令层级、多示例注入，附浏览器内实时运行的提示实验台）
 - [x] 19 RAG 与向量数据库（切块与上下文标题、BM25 / 稠密 / 混合检索、IVF / HNSW / PQ 的召回率与计算量、拼进提示）
 - [x] 20 知识图谱与图数据库（抽取与实体消解、类 Cypher 查询、多跳：一次检索 / 逐跳检索 / 图查询、全局问题与 GraphRAG 社区摘要）
-- [ ] 21 Agent 与 agent loop（含 LangChain 与 LangGraph：手写循环与框架的对照；19 章补一段 LangChain 检索链的对应关系，22 章对比 LangChain 工具与 MCP 工具）、22 MCP、Skills 与 SOP、23 评测、24 安全与可解释性
+- [x] 21 Agent 与 agent loop（工具调用与 JSON schema 校验、ReAct 循环、错误累积与作答前自检、步数上限、上下文成本与并行调用；LangChain 工具与 LCEL、LangGraph 状态图 / 检查点 / 人工介入，与手写循环逐步对照；19 章已补 LangChain 检索链的对应关系）
+- [ ] 22 MCP、Skills 与 SOP（对比 LangChain 工具与 MCP 工具）、23 评测、24 安全与可解释性
 
 ### 持续进行：前沿问答
 - [x] 建立 `docs/qa/` 单元与模板

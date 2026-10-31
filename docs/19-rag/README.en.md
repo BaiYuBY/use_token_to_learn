@@ -161,6 +161,19 @@ Key points:
 - **Sources are only data**: retrieved web pages and documents may hide instructions, which is indirect prompt injection ([chapter 18](../18-prompt-engineering/README.en.md)).
 - **Order and amount**: too many chunks dilute attention, and key information buried in the middle of a long context is easily overlooked ([chapter 14](../14-long-context/README.en.md)). Rerank first and include only the most relevant few.
 
+**The same pipeline in LangChain**: LangChain has a ready-made component for each step, matching this chapter's steps one to one:
+
+| Step in this chapter | LangChain component |
+|---|---|
+| Chunking | text splitters (`RecursiveCharacterTextSplitter` and others) |
+| Encoding | the embedding interface (`Embeddings`) |
+| Vector index | vector stores (`VectorStore`, backed by FAISS, Chroma and others) |
+| Retrieval | retrievers (`vector_store.as_retriever(search_kwargs={"k": 5})`), a BM25 retriever, and `EnsembleRetriever` for weighted fusion |
+| Assembling the prompt | prompt templates (`ChatPromptTemplate`) |
+| Generation | chat models (`ChatModel`) |
+
+LCEL's pipe operator chains them: retriever → format the sources → prompt template → model → output parser, and one `invoke` runs the whole pipeline, with `batch` and `stream` built in. The framework only packages the steps; you still decide how to chunk, how to retrieve and whether to rerank, and you still have to evaluate the result. [Chapter 21](../21-agents/README.en.md)'s code includes a small retrieval chain written in LCEL, and the chapter compares LangChain and LangGraph with hand-written code.
+
 ### 3.5 Evaluation and common failures
 
 Evaluate RAG in two stages:
@@ -176,7 +189,7 @@ Common failures:
 | Found it but answered wrong | too many or too long chunks bury the answer; contradictory chunks | rerank and keep a few; label sources and dates |
 | Not in the sources, but the model answers anyway | no way out offered | offer “I don't know” in the prompt; check citations |
 | Led astray by retrieved content | indirect prompt injection | treat sources as data; limit permissions |
-| The question needs information from several places | one retrieval finds only part | multi-hop retrieval, [knowledge graphs](../20-knowledge-graphs/README.en.md); agentic retrieval (chapter 21, planned) |
+| The question needs information from several places | one retrieval finds only part | multi-hop retrieval, [knowledge graphs](../20-knowledge-graphs/README.en.md); [agentic retrieval](../21-agents/README.en.md) |
 
 ## 4. Minimal code
 

@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 与 agent loop 交互演示 · Agents &amp; the Agent Loop Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .tl { display: grid; gap: 4px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; max-height: 420px; overflow-y: auto; }
+  .tl div { background: var(--bg); border: 1px solid var(--line); border-left-width: 4px; border-radius: 6px; padding: 3px 8px; overflow-wrap: anywhere; }
+  .tl div b { font-weight: 600; margin-right: 6px; }
+  .tl .user { border-left-color: var(--muted); }
+  .tl .assistant { border-left-color: var(--primary); }
+  .tl .tool { border-left-color: var(--accent); }
+  .tl .err { border-left-color: var(--bad); }
+  .tl .check { border-left-color: var(--good); }
+  .tl .new { outline: 2px solid var(--accent); }
+  #lg-svg { width: 100%; max-width: 640px; margin: 0 auto; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  #lg-svg text { font-size: 13px; fill: var(--ink); }
+  table.map td, table.map th { text-align: left !important; white-space: normal !important; vertical-align: top; }
+  table.map code { font-size: .82em; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">Agent 与 agent loop · 交互演示</span><span lang="en">Agents &amp; the Agent Loop · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">一个由 200 个人、20 家公司组成的虚构世界，写成 220 篇短文档；agent 有三个工具：search、read、calculator。“模型”是一个按 ReAct 方式规划、并按设定概率犯错的脚本（与 <code>code/agent_loop.py</code> 相同的逻辑），这样循环本身清清楚楚。一切都在浏览器里实时运行。</span>
+        <span lang="en">A made-up world of 200 people and 20 companies, written as 220 short documents; the agent has three tools: search, read and calculator. The “model” is a script that plans ReAct-style and makes mistakes at a rate you set (the same logic as <code>code/agent_loop.py</code>), so the loop itself is easy to see. Everything runs live in your browser.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. the loop -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">一步一步看 agent loop</span><span lang="en">The agent loop, step by step</span></h2>
+    <p class="hint">
+      <span lang="zh">循环只有几行：把对话发给模型 → 模型返回工具调用 → 程序执行工具、把结果追加进对话 → 再发给模型……直到模型调用 <code>final_answer</code>，或用完步数上限。下方的图是同一个循环的 LangGraph 写法，高亮的是当前所在的节点。调高错误率，看看哪些错误能被循环纠正，哪些不能。</span>
+      <span lang="en">The loop is a few lines: send the conversation to the model → it returns tool calls → the program runs the tools and appends the results → send again… until the model calls <code>final_answer</code> or the step budget runs out. The graph below is the same loop written in LangGraph; the current node is highlighted. Raise the error rate and see which mistakes the loop can recover from and which it can't.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">任务</span><span lang="en">task</span> <select id="ag-len"></select></label>
+      <label><select id="ag-task"></select></label>
+    </div>
+    <div class="controls">
+      <label><span lang="zh">每次模型调用出错的概率</span><span lang="en">error rate per model call</span> <input type="range" id="ag-err" min="0" max="0.5" step="0.05" value="0.2"> <b id="ag-err-v" class="mono"></b></label>
+      <label><span lang="zh">随机种子</span><span lang="en">seed</span> <input type="number" id="ag-seed" value="5" min="0" max="999" style="width:4.5em"></label>
+      <label><span lang="zh">步数上限</span><span lang="en">max model calls</span> <input type="number" id="ag-max" value="10" min="1" max="30" style="width:4em"></label>
+      <label><input type="checkbox" id="ag-check"> <span lang="zh">作答前自检</span><span lang="en">self-check before answering</span></label>
+      <label><input type="checkbox" id="ag-par"> <span lang="zh">并行工具调用</span><span lang="en">parallel tool calls</span></label>
+      <label><input type="checkbox" id="ag-trim"> <span lang="zh">只保留有用的工具结果</span><span lang="en">keep only useful results</span></label>
+    </div>
+    <div class="controls">
+      <button id="ag-step">▶ <span lang="zh">下一步</span><span lang="en">next step</span></button>
+      <button id="ag-all">⏭ <span lang="zh">运行到底</span><span lang="en">run to the end</span></button>
+      <button id="ag-reset">↺ <span lang="zh">重来</span><span lang="en">reset</span></button>
+    </div>
+    <svg id="lg-svg" viewBox="0 0 520 140"></svg>
+    <p class="hint mono" style="margin:4px 0 0">LangGraph: StateGraph(MessagesState) · tools = ToolNode([search, read, calculator])</p>
+    <div class="stats" id="ag-stats"></div>
+    <div class="tl" id="ag-tl"></div>
+    <div class="callout" id="ag-note"></div>
+  </section>
+
+  <!-- 2. compounding -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">错误会累积：步数越多，越容易失败</span><span lang="en">Errors compound: more steps, more failures</span></h2>
+    <p class="hint">
+      <span lang="zh">三种错误各占约三分之一：参数格式错（循环把校验错误返回给模型，它重试就好）、标题拼错（工具说“没有这篇文档”，同样可以重试）、直接编一个答案（循环结束，答错）。只有最后一种是致命的，所以每次模型调用“致命出错”的概率约为 0.3 × 错误率，成功率大约是 (1 − 0.3e)<sup>模型调用次数</sup>。作答前的自检拦下了大部分编造的答案。</span>
+      <span lang="en">The three mistakes are about a third each: malformed arguments (the loop returns the validation error and the model retries), a misspelled title (the tool says “no such document”; again a retry), and a made-up answer (the loop ends with a wrong answer). Only the last is fatal, so each model call fails fatally with probability about 0.3 × the error rate, and success is about (1 − 0.3e)<sup>model calls</sup>. The self-check before answering stops most made-up answers.</span>
+    </p>
+    <div class="row">
+      <div class="col">
+        <div class="legend" id="cp-leg"></div>
+        <svg class="chart" id="cp-chart" viewBox="0 0 520 280"></svg>
+        <p class="hint"><span lang="zh">300 个任务 × 每种长度，Python 版运行结果。实线：无自检；虚线：自检；点线：(1−0.3e)<sup>k+1</sup>。</span><span lang="en">300 tasks per length, from the Python version. Solid: no check; dashed: self-check; dotted: (1−0.3e)<sup>k+1</sup>.</span></p>
+      </div>
+      <div class="col">
+        <svg class="chart" id="bd-chart" viewBox="0 0 520 280"></svg>
+        <p class="hint"><span lang="zh">5 次工具调用的任务、错误率 10%，改变步数上限。不出错时正好要 6 次模型调用；上限太紧，每次可恢复的错误都会变成失败。灰色：无自检，橙色：自检。</span><span lang="en">5-call tasks at a 10% error rate, varying the step budget. With no mistakes it takes exactly 6 model calls; a tight budget turns every recoverable mistake into a failure. Grey: no check, orange: self-check.</span></p>
+      </div>
+    </div>
+    <h3><span lang="zh">在你的浏览器里跑一批</span><span lang="en">Run a batch in your browser</span></h3>
+    <p class="hint"><span lang="zh">用第 1 部分的设置（错误率、自检、并行、步数上限），对 200 个新任务运行这个循环。</span><span lang="en">Run the loop on 200 fresh tasks with the settings from part 1 (error rate, self-check, parallel calls, step budget).</span></p>
+    <div class="controls"><button id="bt-run">▶ <span lang="zh">运行 200 个任务</span><span lang="en">run 200 tasks</span></button></div>
+    <div class="scroll"><table class="t" id="bt-table"></table></div>
+    <h3><span lang="zh">算一算</span><span lang="en">Do the arithmetic</span></h3>
+    <div class="controls">
+      <label><span lang="zh">每步成功率</span><span lang="en">success per step</span> <input type="range" id="ca-p" min="0.9" max="0.999" step="0.001" value="0.99"> <b id="ca-p-v" class="mono"></b></label>
+      <label><span lang="zh">步数</span><span lang="en">steps</span> <input type="range" id="ca-n" min="1" max="200" step="1" value="50"> <b id="ca-n-v" class="mono"></b></label>
+    </div>
+    <div class="stats" id="ca-stats"></div>
+  </section>
+
+  <!-- 3. cost -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">上下文成本：每次调用都要重读整段对话</span><span lang="en">Context cost: every call re-reads the conversation</span></h2>
+    <p class="hint">
+      <span lang="zh">模型没有记忆：每一步都要把系统提示、工具说明和到目前为止的全部对话重新发一遍。所以总读入量随步数超线性增长；其中很大一块是每次都一样的系统提示和工具说明，这正是提示缓存（13 章）发挥作用的地方。删掉没用的工具结果能省一点；把互不依赖的调用一次发出（并行工具调用）能少几个来回。</span>
+      <span lang="en">The model has no memory: every step re-sends the system prompt, the tool descriptions and the whole conversation so far. So the total grows faster than the number of steps, and a big share is the system prompt and tool descriptions, identical every time: exactly what prompt caching (chapter 13) is for. Dropping useless tool results saves a little; sending independent calls together (parallel tool calls) saves round trips.</span>
+    </p>
+    <div class="row">
+      <div class="col"><div class="legend" id="ct-leg"></div><svg class="chart" id="ct-chart" viewBox="0 0 520 260"></svg></div>
+      <div class="col"><div class="legend" id="pc-leg"></div><svg class="chart" id="pc-chart" viewBox="0 0 520 260"></svg></div>
+    </div>
+  </section>
+
+  <!-- 4. LangGraph mapping -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">手写循环 ↔ LangChain / LangGraph</span><span lang="en">Hand-written loop ↔ LangChain / LangGraph</span></h2>
+    <p class="hint">
+      <span lang="zh"><code>code/langgraph_agent.py</code> 用 LangGraph 实现了同一个 agent，在 120 个任务上与手写循环走出完全相同的工具调用序列。框架没有改变循环本身，它提供的是：现成的部件、可视化的结构、持久化的状态和人工介入。</span>
+      <span lang="en"><code>code/langgraph_agent.py</code> builds the same agent in LangGraph; on 120 tasks it makes exactly the same sequence of tool calls as the hand-written loop. The framework doesn't change the loop; it adds ready-made parts, a visible structure, persistent state and human-in-the-loop.</span>
+    </p>
+    <div class="scroll"><table class="t map" id="map"></table></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与代码：</span><span lang="en">Write-up and code: </span>
+    <a href="../README.html">21 Agent 与 agent loop · Agents &amp; the Agent Loop</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+<script src="agents_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.AGENT_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 46, R = 12, T = 10, B = 34;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0), fy = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    (o.vlines || []).forEach(v => { s += `<line x1="${fx(v.x)}" x2="${fx(v.x)}" y1="${T}" y2="${H - B}" stroke="${v.color}" stroke-dasharray="3 3"/><text x="${fx(v.x) + 4}" y="${T + 12}" style="fill:${v.color}">${v.label}</text>`; });
+    series.forEach(se => {
+      const dash = se.dash === "dot" ? 'stroke-dasharray="2 3"' : se.dash ? 'stroke-dasharray="6 4"' : "";
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="${se.w || 2}" opacity="${se.op || 1}" ${dash} points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      if (se.dots) se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="3" fill="${se.color}"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 3}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+
+  // ================= the same logic as code/agent_loop.py =================
+  const YEAR = 2026, DOCS = D.docs, TITLES = Object.keys(DOCS);
+  const SCHEMA = Object.fromEntries(D.tools.map(t => [t.name, t.parameters]));
+  const PEOPLE = TITLES.filter(t => / works at /.test(DOCS[t])), COMPANIES = TITLES.filter(t => / was founded in /.test(DOCS[t]));
+  const EMPLOYER = Object.fromEntries(PEOPLE.map(p => [p, DOCS[p].match(/ works at (.+)\.$/)[1]]));
+  const FOUNDED = Object.fromEntries(COMPANIES.map(c => [c, +DOCS[c].match(/founded in (\d+)/)[1]]));
+  const HQ = Object.fromEntries(COMPANIES.map(c => [c, DOCS[c].match(/headquarters are in (\w+)/)[1]]));
+  const reEsc = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Python's json.dumps style, so word counts match the Python version / 与 Python json.dumps 相同的格式
+  const pyDumps = x => Array.isArray(x) ? "[" + x.map(pyDumps).join(", ") + "]" : x && typeof x === "object" ? "{" + Object.entries(x).map(([k, v]) => JSON.stringify(k) + ": " + pyDumps(v)).join(", ") + "}" : JSON.stringify(x);
+  const words = s => s.split(/\s+/).filter(Boolean).length;
+  function rng(seed) { let a = seed >>> 0 || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+
+  function validate(call) {
+    if (!call || !(call.name in SCHEMA)) return `unknown tool ${call && call.name}`;
+    const spec = SCHEMA[call.name], args = call.args;
+    if (!args || typeof args !== "object") return "args must be a JSON object";
+    const missing = spec.required.filter(k => !(k in args));
+    const wrong = Object.keys(args).filter(k => k in spec.properties && typeof args[k] !== "string");
+    return missing.length ? `missing ['${missing.join("', '")}']` : wrong.length ? `['${wrong.join("', '")}'] must be strings` : null;
+  }
+  const toks = s => new Set(s.toLowerCase().match(/\w+/g) || []);
+  const DOC_TOKS = Object.fromEntries(TITLES.map(t => [t, toks(t + " " + DOCS[t])]));
+  function runTool(name, args) {
+    if (name === "search") {
+      const q = toks(args.query), score = t => [...q].filter(w => DOC_TOKS[t].has(w)).length;
+      return "Titles: " + TITLES.map((t, i) => [score(t), i, t]).sort((a, b) => b[0] - a[0] || a[1] - b[1]).slice(0, 3).map(x => x[2]).join("; ");
+    }
+    if (name === "read") return DOCS[args.title] || `No document titled '${args.title}'.`;
+    if (name === "calculator") {
+      if (!/^[\d\s+\-*/().]+$/.test(args.expression)) return "Error: only arithmetic is allowed.";
+      return String(Function(`"use strict"; return (${args.expression});`)());  // digits and operators only
+    }
+  }
+  function plan(question, observed) {
+    const names = [...question.matchAll(/(?:of|does|company) ([A-Z]\w+ [A-Z]\w+)/g)].map(m => m[1]);
+    [...question.matchAll(/and ([A-Z]\w+ [A-Z]\w+) founded/g)].forEach(m => { if (!names.includes(m[1])) names.push(m[1]); });
+    const employers = names.map(n => observed.match(new RegExp(`${reEsc(n)} works at ([A-Z]\\w+ \\w+)\\.`)));
+    const unread = names.filter((n, i) => !employers[i]);
+    if (unread.length) return unread.map(n => ({ name: "read", args: { title: n } }));
+    const companies = employers.map(e => e[1]);
+    if (question.startsWith("Where does")) return [{ name: "final_answer", args: { answer: companies[0] } }];
+    const facts = companies.map(c => observed.match(new RegExp(`${reEsc(c)} was founded in (\\d+)\\. Its headquarters are in (\\w+)\\.`)));
+    const missing = [...new Set(companies.filter((c, i) => !facts[i]))];
+    if (missing.length) return missing.map(c => ({ name: "read", args: { title: c } }));
+    if (question.includes("headquarters")) return [{ name: "final_answer", args: { answer: facts[0][2] } }];
+    const ys = facts.map(f => +f[1]);
+    const expr = question.includes("years ago") ? `${YEAR} - ${ys[0]}` : `${Math.max(...ys)} - ${Math.min(...ys)}`;
+    const result = observed.match(new RegExp(`${reEsc(expr)} = (\\d+)`));
+    if (!result) return [{ name: "calculator", args: { expression: expr } }];
+    return [{ name: "final_answer", args: { answer: result[1] } }];
+  }
+  function makeModel(errorRate, parallel, seed) {
+    const r = rng(seed * 7919 + 17);
+    return messages => {
+      const question = messages[1].content;
+      const observed = messages.filter(m => m.role === "tool").map(m => m.content).join(" ");
+      const p = plan(question, observed);
+      if (r() < errorRate) {
+        const u = r();
+        let kind = u < 0.35 ? "malformed" : u < 0.7 ? "wrong_arg" : "hallucinate";
+        if (kind === "wrong_arg" && p[0].name !== "read") kind = "malformed";
+        if (kind === "malformed") return { calls: [{ name: p[0].name, args: pyDumps(p[0].args) }], mistake: kind };
+        if (kind === "wrong_arg") return { calls: [{ name: "read", args: { title: p[0].args.title.toLowerCase() } }], mistake: kind };
+        const fake = r() < 20 / 21 ? COMPANIES[Math.floor(r() * COMPANIES.length)] : String(1 + Math.floor(r() * 120));
+        return { calls: [{ name: "final_answer", args: { answer: fake } }], mistake: kind };
+      }
+      return { calls: parallel ? p : p.slice(0, 1), mistake: null };
+    };
+  }
+  const supported = (answer, messages) => messages.some(m => m.role === "tool" && m.content.includes(answer));
+  const USELESS = /^(Titles|Error|No document|Check)/;
+  // The loop. Returns the answer, model calls, words read and an event list for the step-through view.
+  // 循环本身；同时记录事件，供逐步查看。
+  function agentLoop(model, question, o) {
+    const messages = [{ role: "system", content: "", words: D.system_words }, { role: "user", content: question }];
+    const events = [{ node: "START", msgs: [messages[1]] }];
+    let readWords = 0;
+    const push = (node, m) => { messages.push(m); events.push({ node, msgs: [m], read: readWords }); };
+    for (let step = 1; step <= o.maxSteps; step++) {
+      const context = o.trim ? messages.slice(0, 2).concat(messages.slice(2).filter(m => m.role === "tool" && !USELESS.test(m.content))) : messages;
+      readWords += context.reduce((s, m) => s + (m.words || words(m.content)), 0);
+      const { calls, mistake } = model(context);
+      push("agent", { role: "assistant", content: pyDumps(calls), mistake, step });
+      for (const call of calls) {
+        const err = validate(call);
+        if (err) { push("tools", { role: "tool", content: `Error: ${err}. Call the tool again with valid arguments.`, err: true }); continue; }
+        if (call.name === "final_answer") {
+          const answer = call.args.answer;
+          if (o.check) {
+            if (!supported(answer, messages)) { push("check", { role: "tool", content: "Check failed: that answer is not in any tool result. Keep working.", err: true }); continue; }
+            events.push({ node: "check", msgs: [{ role: "check", pass: true, content: "" }], read: readWords });
+          }
+          events.push({ node: "END", msgs: [], answer, read: readWords });
+          return { answer, steps: step, readWords, events };
+        }
+        let out = runTool(call.name, call.args);
+        if (call.name === "calculator") out = `${call.args.expression} = ${out}`;
+        push("tools", { role: "tool", content: out, err: out.startsWith("No document") });
+      }
+    }
+    events.push({ node: "END", msgs: [], answer: null, budget: true, read: readWords });
+    return { answer: null, steps: o.maxSteps, readWords, events };
+  }
+  function makeTasks(n, seed) {
+    const r = rng(seed), out = { 1: [], 2: [], 3: [], 5: [] };
+    for (let i = 0; i < n; i++) {
+      const p = PEOPLE[Math.floor(r() * PEOPLE.length)]; let q; do { q = PEOPLE[Math.floor(r() * PEOPLE.length)]; } while (q === p);
+      const c = EMPLOYER[p], d = EMPLOYER[q];
+      out[1].push([`Where does ${p} work?`, c]);
+      out[2].push([`In which city is the headquarters of the company ${p} works for?`, HQ[c]]);
+      out[3].push([`How many years ago (in ${YEAR}) was the company ${p} works for founded?`, String(YEAR - FOUNDED[c])]);
+      out[5].push([`How many years apart were the companies of ${p} and ${q} founded?`, String(Math.abs(FOUNDED[c] - FOUNDED[d]))]);
+    }
+    return out;
+  }
+
+  // ================= 1. step through =================
+  const settings = () => ({ err: +$("ag-err").value, seed: +$("ag-seed").value || 0, maxSteps: Math.max(1, Math.min(30, +$("ag-max").value || 10)), check: $("ag-check").checked, parallel: $("ag-par").checked, trim: $("ag-trim").checked });
+  let run = null, shown = 1;
+  function newRun() {
+    const s = settings(), [question, truth] = D.tasks[$("ag-len").value][+$("ag-task").value];
+    run = { ...agentLoop(makeModel(s.err, s.parallel, s.seed), question, s), truth };
+    shown = 1; renderAg();
+  }
+  function drawGraph(node, s) {
+    const box = { START: [8, 70, 70], agent: [118, 70, 90], tools: [118, 10, 90], check: [290, 70, 90], END: [440, 70, 70] };
+    if (!s.check) box.check = null;
+    const c = (n) => n === node ? css("--accent") : css("--line");
+    const arrow = (x1, y1, x2, y2, label, bend) => {
+      const mx = (x1 + x2) / 2 + (bend || 0), my = (y1 + y2) / 2 - (bend ? 0 : 0);
+      return `<path d="M${x1},${y1} Q${mx},${(y1 + y2) / 2 + (bend ? 0 : 0)} ${x2},${y2}" fill="none" stroke="${css("--muted")}" stroke-width="1.5" marker-end="url(#ah)"/>` + (label ? `<text x="${mx + 4}" y="${my + (y1 === y2 ? -5 : 4)}" style="font-size:11px;fill:${css("--muted")}">${label}</text>` : "");
+    };
+    let g = `<defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0L10,5L0,10z" fill="${css("--muted")}"/></marker></defs>`;
+    g += arrow(78, 91, 116, 91);
+    g += arrow(148, 70, 148, 54, "") + arrow(178, 52, 178, 68, "");
+    g += `<text x="216" y="36" style="font-size:11px;fill:${css("--muted")}">${tr("有工具调用", "tool calls")}</text>`;
+    if (s.check) {
+      g += arrow(208, 91, 288, 91, tr("答案", "answer")) + arrow(380, 91, 438, 91, tr("通过", "pass"));
+      g += `<path d="M335,112 Q249,150 165,112" fill="none" stroke="${css("--muted")}" stroke-width="1.5" marker-end="url(#ah)"/><text x="346" y="130" style="font-size:11px;fill:${css("--muted")}">${tr("没通过：继续", "fail: keep working")}</text>`;
+    } else {
+      g += arrow(208, 91, 438, 91, tr("答案 / final_answer", "answer / final_answer"));
+    }
+    Object.entries(box).forEach(([n, b]) => {
+      if (!b) return;
+      const [x, y, w] = b, on = n === node;
+      g += `<rect x="${x}" y="${y}" width="${w}" height="42" rx="${n === "START" || n === "END" ? 21 : 8}" fill="${on ? css("--accent") : css("--panel")}" stroke="${c(n)}" stroke-width="2"/>` +
+        `<text x="${x + w / 2}" y="${y + 26}" text-anchor="middle" style="font-weight:600;fill:${on ? css("--bg") : css("--ink")}">${n}</text>`;
+    });
+    $("lg-svg").innerHTML = g;
+  }
+  function renderAg() {
+    const s = settings(), ev = run.events.slice(0, shown), last = ev[ev.length - 1];
+    $("ag-err-v").textContent = pct(s.err);
+    drawGraph(last.node, s);
+    const msgs = ev.flatMap((e, i) => e.msgs.map(m => ({ ...m, isNew: i === shown - 1 })));
+    const MIST = { malformed: tr("出错：参数写成了字符串", "mistake: args as a string"), wrong_arg: tr("出错：标题拼错", "mistake: misspelled title"), hallucinate: tr("出错：编造答案", "mistake: made-up answer") };
+    $("ag-tl").innerHTML = `<div class="system"><b>system</b>${tr(`系统提示 + 4 个工具的 JSON schema（${D.system_words} 个词，每次调用都要重发）`, `system prompt + JSON schemas of 4 tools (${D.system_words} words, re-sent on every call)`)}</div>` +
+      msgs.map(m => `<div class="${m.role} ${m.err ? "err" : ""} ${m.isNew ? "new" : ""}"><b>${m.role}${m.step ? " #" + m.step : ""}</b>${m.pass ? tr("答案出现在工具结果里：通过", "the answer appears in a tool result: pass") : esc(m.content)}${m.mistake ? ` <span class="no">← ${MIST[m.mistake]}</span>` : ""}</div>`).join("") ;
+    $("ag-tl").scrollTop = $("ag-tl").scrollHeight;
+    const modelCalls = ev.filter(e => e.node === "agent").length, toolCalls = ev.filter(e => e.node === "tools").reduce((a, e) => a + e.msgs.length, 0);
+    const done = shown >= run.events.length, ok = run.answer === run.truth;
+    $("ag-stats").innerHTML = stat(tr("模型调用", "model calls"), `${modelCalls} / ${s.maxSteps}`) + stat(tr("工具调用", "tool calls"), toolCalls) +
+      stat(tr("模型累计读入的词", "words the model has read"), (last.read || 0).toLocaleString("en-US"), css("--primary")) +
+      stat(tr("结果", "result"), done ? (run.answer === null ? tr("用完步数", "out of steps") : ok ? "✓ " + esc(run.answer) : "✗ " + esc(run.answer)) : "…", done ? (ok ? css("--good") : css("--bad")) : css("--muted")) +
+      stat(tr("正确答案", "true answer"), esc(run.truth));
+    $("ag-step").disabled = $("ag-all").disabled = done;
+    const mistakes = run.events.filter(e => e.msgs[0] && e.msgs[0].mistake).map(e => e.msgs[0].mistake);
+    let note = tr("点“下一步”。每一步对应 LangGraph 图里的一个节点：agent 节点调用模型，tools 节点执行工具，", "Press “next step”. Each step is one node of the LangGraph graph: the agent node calls the model, the tools node runs tools, ") +
+      (s.check ? tr("check 节点检查答案是否有工具结果支持。", "the check node tests whether a tool result supports the answer.") : tr("模型给出答案时就结束。", "and a final answer ends the run."));
+    if (done) {
+      if (!mistakes.length) note = tr(`这一次模型没犯错：${run.steps} 次模型调用，每次都把整段对话重新读一遍，累计 ${run.readWords} 个词。`, `No mistakes this time: ${run.steps} model calls, each re-reading the whole conversation, ${run.readWords} words in total.`);
+      else {
+        const rec = mistakes.filter(m => m !== "hallucinate").length, hal = mistakes.length - rec;
+        note = tr(`这次一共犯了 ${mistakes.length} 个错：${rec} 个可恢复（格式错 / 拼错——工具返回错误信息，模型下一步改正，只多花了步数）`, `${mistakes.length} mistake(s) this time: ${rec} recoverable (malformed or misspelled: the tool returns an error and the model fixes it next step, costing only steps)`) +
+          (hal ? tr(`，${hal} 个编造答案${s.check ? "：自检发现答案不在任何工具结果里，把它拦了下来" + (ok ? "，最终答对了" : "") : "：没有检查，循环直接结束，答错了。勾上“作答前自检”再试一次"}。`, `, ${hal} made-up answer(s)${s.check ? ": the self-check found the answer in no tool result and stopped it" + (ok ? "; the final answer is right" : "") : ": nothing checks it, so the loop ends with a wrong answer. Tick “self-check” and try again"}.`) : tr("。", ".")) +
+          (run.answer === null ? tr(" 步数上限用完了，没有答案。", " The step budget ran out with no answer.") : "");
+      }
+    }
+    $("ag-note").innerHTML = note;
+  }
+
+  // ================= 2. compounding =================
+  let cpOn = new Set(["0.1", "0.3"]);
+  function renderCp() {
+    const ks = D.lengths, cmap = ["#9e9e9e", "#26a69a", "#3f51b5", "#e8710a", "#c5221f"];
+    const series = [];
+    D.rates.forEach((e, i) => {
+      const k = String(e); if (!cpOn.has(k)) return;
+      series.push({ x: ks, y: D.success[k], color: cmap[i], dots: true }, { x: ks, y: D.success_check[k], color: cmap[i], dash: true, op: .7 },
+        { x: ks, y: ks.map(n => Math.pow(1 - 0.3 * e, n + 1)), color: cmap[i], dash: "dot", w: 1 });
+    });
+    chart($("cp-chart"), series, { x0: 0.7, x1: 5.3, y0: 0.4, y1: 1.02, xticks: ks, yticks: [0.4, 0.6, 0.8, 1], yfmt: v => pct(v), xlabel: tr("任务需要的工具调用次数", "tool calls the task needs") });
+    $("cp-leg").innerHTML = D.rates.map((e, i) => `<button class="${cpOn.has(String(e)) ? "" : "off"}" data-e="${e}"><span class="dot" style="background:${cmap[i]}"></span>${tr("错误率", "error")} ${pct(e)}</button>`).join("");
+    $("cp-leg").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { const k = b.dataset.e; cpOn.has(k) ? cpOn.delete(k) : cpOn.add(k); renderCp(); }));
+    chart($("bd-chart"), [{ x: D.budgets, y: D.budget.plain, color: css("--muted"), dots: true }, { x: D.budgets, y: D.budget.check, color: css("--accent"), dots: true }],
+      { x0: 4.5, x1: 16.5, y0: 0, y1: 1.02, xticks: D.budgets, yticks: [0, 0.25, 0.5, 0.75, 1], yfmt: v => pct(v), xlabel: tr("最多允许的模型调用次数", "max model calls"), vlines: [{ x: 6, color: css("--primary"), label: tr("无错时需要 6 次", "6 with no mistakes") }] });
+  }
+  let batch = null;
+  function runBatch() {
+    const s = settings(), tasks = makeTasks(200, 2026 + s.seed), rows = [];
+    D.lengths.forEach(k => {
+      const model = makeModel(s.err, s.parallel, s.seed + k);
+      let ok = 0, steps = 0, w = 0, outOf = 0;
+      tasks[k].forEach(([q, t]) => { const r = agentLoop(model, q, s); ok += r.answer === t; steps += r.steps; w += r.readWords; outOf += r.answer === null; });
+      rows.push([k, ok / 200, steps / 200, w / 200, outOf / 200]);
+    });
+    batch = { s, rows }; renderBatch();
+  }
+  function renderBatch() {
+    if (!batch) { $("bt-table").innerHTML = ""; return; }
+    const s = batch.s;
+    $("bt-table").innerHTML = `<tr><th>${tr("工具调用次数", "tool calls needed")}</th><th>${tr("答对", "correct")}</th><th>${tr("用完步数", "out of steps")}</th><th>${tr("平均模型调用", "avg model calls")}</th><th>${tr("平均读入词数", "avg words read")}</th><th>(1−0.3e)<sup>k+1</sup></th></tr>` +
+      batch.rows.map(([k, ok, st, w, oo]) => `<tr><td>${k}</td><td><b>${pct(ok)}</b></td><td>${pct(oo)}</td><td>${st.toFixed(2)}</td><td>${Math.round(w)}</td><td>${pct(Math.pow(1 - 0.3 * s.err, k + 1))}</td></tr>`).join("") +
+      `<tr><td colspan="6" class="hint">${tr(`设置：错误率 ${pct(s.err)}，${s.check ? "自检" : "无自检"}，${s.parallel ? "并行" : "串行"}，步数上限 ${s.maxSteps}`, `settings: error ${pct(s.err)}, ${s.check ? "self-check" : "no check"}, ${s.parallel ? "parallel" : "serial"}, max ${s.maxSteps} model calls`)}</td></tr>`;
+  }
+  function renderCa() {
+    const p = +$("ca-p").value, n = +$("ca-n").value;
+    $("ca-p-v").textContent = pct(p, 1); $("ca-n-v").textContent = n;
+    const half = Math.log(0.5) / Math.log(p);
+    $("ca-stats").innerHTML = stat(tr(`${n} 步全部成功`, `all ${n} steps succeed`), pct(Math.pow(p, n), 1), Math.pow(p, n) < 0.5 ? css("--bad") : css("--good")) +
+      stat(tr("成功率跌到 50% 的步数", "steps until success drops to 50%"), Math.round(half)) +
+      stat(tr("要让 100 步有 90% 成功，每步需要", "for 90% over 100 steps, each step needs"), pct(Math.pow(0.9, 1 / 100), 2));
+  }
+
+  // ================= 3. cost =================
+  function renderCt() {
+    const ks = D.lengths, sys = D.model_calls.serial.map(c => c * D.system_words);
+    chart($("ct-chart"), [{ x: ks, y: D.words.full, color: css("--primary"), dots: true }, { x: ks, y: D.words.trimmed, color: css("--accent"), dots: true }, { x: ks, y: sys, color: css("--muted"), dash: "dot" }],
+      { x0: 0.7, x1: 5.3, y0: 0, y1: 1000, xticks: ks, yticks: [0, 250, 500, 750, 1000], xlabel: tr("任务需要的工具调用次数", "tool calls the task needs") });
+    legend($("ct-leg"), [[css("--primary"), tr("模型累计读入的词：完整对话", "words the model reads: full transcript")], [css("--accent"), tr("只保留有用的工具结果", "useful results only")], [css("--muted"), tr("其中系统提示 + 工具说明", "of which system prompt + tools")]]);
+    chart($("pc-chart"), [{ x: ks, y: D.model_calls.serial, color: css("--muted"), dots: true }, { x: ks, y: D.model_calls.parallel, color: css("--accent"), dots: true }],
+      { x0: 0.7, x1: 5.3, y0: 0, y1: 7, xticks: ks, yticks: [0, 2, 4, 6], xlabel: tr("任务需要的工具调用次数", "tool calls the task needs") });
+    legend($("pc-leg"), [[css("--muted"), tr("模型调用次数：一次一个工具", "model calls: one tool per call")], [css("--accent"), tr("并行工具调用（两个人的雇主可以同时查）", "parallel calls (both people's employers at once)")]]);
+  }
+
+  // ================= 4. mapping =================
+  const MAP = [
+    [["工具说明：手写 JSON schema", "Tool descriptions: hand-written JSON schemas"], "TOOLS = [{\"name\": \"read\", \"parameters\": {...}}]", ["@tool 装饰器：从函数签名和文档字符串生成 schema", "@tool decorator: the schema comes from the signature and docstring"], "@tool\ndef read(title: str) -> str:\n    \"\"\"Read the document ...\"\"\""],
+    [["对话", "The conversation"], "messages = [system, user, ...]", ["图的状态：MessagesState（新消息自动追加）", "Graph state: MessagesState (new messages are appended)"], "StateGraph(MessagesState)"],
+    [["调用模型", "Call the model"], "calls = model(messages)", ["agent 节点", "the agent node"], "graph.add_node(\"agent\", agent)"],
+    [["执行工具、校验参数", "Run tools, validate arguments"], "err = validate(call)\nout = run_tool(...)", ["预置的 ToolNode：执行工具，参数不合法时把错误作为 ToolMessage 返回", "Prebuilt ToolNode: runs tools; invalid arguments come back as a ToolMessage"], "ToolNode([search, read, calculator])"],
+    [["if：有工具调用就继续，否则结束", "if: tool calls → continue, else stop"], "if call[\"name\"] == \"final_answer\": return", ["条件边：路由函数返回下一个节点名", "Conditional edge: a routing function returns the next node"], "add_conditional_edges(\"agent\", route,\n  [\"tools\", \"check\", END])"],
+    [["作答前自检", "Self-check before answering"], "if check and not supported(...)", ["check 节点 + 一条回到 agent 的条件边", "a check node + a conditional edge back to agent"], "add_conditional_edges(\"check\", ..., [\"agent\", END])"],
+    [["步数上限", "Step budget"], "for step in range(max_steps)", ["递归上限（超过就抛 GraphRecursionError）", "the recursion limit (GraphRecursionError when exceeded)"], "invoke(..., {\"recursion_limit\": 25})"],
+    [["进程崩溃，状态就没了", "If the process dies, the state is gone"], "—", ["检查点：每个节点之后保存状态，可查看历史、从中断处继续", "Checkpointer: state saved after every node; history and resume"], "compile(checkpointer=InMemorySaver())\n{\"configurable\": {\"thread_id\": \"t1\"}}"],
+    [["危险操作前问人", "Ask a person before a risky action"], "input(\"approve?\")  # blocks the process", ["interrupt() 暂停并保存；之后用 Command(resume=...) 继续，可以隔几天", "interrupt() pauses and saves; resume later with Command(resume=...), even days later"], "decision = interrupt({...})\napp.invoke(Command(resume=\"yes\"), config)"],
+    [["函数组合", "Composing functions"], "to_prompt(fetch(retrieve(q)))", ["LCEL：用 | 把 Runnable 串起来，自带 invoke / batch / stream", "LCEL: chain Runnables with |, with invoke / batch / stream built in"], "chain = retrieve | fetch | to_prompt\nchain.batch(questions)"],
+  ];
+  function renderMap() {
+    $("map").innerHTML = `<tr><th>${tr("概念", "concept")}</th><th>${tr("手写循环（agent_loop.py）", "hand-written loop (agent_loop.py)")}</th><th>${tr("LangChain / LangGraph（langgraph_agent.py）", "LangChain / LangGraph (langgraph_agent.py)")}</th></tr>` +
+      MAP.map(([c, a, b, code]) => `<tr><td>${tr(...c)}</td><td><code>${esc(a).replace(/\n/g, "<br>")}</code></td><td>${tr(...b)}<br><code>${esc(code).replace(/\n/g, "<br>")}</code></td></tr>`).join("");
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["每一步有 95% 的把握做对，一个需要 20 步的任务全部做对的概率大约是？", "Each step is right 95% of the time. What is the chance a 20-step task is right all the way?"],
+      opts: [["95%", "95%"], ["约 36%", "About 36%"], ["约 80%", "About 80%"]],
+      a: 1, ex: ["0.95²⁰ ≈ 0.36。这就是长任务难的原因：每步的小错误会相乘。好在不是所有错误都致命：能被发现并重试的错误只花步数。", "0.95²⁰ ≈ 0.36. That is why long tasks are hard: small per-step errors multiply. Luckily not every mistake is fatal: one that is noticed and retried only costs steps."] },
+    { q: ["下面哪种错误，agent loop 自己就能恢复？", "Which mistake can the agent loop recover from on its own?"],
+      opts: [["模型编造了一个看似合理的答案并直接给出", "The model makes up a plausible answer and gives it"], ["工具参数格式不对：循环把校验错误返回给模型，模型下一步改正", "Malformed tool arguments: the loop returns the validation error and the model fixes it next step"], ["两种都不能", "Neither"]],
+      a: 1, ex: ["错误信息本身就是给模型的反馈。编造的答案没有任何信号提示它错了，除非有东西去检查它（比如自检、单元测试、引用核对）。", "The error message is feedback for the model. A made-up answer sends no signal that it is wrong unless something checks it (a self-check, unit tests, citation checks)."] },
+    { q: ["为什么 agent 的成本随步数超线性增长？", "Why does an agent's cost grow faster than its number of steps?"],
+      opts: [["工具调用很贵", "Tools are expensive"], ["每次模型调用都要重新读一遍系统提示、工具说明和到目前为止的全部对话", "Every model call re-reads the system prompt, the tool descriptions and the whole conversation so far"], ["模型每一步都会变慢", "The model gets slower every step"]],
+      a: 1, ex: ["第 n 次调用要读约 n 段内容，总量 ∝ n²。系统提示和工具说明每次都一样，所以提示缓存（13 章）在 agent 里特别有用；删掉没用的工具结果、压缩历史也能省。", "Call n reads about n pieces, so the total ∝ n². The system prompt and tool descriptions are identical every time, which is why prompt caching (chapter 13) pays off so well for agents; dropping useless results and summarizing history help too."] },
+    { q: ["什么时候可以并行调用工具？", "When can tool calls go out in parallel?"],
+      opts: [["任何时候", "Always"], ["几个调用互不依赖，比如同时查两个人的雇主；而“查这家公司”要等知道公司名之后", "When the calls don't depend on each other, like looking up two people's employers at once; “read the company” must wait until its name is known"], ["只有在 LangGraph 里", "Only in LangGraph"]],
+      a: 1, ex: ["本章的 5 次工具调用任务里，并行把模型调用从约 6 次降到 4 次。依赖链上的步骤仍然只能一步一步来。", "On this chapter's 5-call tasks, parallel calls cut model calls from about 6 to 4. Steps along a dependency chain still have to go one by one."] },
+    { q: ["LangGraph 的 interrupt() 需要什么才能工作？", "What does LangGraph's interrupt() need in order to work?"],
+      opts: [["一个检查点存储（checkpointer）和 thread_id：暂停时保存状态，之后用 Command(resume=...) 从同一处继续", "A checkpointer and a thread_id: the state is saved when it pauses, and Command(resume=...) continues from the same place"], ["一个更大的模型", "A bigger model"], ["一个 while 循环", "A while loop"]],
+      a: 0, ex: ["人工批准可能要几分钟甚至几天，程序不能一直阻塞等待。把状态存下来，批准后再恢复，这正是图框架相对手写循环的主要价值之一。", "Approval can take minutes or days, and the program can't block that long. Saving the state and resuming after approval is one of the main things a graph framework adds over a hand-written loop."] },
+    { q: ["什么时候值得用 LangGraph 这类框架，而不是手写循环？", "When is a framework like LangGraph worth it over a hand-written loop?"],
+      opts: [["永远都值得", "Always"], ["需要持久化状态、人工介入、多个 agent 或复杂分支，并且团队愿意接受框架的抽象和版本变化时", "When you need persistent state, human-in-the-loop, several agents or complex branching, and the team accepts the framework's abstractions and version churn"], ["永远不值得", "Never"]],
+      a: 1, ex: ["一个简单的工具循环只有 20 行，手写更容易调试；需求复杂起来，自己维护检查点、恢复、流式输出、可视化就不划算了。先理解循环本身，再决定要不要框架。", "A simple tool loop is 20 lines and easier to debug by hand; as needs grow, maintaining your own checkpoints, resume, streaming and visualization stops paying off. Understand the loop first, then decide on a framework."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  const LEN_NAMES = { 1: ["1 次工具调用：X 在哪里工作？", "1 tool call: where does X work?"], 2: ["2 次：X 的公司总部在哪个城市？", "2 calls: X's company's headquarters city"], 3: ["3 次：X 的公司是多少年前成立的？", "3 calls: how many years ago was X's company founded?"], 5: ["5 次：X 和 Y 的公司成立时间相差几年？", "5 calls: years between X's and Y's companies"] };
+  function fillSelects() {
+    const lv = $("ag-len").value || "5", tv = $("ag-task").value || "0";
+    $("ag-len").innerHTML = D.lengths.map(k => `<option value="${k}">${tr(...LEN_NAMES[k])}</option>`).join("");
+    $("ag-len").value = lv;
+    $("ag-task").innerHTML = D.tasks[lv].map(([q], i) => `<option value="${i}">${esc(q)}</option>`).join("");
+    $("ag-task").value = tv;
+  }
+  function renderAll() { fillSelects(); if (!run) newRun(); else renderAg(); renderCp(); renderBatch(); renderCa(); renderCt(); renderMap(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("ag-len").addEventListener("input", () => { $("ag-task").value = "0"; fillSelects(); $("ag-task").value = "0"; newRun(); });
+  ["ag-task", "ag-err", "ag-seed", "ag-max", "ag-check", "ag-par", "ag-trim"].forEach(id => $(id).addEventListener("input", newRun));
+  $("ag-step").addEventListener("click", () => { shown = Math.min(shown + 1, run.events.length); renderAg(); });
+  $("ag-all").addEventListener("click", () => { shown = run.events.length; renderAg(); });
+  $("ag-reset").addEventListener("click", () => { shown = 1; renderAg(); });
+  $("bt-run").addEventListener("click", runBatch);
+  ["ca-p", "ca-n"].forEach(id => $(id).addEventListener("input", renderCa));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+  window.__agent = { agentLoop, makeModel, makeTasks, D };  // for tests / 供测试
+})();
+</script>
+</body>
+</html>

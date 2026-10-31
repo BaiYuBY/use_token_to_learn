@@ -161,6 +161,19 @@ Question: What is Vevik Lishas's occupation?
 - **资料只是数据**：检索到的网页、文档可能藏着指令，这就是间接提示注入（[18 章](../18-prompt-engineering/README.md)）。
 - **顺序和数量**：放太多块会稀释注意力，关键信息埋在长上下文中间也容易被忽略（[14 章](../14-long-context/README.md)）。先重排，只放最相关的几块。
 
+**用 LangChain 写这个流程**：LangChain 为每一步都提供了现成的组件，名字和本章的步骤一一对应：
+
+| 本章的步骤 | LangChain 中的组件 |
+|---|---|
+| 切块 | 文本切分器（`RecursiveCharacterTextSplitter` 等） |
+| 编码 | 嵌入模型接口（`Embeddings`） |
+| 向量索引 | 向量库（`VectorStore`，后端可以是 FAISS、Chroma 等） |
+| 检索 | 检索器（`vector_store.as_retriever(search_kwargs={"k": 5})`），BM25 检索器，按权重融合的 `EnsembleRetriever` |
+| 拼进提示 | 提示模板（`ChatPromptTemplate`） |
+| 生成 | 聊天模型（`ChatModel`） |
+
+这些组件用 LCEL 的管道运算符串成一条链：检索器 → 格式化资料 → 提示模板 → 模型 → 输出解析，一次 `invoke` 就走完全程，`batch` 和 `stream` 也是现成的。框架只是把这些步骤包装好，切块、检索方法、重排这些决定仍然要自己做，效果也要自己评测。[21 章](../21-agents/README.md)的代码里有一个用 LCEL 写的小检索链，并会对照手写代码讲解 LangChain 和 LangGraph。
+
 ### 3.5 评测与常见失败
 
 RAG 要分两段评测：
@@ -176,7 +189,7 @@ RAG 要分两段评测：
 | 找到了但答错 | 块太多太长，答案被淹没；块之间矛盾 | 重排后只放少量块；标注来源和时间 |
 | 资料里没有，模型硬答 | 没有拒答的退路 | 提示里给出“不知道”的选项；校验引用 |
 | 被检索内容带偏 | 间接提示注入 | 资料当数据处理；限制权限 |
-| 问题需要综合多处信息 | 单次检索只找到一部分 | 多跳检索、[知识图谱](../20-knowledge-graphs/README.md)；Agent 式检索（21 章，计划中） |
+| 问题需要综合多处信息 | 单次检索只找到一部分 | 多跳检索、[知识图谱](../20-knowledge-graphs/README.md)；[Agent 式检索](../21-agents/README.md) |
 
 ## 4. 最小代码实现
 
