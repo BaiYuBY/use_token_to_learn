@@ -150,6 +150,16 @@
 | HNSW | HNSW (hierarchical navigable small world) | 多层近邻图，从顶层贪心走向查询，在底层做宽度为 ef 的搜索 | [19](19-rag/README.md) |
 | 乘积量化 | PQ (product quantization) | 把向量切段、每段用中心编号代替，大幅压缩内存，距离变为近似 | [19](19-rag/README.md) |
 | 向量数据库 | vector database | 存储向量并提供 ANN 索引、过滤和更新的数据库，如 FAISS、Milvus、Qdrant、pgvector | [19](19-rag/README.md) |
+| 知识图谱 / 三元组 | knowledge graph / triple | 把知识存成（主语，关系，宾语）三元组组成的网络 | [20](20-knowledge-graphs/README.md) |
+| 属性图 / RDF | property graph / RDF | 节点和边可带标签与属性的图模型（Cypher 查询）/ 用 URI 表示一切的 W3C 标准（SPARQL 查询） | [20](20-knowledge-graphs/README.md) |
+| 图数据库 | graph database | 直接存储邻接关系、沿边查询的数据库，如 Neo4j | [20](20-knowledge-graphs/README.md) |
+| Cypher | Cypher | 用 (节点)-[:关系]->(节点) 画出模式来查询图的语言；ISO 标准 GQL 以它为基础 | [20](20-knowledge-graphs/README.md) |
+| 实体消解 | entity resolution | 把同一实体的不同叫法合并成一个节点 | [20](20-knowledge-graphs/README.md) |
+| 指代消解 | coreference resolution | 判断代词或简称指的是哪个实体 | [20](20-knowledge-graphs/README.md) |
+| 多跳问答 | multi-hop question answering | 需要串起多条事实（多篇文档或多条边）才能回答的问题 | [20](20-knowledge-graphs/README.md) |
+| 逐跳检索 | iterative / hop-by-hop retrieval | 检索、读出下一个实体、再检索，如 self-ask、IRCoT | [20](20-knowledge-graphs/README.md) |
+| 社区发现 | community detection | 在图中找出内部连接紧密的群体，如 Leiden、标签传播 | [20](20-knowledge-graphs/README.md) |
+| GraphRAG | GraphRAG | 用大模型建图、为社区写报告，再对报告做 map-reduce 回答全局问题 | [20](20-knowledge-graphs/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

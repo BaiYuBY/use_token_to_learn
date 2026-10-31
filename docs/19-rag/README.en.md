@@ -176,7 +176,7 @@ Common failures:
 | Found it but answered wrong | too many or too long chunks bury the answer; contradictory chunks | rerank and keep a few; label sources and dates |
 | Not in the sources, but the model answers anyway | no way out offered | offer “I don't know” in the prompt; check citations |
 | Led astray by retrieved content | indirect prompt injection | treat sources as data; limit permissions |
-| The question needs information from several places | one retrieval finds only part | multi-hop retrieval, knowledge graphs (chapter 20, planned); agentic retrieval (chapter 21, planned) |
+| The question needs information from several places | one retrieval finds only part | multi-hop retrieval, [knowledge graphs](../20-knowledge-graphs/README.en.md); agentic retrieval (chapter 21, planned) |
 
 ## 4. Minimal code
 

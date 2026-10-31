@@ -35,7 +35,8 @@ Each chapter follows the same rhythm:
 | 17 | [Code models](17-code-models/README.md) | [FIM, pass@k and test-based selection playground](17-code-models/interactive/code_models.html?lang=en) | ✅ done |
 | 18 | [Prompt engineering](18-prompt-engineering/README.md) | [Prompt bench: two models answer live](18-prompt-engineering/interactive/prompting.html?lang=en) | ✅ done |
 | 19 | [RAG and vector databases](19-rag/README.md) | [Retrieval bench and HNSW / IVF search playground](19-rag/interactive/rag.html?lang=en) | ✅ done |
-| 20–24 | Applications and frontiers: knowledge graphs and graph databases, agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
+| 20 | [Knowledge graphs and graph databases](20-knowledge-graphs/README.md) | [Extraction, Cypher queries and multi-hop retrieval playground](20-knowledge-graphs/interactive/knowledge_graph.html?lang=en) | ✅ done |
+| 21–24 | Applications and frontiers: agents, MCP / Skills / SOP, evaluation, safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 

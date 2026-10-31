@@ -76,7 +76,7 @@ use_token_to_learn/
 | 18 | **提示工程** 🆕 | 指令写法、few-shot、思维链提示、角色与系统提示、输出格式约束、提示注入 | **交互**：同一模型不同提示的输出对比 |
 | 19 | **RAG 与向量数据库** 🆕 | 切块、嵌入检索、相似度度量、近似最近邻（IVF、HNSW、PQ）、重排、混合检索、评测 | **交互**：HNSW 分层图搜索动画；召回率-速度曲线 |
 | 20 | **知识图谱与图数据库** 🆕 | 三元组与属性图、Cypher 查询、实体关系抽取、GraphRAG（社区摘要）、多跳问答 | **交互**：图谱遍历与多跳检索演示 |
-| 21 | **Agent 与 agent loop** 🆕 | 工具调用（function calling）、ReAct 循环、规划与反思、记忆、多智能体、失败模式 | 时序图（Mermaid sequenceDiagram）；**交互**：逐步运行的 agent loop |
+| 21 | **Agent 与 agent loop** 🆕 | 工具调用（function calling）、ReAct 循环、规划与反思、记忆、多智能体、失败模式；**框架：LangChain 与 LangGraph**（先手写 agent loop，再对照 LangGraph 的 StateGraph、节点、条件边、检查点与人工介入；LangChain 的模型、工具、检索器接口与 LCEL；什么时候用框架、什么时候手写） | 时序图（Mermaid sequenceDiagram）；**交互**：逐步运行的 agent loop，并标出每一步对应的 LangGraph 节点 |
 | 22 | **MCP、Skills 与 SOP** 🆕 | MCP 协议（客户端/服务器、工具/资源/提示）、Agent Skills（按需加载的说明与脚本）、SOP 驱动的多智能体协作（如 MetaGPT） | 架构图；**交互**：MCP 消息流演示 |
 | 23 | 评测 | 困惑度、基准测试、LLM-as-judge、污染问题 | 雷达图、排行榜表格 |
 | 24 | 安全与可解释性 | 幻觉、越狱、探针、稀疏自编码器特征 | 激活可视化 |
@@ -179,8 +179,8 @@ use_token_to_learn/
 - [x] 17 代码模型（FIM、pass@k 无偏估计、采样 + 测试筛选、测试强度、拒绝采样微调）
 - [x] 18 提示工程（指令与示例、上下文学习的覆盖面、提示注入与指令层级、多示例注入，附浏览器内实时运行的提示实验台）
 - [x] 19 RAG 与向量数据库（切块与上下文标题、BM25 / 稠密 / 混合检索、IVF / HNSW / PQ 的召回率与计算量、拼进提示）
-- [ ] 20 知识图谱与图数据库（GraphRAG）
-- [ ] 21 Agent 与 agent loop、22 MCP、Skills 与 SOP、23 评测、24 安全与可解释性
+- [x] 20 知识图谱与图数据库（抽取与实体消解、类 Cypher 查询、多跳：一次检索 / 逐跳检索 / 图查询、全局问题与 GraphRAG 社区摘要）
+- [ ] 21 Agent 与 agent loop（含 LangChain 与 LangGraph：手写循环与框架的对照；19 章补一段 LangChain 检索链的对应关系，22 章对比 LangChain 工具与 MCP 工具）、22 MCP、Skills 与 SOP、23 评测、24 安全与可解释性
 
 ### 持续进行：前沿问答
 - [x] 建立 `docs/qa/` 单元与模板
