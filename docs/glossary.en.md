@@ -139,6 +139,17 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 指令层级 | instruction hierarchy | Training a model to prioritize the system prompt over the user, and the user over data, when they conflict | [18](18-prompt-engineering/README.en.md) |
 | 多示例越狱 | many-shot jailbreaking | Packing many examples into a long context to override safety training or system instructions | [18](18-prompt-engineering/README.en.md) |
 | 纵深防御 | defence in depth | Layered safeguards such as least privilege, output validation and human confirmation, rather than one line of defence | [18](18-prompt-engineering/README.en.md) |
+| 检索增强生成 | RAG (retrieval-augmented generation) | Retrieve relevant text from a knowledge base and put it in the prompt with the question, so the model answers from it | [19](19-rag/README.en.md) |
+| 切块 / 上下文标题 | chunking / contextual header | Cutting documents into retrievable pieces; adding the source document and topic to each so it makes sense alone | [19](19-rag/README.en.md) |
+| BM25 | BM25 | Classic keyword retrieval scoring term frequency and rarity; strong on rare words and exact matches | [19](19-rag/README.en.md) |
+| 稠密检索 / 双塔编码器 | dense retrieval / bi-encoder | Encoding questions and documents separately as vectors and retrieving by similarity; strong on paraphrases | [19](19-rag/README.en.md) |
+| 倒数排名融合 | RRF (reciprocal rank fusion) | Merging rankings by summing 1/(k + rank) across them, without needing comparable scores | [19](19-rag/README.en.md) |
+| 重排 / 交叉编码器 | reranking / cross-encoder | Scoring question and candidate together; more accurate but slower than a bi-encoder, used on a few candidates | [19](19-rag/README.en.md) |
+| 近似最近邻 | ANN (approximate nearest neighbour) | Vector search that computes far fewer distances and occasionally misses a true neighbour; measured by recall@k | [19](19-rag/README.en.md) |
+| IVF | IVF (inverted file index) | Cluster the vectors first; a query searches only the nprobe closest clusters | [19](19-rag/README.en.md) |
+| HNSW | HNSW (hierarchical navigable small world) | A layered neighbour graph searched greedily from the top layer, then with width ef at the bottom | [19](19-rag/README.en.md) |
+| 乘积量化 | PQ (product quantization) | Split vectors into pieces and store each as a centroid id, shrinking memory at the price of approximate distances | [19](19-rag/README.en.md) |
+| 向量数据库 | vector database | A database storing vectors with ANN indexes, filtering and updates, such as FAISS, Milvus, Qdrant, pgvector | [19](19-rag/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

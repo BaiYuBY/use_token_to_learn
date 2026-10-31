@@ -167,7 +167,7 @@ $$
 
 ### 10. 提示词到顶以后
 
-- **事实类错误**：用 RAG 和工具（19 RAG 与向量数据库、21 Agent，计划中）。
+- **事实类错误**：用 RAG 和工具（[19 RAG 与向量数据库](../19-rag/README.md)；21 Agent，计划中）。
 - **格式、风格、人设一致性**：用几百到几千条高质量样例做 SFT 或 LoRA，见 [08 微调](../08-finetuning/README.md)。
 - **上线后**：记录日志、抽样复查、给错误归类，把错例补进评测集，形成闭环。
 
@@ -205,7 +205,7 @@ python docs/qa/code/reliability.py
 - [10 推理模型与测试时计算](../10-reasoning/README.md)：先思考再回答、自洽性投票、验证器
 - [11 解码与采样](../11-decoding/README.md)：温度、约束解码与结构化输出
 - [推理强度是怎么设置的](reasoning-effort.md)：让模型多想一会儿的代价
-- **[18 提示工程](../18-prompt-engineering/README.md)**、**19 RAG 与向量数据库**、**21 Agent 与 agent loop**、**23 评测**（计划中）
+- **[18 提示工程](../18-prompt-engineering/README.md)**、**[19 RAG 与向量数据库](../19-rag/README.md)**、**21 Agent 与 agent loop**、**23 评测**（计划中）
 
 ## 来源
 

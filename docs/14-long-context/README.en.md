@@ -162,7 +162,7 @@ A model's advertised context length only says it can *run* that long. Whether it
 In practice:
 
 - Put the most important information at the start or the end.
-- Rather than pasting a whole book, retrieve the most relevant passages first (RAG; see 19 RAG and vector databases, planned).
+- Rather than pasting a whole book, retrieve the most relevant passages first (RAG; see [19 RAG and vector databases](../19-rag/README.en.md)).
 - Test how well it works at different lengths on your own task.
 
 ## 4. Minimal code
