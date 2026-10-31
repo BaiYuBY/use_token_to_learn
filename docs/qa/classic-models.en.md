@@ -130,7 +130,7 @@ The price is compute that grows with the square of the length, and the KV cache 
 
 - **CNNs**: Vision Transformers (ViT) can beat CNNs given enough data, but CNNs remain common on devices and with small datasets. Residual connections and normalization layers also carried over from the CNN era.
 - **RNNs**: Mamba (a state-space model) and RWKV combine the RNN's fixed-size state with parallel training. Linear attention can also be written as an RNN. They attract interest for long contexts and low-memory inference.
-- **KNN**: vector search in RAG is KNN in embedding space (see 19 RAG and vector databases, planned). kNN-LM (Khandelwal et al., 2020) combined a language model's predictions with nearest-neighbour retrieval over its training data and lowered perplexity.
+- **KNN**: vector search in RAG is KNN in embedding space (see [19 RAG and vector databases](../19-rag/README.en.md)). kNN-LM (Khandelwal et al., 2020) combined a language model's predictions with nearest-neighbour retrieval over its training data and lowered perplexity.
 
 ## Why it matters
 
@@ -163,7 +163,7 @@ def lstm_forward(x, w_ih, w_hh, b_ih, b_hh):
 - [04 Attention](../04-attention/README.en.md): how attention replaced the RNN's step-by-step relay
 - [05 Transformer block](../05-transformer/README.en.md): residual connections and the LSTM's additive memory
 - [How LLM compute is counted](compute.en.md): compute and bottlenecks compared across models
-- **[14 Long context](../14-long-context/README.en.md)**, **[16 Multimodal models](../16-multimodal/README.en.md)**, **19 RAG and vector databases** (planned): linear attention and state-space models, ViT, vector search
+- **[14 Long context](../14-long-context/README.en.md)**, **[16 Multimodal models](../16-multimodal/README.en.md)**, **[19 RAG and vector databases](../19-rag/README.en.md)**: linear attention and state-space models, ViT, vector search
 
 ## Sources
 

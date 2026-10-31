@@ -73,6 +73,7 @@ plugins:
             多模态模型: Multimodal Models
             代码模型: Code Models
             提示工程: Prompt Engineering
+            RAG 与向量数据库: RAG & Vector Databases
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -131,6 +132,7 @@ nav:
       - 多模态模型: 16-multimodal/README.md
       - 代码模型: 17-code-models/README.md
       - 提示工程: 18-prompt-engineering/README.md
+      - RAG 与向量数据库: 19-rag/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

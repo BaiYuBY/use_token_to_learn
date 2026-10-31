@@ -167,7 +167,7 @@ Research finds that models accept coherent, convincing external evidence, yet sh
 
 ### 10. When the prompt has hit its ceiling
 
-- **Factual errors**: add RAG and tools (19 RAG and vector databases, 21 Agents, planned).
+- **Factual errors**: add RAG and tools ([19 RAG and vector databases](../19-rag/README.en.md); 21 Agents, planned).
 - **Format, style and persona consistency**: fine-tune with a few hundred to a few thousand good examples using SFT or LoRA; see [08 Fine-tuning](../08-finetuning/README.md).
 - **After launch**: log outputs, spot-check samples, classify the errors and add the failures to the test set, closing the loop.
 
@@ -205,7 +205,7 @@ The figures and the playground's data come from [`figures/reliability_figures.py
 - [10 Reasoning models and test-time compute](../10-reasoning/README.md): thinking first, self-consistency voting, verifiers
 - [11 Decoding and sampling](../11-decoding/README.md): temperature, constrained decoding and structured output
 - [How reasoning effort is set](reasoning-effort.en.md): the cost of letting the model think longer
-- **[18 Prompt engineering](../18-prompt-engineering/README.en.md)**, **19 RAG and vector databases**, **21 Agents and the agent loop**, **23 Evaluation** (planned)
+- **[18 Prompt engineering](../18-prompt-engineering/README.en.md)**, **[19 RAG and vector databases](../19-rag/README.en.md)**, **21 Agents and the agent loop**, **23 Evaluation** (planned)
 
 ## Sources
 

@@ -139,6 +139,17 @@
 | 指令层级 | instruction hierarchy | 训练模型在冲突时优先听系统提示，其次用户，再次数据 | [18](18-prompt-engineering/README.md) |
 | 多示例越狱 | many-shot jailbreaking | 在长上下文里塞进大量示例，压过模型的安全训练或系统指令 | [18](18-prompt-engineering/README.md) |
 | 纵深防御 | defence in depth | 最小权限、输出校验、人工确认等多层措施，不依赖单一防线 | [18](18-prompt-engineering/README.md) |
+| 检索增强生成 | RAG (retrieval-augmented generation) | 先从知识库检索相关文字，连同问题放进提示，让模型据此回答 | [19](19-rag/README.md) |
+| 切块 / 上下文标题 | chunking / contextual header | 把文档切成可检索的块；给每块加上所属文档与主题，让它单独也能被理解 | [19](19-rag/README.md) |
+| BM25 | BM25 | 按词频和稀有度给关键词打分的经典检索方法，擅长罕见词与精确匹配 | [19](19-rag/README.md) |
+| 稠密检索 / 双塔编码器 | dense retrieval / bi-encoder | 把问题和文档分别编码成向量，按向量相似度检索，擅长换说法的语义匹配 | [19](19-rag/README.md) |
+| 倒数排名融合 | RRF (reciprocal rank fusion) | 把多个排名中的 1/(k+名次) 相加来合并结果，不需要分数可比 | [19](19-rag/README.md) |
+| 重排 / 交叉编码器 | reranking / cross-encoder | 把问题和候选块拼在一起打分，比双塔更准但更慢，用于精排少量候选 | [19](19-rag/README.md) |
+| 近似最近邻 | ANN (approximate nearest neighbour) | 少算很多次距离、偶尔漏掉真近邻的向量搜索；用 recall@k 衡量 | [19](19-rag/README.md) |
+| IVF | IVF (inverted file index) | 先把向量聚类，查询时只搜索最近的 nprobe 个簇 | [19](19-rag/README.md) |
+| HNSW | HNSW (hierarchical navigable small world) | 多层近邻图，从顶层贪心走向查询，在底层做宽度为 ef 的搜索 | [19](19-rag/README.md) |
+| 乘积量化 | PQ (product quantization) | 把向量切段、每段用中心编号代替，大幅压缩内存，距离变为近似 | [19](19-rag/README.md) |
+| 向量数据库 | vector database | 存储向量并提供 ANN 索引、过滤和更新的数据库，如 FAISS、Milvus、Qdrant、pgvector | [19](19-rag/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

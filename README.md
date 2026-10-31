@@ -34,6 +34,7 @@
 | 16 多模态模型 Multimodal Models | [中文](docs/16-multimodal/README.md) · [EN](docs/16-multimodal/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/16-multimodal/interactive/multimodal.html) | [multimodal.py](docs/16-multimodal/code/multimodal.py) |
 | 17 代码模型 Code Models | [中文](docs/17-code-models/README.md) · [EN](docs/17-code-models/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/17-code-models/interactive/code_models.html) | [code_models.py](docs/17-code-models/code/code_models.py) |
 | 18 提示工程 Prompt Engineering | [中文](docs/18-prompt-engineering/README.md) · [EN](docs/18-prompt-engineering/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/18-prompt-engineering/interactive/prompting.html) | [prompting.py](docs/18-prompt-engineering/code/prompting.py) |
+| 19 RAG 与向量数据库 RAG & Vector Databases | [中文](docs/19-rag/README.md) · [EN](docs/19-rag/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/19-rag/interactive/rag.html) | [rag.py](docs/19-rag/code/rag.py) |
 
 ## 前沿问答
 
