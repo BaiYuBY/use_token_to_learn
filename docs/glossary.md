@@ -131,6 +131,14 @@
 | 拒绝采样微调 | rejection-sampling fine-tuning (RFT, expert iteration) | 只用模型自己生成且通过检验的样本继续训练 | [17](17-code-models/README.md) |
 | 奖励投机 | reward hacking | 模型钻奖励的漏洞，例如针对测试写特例或修改测试 | [17](17-code-models/README.md) |
 | 数据污染 | data contamination | 评测题出现在训练数据里，分数因此虚高 | [17](17-code-models/README.md) |
+| 上下文学习 / 少样本提示 | in-context learning (ICL) / few-shot prompting | 不改参数，只靠提示里的几个示例让模型做新任务 | [18](18-prompt-engineering/README.md) |
+| 系统提示 | system prompt | 开发者写在对话最前面、规定任务和规则的消息 | [18](18-prompt-engineering/README.md) |
+| 角色标记 | role tokens | 对话模板里分隔系统、用户、助手消息的专用词元，用户文本无法生成 | [18](18-prompt-engineering/README.md) |
+| 归纳头 | induction head | 找到与当前位置相似的早先位置、复制其后续词元的注意力机制，被认为支撑上下文学习 | [18](18-prompt-engineering/README.md) |
+| 提示注入 | prompt injection (direct / indirect) | 混在用户输入或外部数据里的指令让模型偏离开发者意图；间接注入藏在网页、邮件、文档中 | [18](18-prompt-engineering/README.md) |
+| 指令层级 | instruction hierarchy | 训练模型在冲突时优先听系统提示，其次用户，再次数据 | [18](18-prompt-engineering/README.md) |
+| 多示例越狱 | many-shot jailbreaking | 在长上下文里塞进大量示例，压过模型的安全训练或系统指令 | [18](18-prompt-engineering/README.md) |
+| 纵深防御 | defence in depth | 最小权限、输出校验、人工确认等多层措施，不依赖单一防线 | [18](18-prompt-engineering/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |
