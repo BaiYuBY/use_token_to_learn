@@ -182,7 +182,8 @@ use_token_to_learn/
 - [x] 20 知识图谱与图数据库（抽取与实体消解、类 Cypher 查询、多跳：一次检索 / 逐跳检索 / 图查询、全局问题与 GraphRAG 社区摘要）
 - [x] 21 Agent 与 agent loop（工具调用与 JSON schema 校验、ReAct 循环、错误累积与作答前自检、步数上限、上下文成本与并行调用；LangChain 工具与 LCEL、LangGraph 状态图 / 检查点 / 人工介入，与手写循环逐步对照；19 章已补 LangChain 检索链的对应关系）
 - [x] 22 MCP、Skills 与 SOP（从零实现 2026-07-28 版无状态 MCP 并与官方 SDK 互通、旧版握手对照、MCP 工具与 LangChain 工具的对比与适配、Agent Skills 渐进式披露与描述质量、SOP 交接：自由文本 / schema 校验 / 对照来源审阅）
-- [ ] 23 评测、24 安全与可解释性
+- [x] 23 评测（困惑度的下限与跨分词比较、每字符比特数；基准误差、配对比较、IRT 排行榜与饱和、雷达图；LLM 评委的位置与冗长偏差及修正、Elo 与 Bradley-Terry；污染实验与检测：精确匹配、同分布新题、损失）
+- [ ] 24 安全与可解释性
 
 ### 持续进行：前沿问答
 - [x] 建立 `docs/qa/` 单元与模板

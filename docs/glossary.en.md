@@ -182,6 +182,20 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 渐进式披露 | progressive disclosure | Keep only skills' names and descriptions in context; load the body and files when they are used | [22](22-mcp-skills-sop/README.en.md) |
 | SOP（标准作业程序） | SOP (standard operating procedure) | A procedure fixing each role's inputs, output formats and checks, as in MetaGPT | [22](22-mcp-skills-sop/README.en.md) |
 | 结构化产物 | structured artifact | A fixed-format document handed between roles, which can be checked against a schema | [22](22-mcp-skills-sop/README.en.md) |
+| 每字节比特数 | bits per byte / bits per character | Total negative log-likelihood ÷ ln 2 ÷ bytes (characters); comparable across tokenizers | [23](23-evaluation/README.en.md) |
+| 基准测试 | benchmark | A question set with answer keys; its score is a sample estimate of a model's ability | [23](23-evaluation/README.en.md) |
+| 置信区间 | confidence interval | The error range of a score; the standard error of an accuracy is sqrt(p(1-p)/n) | [23](23-evaluation/README.en.md) |
+| 配对比较 | paired comparison | Comparing two models question by question on the same items, removing the noise from question difficulty | [23](23-evaluation/README.en.md) |
+| 项目反应理论 | IRT (item response theory) | A measurement model with P(correct) = sigmoid(ability − difficulty), used to analyse questions and pick informative ones | [23](23-evaluation/README.en.md) |
+| 基准饱和 | benchmark saturation | Questions too easy for every model: scores bunch together and noise decides the ranking | [23](23-evaluation/README.en.md) |
+| LLM 评委 | LLM-as-a-judge | A strong model grading or comparing open-ended answers; prone to position bias, verbosity bias and self-preference | [23](23-evaluation/README.en.md) |
+| 位置偏差 / 冗长偏差 | position bias / verbosity bias | A judge favouring the answer shown first / the longer answer | [23](23-evaluation/README.en.md) |
+| 长度控制 | length control | Estimating and removing the effect of length on win rates by regression, as in length-controlled AlpacaEval | [23](23-evaluation/README.en.md) |
+| Bradley-Terry 模型 | Bradley-Terry model | P(i beats j) = σ(s_i − s_j), fitted to all pairwise votes at once; independent of their order | [23](23-evaluation/README.en.md) |
+| Elo 评分 | Elo rating | An online rating updated after every game; the result depends on the order of games | [23](23-evaluation/README.en.md) |
+| 基准污染 | benchmark contamination | Test questions or answers appearing in training data, so the score overstates real ability | [23](23-evaluation/README.en.md) |
+| 成员推断 | membership inference | Telling whether an example was in the training data from the model's loss on it, e.g. Min-K% Prob | [23](23-evaluation/README.en.md) |
+| 金丝雀字符串 | canary string | A unique marker placed in benchmark files to filter training data or detect leaks | [23](23-evaluation/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |

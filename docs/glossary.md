@@ -182,6 +182,20 @@
 | 渐进式披露 | progressive disclosure | 只把 skill 的名字和描述常驻上下文，用到时才加载正文和文件 | [22](22-mcp-skills-sop/README.md) |
 | SOP（标准作业程序） | SOP (standard operating procedure) | 规定每个角色的输入、输出格式和检查项的流程，如 MetaGPT | [22](22-mcp-skills-sop/README.md) |
 | 结构化产物 | structured artifact | 角色之间交接的固定格式文档，可以按 schema 校验 | [22](22-mcp-skills-sop/README.md) |
+| 每字节比特数 | bits per byte / bits per character | 总负对数似然 ÷ ln2 ÷ 字节（字符）数；不同分词器的模型可以用它比较 | [23](23-evaluation/README.md) |
+| 基准测试 | benchmark | 有标准答案的题库，分数是对模型能力的一次抽样估计 | [23](23-evaluation/README.md) |
+| 置信区间 | confidence interval | 分数的误差范围；准确率的标准误差是 sqrt(p(1-p)/n) | [23](23-evaluation/README.md) |
+| 配对比较 | paired comparison | 在同一批题上逐题比较两个模型，去掉题目难度带来的噪声 | [23](23-evaluation/README.md) |
+| 项目反应理论 | IRT (item response theory) | 答对概率 = sigmoid(能力 − 难度) 的测量模型，用来分析题目与挑选有区分度的题 | [23](23-evaluation/README.md) |
+| 基准饱和 | benchmark saturation | 题目对所有模型都太容易，分数挤在一起，排名主要由噪声决定 | [23](23-evaluation/README.md) |
+| LLM 评委 | LLM-as-a-judge | 用强模型给开放式回答打分或做两两比较；有位置偏差、冗长偏差和自我偏好 | [23](23-evaluation/README.md) |
+| 位置偏差 / 冗长偏差 | position bias / verbosity bias | 评委偏爱先出现的答案 / 更长的答案 | [23](23-evaluation/README.md) |
+| 长度控制 | length control | 用回归估计并扣除长度对胜率的影响，如长度控制的 AlpacaEval | [23](23-evaluation/README.md) |
+| Bradley-Terry 模型 | Bradley-Terry model | P(i 胜 j) = σ(s_i − s_j)，用全部两两投票拟合评分，与顺序无关 | [23](23-evaluation/README.md) |
+| Elo 评分 | Elo rating | 每场比赛后更新双方评分的在线方法，结果依赖比赛顺序 | [23](23-evaluation/README.md) |
+| 基准污染 | benchmark contamination | 测试题或答案出现在训练数据中，使分数高估真实能力 | [23](23-evaluation/README.md) |
+| 成员推断 | membership inference | 根据模型在某样本上的损失判断它是否在训练数据中，如 Min-K% Prob | [23](23-evaluation/README.md) |
+| 金丝雀字符串 | canary string | 放在基准文件里的独特标记，用来过滤训练数据或检测泄漏 | [23](23-evaluation/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

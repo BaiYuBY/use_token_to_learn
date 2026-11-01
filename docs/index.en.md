@@ -38,7 +38,8 @@ Each chapter follows the same rhythm:
 | 20 | [Knowledge graphs and graph databases](20-knowledge-graphs/README.md) | [Extraction, Cypher queries and multi-hop retrieval playground](20-knowledge-graphs/interactive/knowledge_graph.html?lang=en) | ✅ done |
 | 21 | [Agents and the agent loop](21-agents/README.md) | [Step-through agent loop with LangGraph nodes](21-agents/interactive/agents.html?lang=en) | ✅ done |
 | 22 | [MCP, Skills and SOPs](22-mcp-skills-sop/README.md) | [MCP messages, skill progressive disclosure and an SOP pipeline](22-mcp-skills-sop/interactive/mcp.html?lang=en) | ✅ done |
-| 23–24 | Applications and frontiers: evaluation, safety and interpretability | | 🚧 planned |
+| 23 | [Evaluation](23-evaluation/README.md) | [Perplexity, leaderboard error bars, LLM-judge bias and contamination detection](23-evaluation/interactive/evaluation.html?lang=en) | ✅ done |
+| 24 | Applications and frontiers: safety and interpretability | | 🚧 planned |
 
 ## Frontier Q&A
 
