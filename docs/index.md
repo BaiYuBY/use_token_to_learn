@@ -39,7 +39,7 @@
 | 21 | [Agent 与 agent loop](21-agents/README.md) | [逐步运行的 agent loop 与 LangGraph 节点演示](21-agents/interactive/agents.html) | ✅ 已完成 |
 | 22 | [MCP、Skills 与 SOP](22-mcp-skills-sop/README.md) | [MCP 消息、skill 渐进式披露与 SOP 流水线演示](22-mcp-skills-sop/interactive/mcp.html) | ✅ 已完成 |
 | 23 | [评测](23-evaluation/README.md) | [困惑度、排行榜误差、LLM 评委偏差与污染检测演示](23-evaluation/interactive/evaluation.html) | ✅ 已完成 |
-| 24 | 应用与前沿：安全与可解释性 | | 🚧 计划中 |
+| 24 | [安全与可解释性](24-safety-interpretability/README.md) | [探针与引导、叠加与 SAE 特征浏览器、幻觉评分与越狱演示](24-safety-interpretability/interactive/safety.html) | ✅ 已完成 |
 
 ## 前沿问答
 

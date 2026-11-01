@@ -20,11 +20,11 @@
 
 The model from [06 Pre-training](../06-pretraining/README.en.md) has learned to predict the next token, that is, to continue text. Ask it a question and it usually does not answer; it treats the question as the start of a document and keeps writing. The base model in this chapter's experiment was pre-trained only on Python source code. Give it `Reverse: lambda` and it outputs `#`: to it, this looks like a line of code that should be followed by a comment.
 
-**Fine-tuning** continues training a pre-trained model on a small, targeted dataset. The most common step is **supervised fine-tuning** (SFT, also called instruction tuning): collect many “instruction → ideal response” examples and teach the model to respond to instructions. Alignment usually follows (see 09 Alignment, planned).
+**Fine-tuning** continues training a pre-trained model on a small, targeted dataset. The most common step is **supervised fine-tuning** (SFT, also called instruction tuning): collect many “instruction → ideal response” examples and teach the model to respond to instructions. Alignment usually follows (see [09 Alignment](../09-alignment/README.en.md)).
 
 ```mermaid
 flowchart LR
-    P["Pre-training<br/>huge text corpus, learns to continue<br/>(06, 07)"] --> S["Supervised fine-tuning<br/>instruction → response<br/>(this chapter)"] --> A["Alignment<br/>preferences and safety<br/>(09, planned)"] --> D["Deployment"]
+    P["Pre-training<br/>huge text corpus, learns to continue<br/>(06, 07)"] --> S["Supervised fine-tuning<br/>instruction → response<br/>(this chapter)"] --> A["Alignment<br/>preferences and safety<br/>(09)"] --> D["Deployment"]
     S -.-> M["Methods: full fine-tuning / LoRA / QLoRA"]
 ```
 

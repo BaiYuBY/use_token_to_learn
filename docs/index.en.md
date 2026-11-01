@@ -39,7 +39,7 @@ Each chapter follows the same rhythm:
 | 21 | [Agents and the agent loop](21-agents/README.md) | [Step-through agent loop with LangGraph nodes](21-agents/interactive/agents.html?lang=en) | ✅ done |
 | 22 | [MCP, Skills and SOPs](22-mcp-skills-sop/README.md) | [MCP messages, skill progressive disclosure and an SOP pipeline](22-mcp-skills-sop/interactive/mcp.html?lang=en) | ✅ done |
 | 23 | [Evaluation](23-evaluation/README.md) | [Perplexity, leaderboard error bars, LLM-judge bias and contamination detection](23-evaluation/interactive/evaluation.html?lang=en) | ✅ done |
-| 24 | Applications and frontiers: safety and interpretability | | 🚧 planned |
+| 24 | [Safety and interpretability](24-safety-interpretability/README.md) | [Probes and steering, superposition and an SAE feature browser, hallucination grading and jailbreaks](24-safety-interpretability/interactive/safety.html?lang=en) | ✅ done |
 
 ## Frontier Q&A
 

@@ -81,6 +81,7 @@ plugins:
             Agent 与 agent loop: Agents & the Agent Loop
             MCP、Skills 与 SOP: MCP, Skills & SOPs
             评测: Evaluation
+            安全与可解释性: Safety & Interpretability
             前沿问答: Frontier Q&A
             问答首页: Q&A index
             推理强度是怎么设置的: How reasoning effort is set
@@ -144,6 +145,7 @@ nav:
       - Agent 与 agent loop: 21-agents/README.md
       - MCP、Skills 与 SOP: 22-mcp-skills-sop/README.md
       - 评测: 23-evaluation/README.md
+      - 安全与可解释性: 24-safety-interpretability/README.md
   - 前沿问答:
       - 问答首页: qa/index.md
       - 推理强度是怎么设置的: qa/reasoning-effort.md

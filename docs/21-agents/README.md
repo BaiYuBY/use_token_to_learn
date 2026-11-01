@@ -320,7 +320,7 @@ chain.batch(questions)
 - **能撤销**：在沙箱里运行代码。
 - **留日志**：所有操作都有记录，可以审计。
 
-安全会在 24 章（计划中）详细讨论。工具的标准化接口（MCP）和把流程固化下来的 Skills / SOP 见 [22 章](../22-mcp-skills-sop/README.md)；怎样评测 agent 见 [23 章](../23-evaluation/README.md)。
+安全在 [24 章](../24-safety-interpretability/README.md) 详细讨论。工具的标准化接口（MCP）和把流程固化下来的 Skills / SOP 见 [22 章](../22-mcp-skills-sop/README.md)；怎样评测 agent 见 [23 章](../23-evaluation/README.md)。
 
 ## 4. 最小代码实现
 

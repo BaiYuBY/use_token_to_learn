@@ -196,6 +196,21 @@
 | 基准污染 | benchmark contamination | 测试题或答案出现在训练数据中，使分数高估真实能力 | [23](23-evaluation/README.md) |
 | 成员推断 | membership inference | 根据模型在某样本上的损失判断它是否在训练数据中，如 Min-K% Prob | [23](23-evaluation/README.md) |
 | 金丝雀字符串 | canary string | 放在基准文件里的独特标记，用来过滤训练数据或检测泄漏 | [23](23-evaluation/README.md) |
+| 残差流 | residual stream | 贯穿各层的向量，每一层都从中读取并把结果加回去 | [24](24-safety-interpretability/README.md) |
+| 线性探针 | linear probe | 在模型内部激活上训练的线性分类器，检验某个属性是否线性可读 | [24](24-safety-interpretability/README.md) |
+| 对照任务 | control task | 用打乱或随机的标签训练探针，排除探针自己“硬记”的可能 | [24](24-safety-interpretability/README.md) |
+| 激活引导 | activation steering / activation addition | 在残差流上加减某个方向的向量，改变模型行为 | [24](24-safety-interpretability/README.md) |
+| 方向消融 | directional ablation | 把残差流在某个方向上的分量去掉，检验模型是否依赖它 | [24](24-safety-interpretability/README.md) |
+| 叠加 | superposition | 特征比维度多时，让稀疏的特征共享方向来存储，代价是相互干扰 | [24](24-safety-interpretability/README.md) |
+| 多义神经元 | polysemantic neuron | 对多种不相关输入都有反应的神经元，常由叠加造成 | [24](24-safety-interpretability/README.md) |
+| 稀疏自编码器 | SAE (sparse autoencoder) | 用比维度多得多、每次只有少数激活的特征重建激活，把叠加的特征拆开 | [24](24-safety-interpretability/README.md) |
+| 幻觉 | hallucination | 模型自信地给出没有依据或错误的内容 | [24](24-safety-interpretability/README.md) |
+| 弃答 | abstention | 模型回答“不知道”而不是猜测；评分是否惩罚答错决定了弃答是否划算 | [24](24-safety-interpretability/README.md) |
+| 越狱 | jailbreak | 绕过模型安全训练、让它执行本应拒绝的请求的输入 | [24](24-safety-interpretability/README.md) |
+| 泛化不匹配 | mismatched generalization | 模型能力覆盖的形式（如编码、少见语言）超出了安全训练覆盖的范围 | [24](24-safety-interpretability/README.md) |
+| 浅层对齐 | shallow alignment | 安全行为只体现在回答开头几个词元上，预填等方法即可绕过 | [24](24-safety-interpretability/README.md) |
+| 拒绝方向 | refusal direction | 大模型残差流中控制拒绝行为的单一方向（Arditi 等, 2024） | [24](24-safety-interpretability/README.md) |
+| 红队测试 | red-teaming | 主动寻找模型的有害行为和漏洞，用来改进防御 | [24](24-safety-interpretability/README.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | 用滑动的卷积核提取局部特征，权重在各位置共享 | [问答](qa/classic-models.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | 逐步更新隐藏状态来处理序列；LSTM 用门控缓解梯度消失 | [问答](qa/classic-models.md) |
 | 梯度消失 | vanishing gradients | 梯度在很多层或很多步的连乘中指数缩小 | [问答](qa/classic-models.md) |

@@ -196,6 +196,21 @@ Throughout this knowledge base, ambiguous terms carry their English name, e.g. �
 | 基准污染 | benchmark contamination | Test questions or answers appearing in training data, so the score overstates real ability | [23](23-evaluation/README.en.md) |
 | 成员推断 | membership inference | Telling whether an example was in the training data from the model's loss on it, e.g. Min-K% Prob | [23](23-evaluation/README.en.md) |
 | 金丝雀字符串 | canary string | A unique marker placed in benchmark files to filter training data or detect leaks | [23](23-evaluation/README.en.md) |
+| 残差流 | residual stream | The vector running through the layers; every layer reads from it and adds its result back | [24](24-safety-interpretability/README.en.md) |
+| 线性探针 | linear probe | A linear classifier trained on internal activations, testing whether a property is linearly readable | [24](24-safety-interpretability/README.en.md) |
+| 对照任务 | control task | Training the probe on shuffled or random labels to rule out the probe memorizing on its own | [24](24-safety-interpretability/README.en.md) |
+| 激活引导 | activation steering / activation addition | Adding or subtracting a direction in the residual stream to change the model's behaviour | [24](24-safety-interpretability/README.en.md) |
+| 方向消融 | directional ablation | Removing the residual stream's component along a direction to test whether the model relies on it | [24](24-safety-interpretability/README.en.md) |
+| 叠加 | superposition | Storing more features than dimensions by letting sparse features share directions, at the cost of interference | [24](24-safety-interpretability/README.en.md) |
+| 多义神经元 | polysemantic neuron | A neuron responding to several unrelated inputs, often a result of superposition | [24](24-safety-interpretability/README.en.md) |
+| 稀疏自编码器 | SAE (sparse autoencoder) | Reconstructing activations from many more features than dimensions, few active at a time, to pull superposed features apart | [24](24-safety-interpretability/README.en.md) |
+| 幻觉 | hallucination | A model confidently producing unsupported or false content | [24](24-safety-interpretability/README.en.md) |
+| 弃答 | abstention | Answering “I don't know” instead of guessing; whether grading penalizes wrong answers decides whether it pays | [24](24-safety-interpretability/README.en.md) |
+| 越狱 | jailbreak | An input that gets around a model's safety training so it carries out a request it should refuse | [24](24-safety-interpretability/README.en.md) |
+| 泛化不匹配 | mismatched generalization | The model's capabilities cover forms (encodings, rare languages) that its safety training does not | [24](24-safety-interpretability/README.en.md) |
+| 浅层对齐 | shallow alignment | Safety behaviour that lives only in the first few tokens of an answer, so prefilling and similar tricks get around it | [24](24-safety-interpretability/README.en.md) |
+| 拒绝方向 | refusal direction | A single direction in large models' residual streams that controls refusal (Arditi et al., 2024) | [24](24-safety-interpretability/README.en.md) |
+| 红队测试 | red-teaming | Actively searching for a model's harmful behaviours and weaknesses to improve its defences | [24](24-safety-interpretability/README.en.md) |
 | 卷积神经网络 | CNN (convolutional neural network) | Extracts local features with a sliding kernel whose weights are shared across positions | [Q&A](qa/classic-models.en.md) |
 | 循环神经网络 / 长短期记忆网络 | RNN / LSTM | Processes a sequence by updating a hidden state step by step; the LSTM's gates ease vanishing gradients | [Q&A](qa/classic-models.en.md) |
 | 梯度消失 | vanishing gradients | Gradients shrinking exponentially through a product over many layers or steps | [Q&A](qa/classic-models.en.md) |
