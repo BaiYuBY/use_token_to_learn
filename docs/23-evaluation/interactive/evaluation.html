@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>评测交互演示 · Evaluation Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .words { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .words button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; padding: 3px 7px; }
+  .words button small { font-size: .7rem; opacity: .9; }
+  .words button.sel { outline: 2px solid var(--accent); }
+  .chars { font-family: ui-monospace, monospace; font-size: .85rem; line-height: 1.9; word-break: break-all; }
+  .chars span { padding: 1px 0; border-radius: 2px; }
+  .topk div { display: grid; grid-template-columns: 7em 1fr 3.5em; gap: 6px; align-items: center; font-size: .82rem; margin: 2px 0; }
+  .topk span.bar { height: 12px; border-radius: 3px; background: var(--primary); }
+  table.lb td, table.lb th { padding: 3px 6px; }
+  .ci { position: relative; height: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 4px; min-width: 140px; }
+  .ci i { position: absolute; top: 2px; height: 8px; background: rgba(63,81,181,.35); border-radius: 3px; }
+  .ci b { position: absolute; top: 0; width: 2px; height: 12px; background: var(--primary); }
+  .ci u { position: absolute; top: -2px; width: 2px; height: 16px; background: var(--accent); text-decoration: none; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+  svg.radar { width: 100%; max-width: 420px; height: auto; display: block; margin: 0 auto; }
+  svg.radar text { fill: var(--muted); font-size: 11px; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">评测 · 交互演示</span><span lang="en">Evaluation · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">怎么知道一个模型好不好？这一页用真实训练的小模型和可控的模拟，看清四件事：困惑度衡量什么、什么时候能比较；基准分数有多少噪声、排行榜有多可靠；用大模型当评委有哪些偏差；以及测试题泄漏进训练数据（污染）会怎样抬高分数、怎样发现。</span>
+        <span lang="en">How do you know whether a model is good? With small models trained for real and controlled simulations, this page shows four things: what perplexity measures and when it can be compared; how noisy benchmark scores are and how reliable leaderboards are; the biases of LLM judges; and how test questions leaking into training data (contamination) inflate scores, and how to catch it.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. perplexity -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">困惑度：逐词看模型有多“意外”</span><span lang="en">Perplexity: how surprised the model is, word by word</span></h2>
+    <p class="hint">
+      <span lang="zh">困惑度 = exp(每个词元的平均负对数似然)。可以理解为：模型平均在几个选项之间犹豫。下面是 06 章小语言上训练的词级模型，对测试句子每个词给出的概率（颜色越深越意外）。点一个词，看模型在那个位置预测的前 5 名。</span>
+      <span lang="en">Perplexity = exp(average negative log-likelihood per token): roughly, how many options the model is torn between on average. Below, a word-level model trained on chapter 6's toy language gives each word of a test sentence a probability (darker = more surprising). Click a word to see the model's top 5 predictions there.</span>
+    </p>
+    <div class="controls"><label><span lang="zh">句子</span><span lang="en">sentence</span> <select id="px-s"></select></label></div>
+    <div class="words" id="px-words"></div>
+    <div class="row">
+      <div class="col"><h3 id="px-top-h"></h3><div class="topk" id="px-top"></div></div>
+      <div class="col"><h3><span lang="zh">同一句话，字符级模型</span><span lang="en">The same sentence, character-level model</span></h3><div class="chars" id="px-chars"></div></div>
+    </div>
+    <div class="stats" id="px-stats"></div>
+    <div class="callout" id="px-note"></div>
+  </section>
+
+  <!-- 2. benchmarks -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">基准分数是抽样：排行榜有多可靠</span><span lang="en">A benchmark is a sample: how reliable is a leaderboard?</span></h2>
+    <p class="hint">
+      <span lang="zh">10 个模型，真实准确率（在所有可能的题上）从 55% 到 69%，相邻约差 1.5 分。每次从题库里抽一套基准题，按项目反应理论让模型作答：答对概率 = sigmoid(能力 − 难度)。看看抽到的题不同，排行榜会怎样变。蓝条是 95% 置信区间，橙线是真实准确率。</span>
+      <span lang="en">10 models whose true accuracy (over all possible questions) runs from 55% to 69%, neighbours about 1.5 points apart. Each draw takes a benchmark from the question pool and has the models answer it by item response theory: P(correct) = sigmoid(ability − difficulty). See how the leaderboard changes with the questions drawn. Blue bars are 95% intervals; the orange tick is the true accuracy.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">题目数</span><span lang="en">questions</span> <input type="range" id="lb-n" min="0" max="6" value="2"> <b id="lb-n-v" class="mono"></b></label>
+      <label><input type="checkbox" id="lb-easy"> <span lang="zh">太容易的（饱和的）基准</span><span lang="en">an easy (saturated) benchmark</span></label>
+      <button id="lb-draw">🎲 <span lang="zh">重新抽一套题</span><span lang="en">draw another benchmark</span></button>
+    </div>
+    <div class="row">
+      <div class="col"><div class="scroll"><table class="t lb" id="lb-table"></table></div><div class="stats" id="lb-stats"></div></div>
+      <div class="col"><div class="legend" id="lb-leg"></div><svg class="chart" id="lb-chart" viewBox="0 0 520 260"></svg>
+        <p class="hint"><span lang="zh">每种题目数抽 200 次的平均（Python 版）。实线：正常难度；虚线：饱和的基准。</span><span lang="en">Averages over 200 draws per size (Python version). Solid: normal difficulty; dashed: saturated.</span></p></div>
+    </div>
+    <h3><span lang="zh">平均分会掩盖能力结构</span><span lang="en">Averages hide profiles</span></h3>
+    <div class="row">
+      <div class="col"><svg class="radar" id="rd-svg" viewBox="0 0 420 340"></svg></div>
+      <div class="col">
+        <div class="controls"><label><span lang="zh">用途</span><span lang="en">use case</span> <select id="rd-use"></select></label></div>
+        <div class="stats" id="rd-stats"></div>
+        <div class="callout" id="rd-note"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. judge -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">用大模型当评委：偏差与修正</span><span lang="en">LLM as a judge: biases and fixes</span></h2>
+    <p class="hint">
+      <span lang="zh">评委看两个答案，说哪个更好。真实的大模型评委被测出偏爱<b>先出现的</b>答案（位置偏差）和<b>更长的</b>答案（冗长偏差）。这里的评委是模拟的：感知分 = 真实质量 + 冗长系数 × log(长度) + 噪声，第一个答案额外加分。拖动滑块，在浏览器里对 3000 对答案重新评判。</span>
+      <span lang="en">A judge sees two answers and says which is better. Real LLM judges have been measured to favour the answer shown <b>first</b> (position bias) and the <b>longer</b> one (verbosity bias). This judge is simulated: perceived = true quality + verbosity × log(length) + noise, plus a bonus for the first answer. Drag the sliders to re-judge 3,000 pairs in your browser.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">位置偏差</span><span lang="en">position bias</span> <input type="range" id="jd-pos" min="0" max="1" step="0.05" value="0.35"> <b id="jd-pos-v" class="mono"></b></label>
+      <label><span lang="zh">冗长偏差</span><span lang="en">verbosity bias</span> <input type="range" id="jd-len" min="0" max="1.5" step="0.05" value="0.6"> <b id="jd-len-v" class="mono"></b></label>
+      <label><span lang="zh">噪声</span><span lang="en">noise</span> <input type="range" id="jd-noise" min="0" max="1.5" step="0.05" value="0.5"> <b id="jd-noise-v" class="mono"></b></label>
+    </div>
+    <div class="stats" id="jd-stats"></div>
+    <div class="callout" id="jd-note"></div>
+    <h3><span lang="zh">竞技场评分：Elo 与 Bradley-Terry</span><span lang="en">Arena ratings: Elo vs Bradley-Terry</span></h3>
+    <p class="hint">
+      <span lang="zh">8 个模型、若干张两两投票（Chatbot Arena 的做法）。在线 Elo 按比赛顺序逐场更新，同样的票换个顺序结果就不同；Bradley-Terry 一次性拟合所有票，与顺序无关。点“打乱顺序”看看。</span>
+      <span lang="en">8 models and a set of pairwise votes (as in Chatbot Arena). Online Elo updates game by game, so the same votes in another order give different ratings; Bradley-Terry fits all votes at once, regardless of order. Press “shuffle the order”.</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">投票数</span><span lang="en">votes</span> <select id="ar-n"><option>500</option><option selected>3000</option><option>20000</option></select></label>
+      <button id="ar-shuffle">🔀 <span lang="zh">打乱顺序</span><span lang="en">shuffle the order</span></button>
+      <button id="ar-new">🎲 <span lang="zh">换一批投票</span><span lang="en">new votes</span></button>
+    </div>
+    <svg class="chart" id="ar-chart" viewBox="0 0 640 250"></svg>
+    <div class="legend" id="ar-leg"></div>
+  </section>
+
+  <!-- 4. contamination -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">污染：测试题泄漏进训练数据</span><span lang="en">Contamination: test questions in the training data</span></h2>
+    <p class="hint">
+      <span lang="zh">基准：200 道两位数乘法（答案倒着写，小模型更好学）。另取 200 道同分布的“新题”，任何模型都没见过。同一个小 GPT 用 3000 道其他题训练，再把基准题混进训练数据 0–8 次。下面的结果都是真实训练出来的。</span>
+      <span lang="en">The benchmark: 200 two-digit multiplications (answers written backwards, which a small model learns more easily). Another 200 “fresh” problems from the same distribution are never seen by any model. The same small GPT trains on 3,000 other problems, with the benchmark mixed into its data 0–8 times. All results below come from real training runs.</span>
+    </p>
+    <div class="row">
+      <div class="col"><div class="legend" id="ct-leg"></div><svg class="chart" id="ct-chart" viewBox="0 0 520 250"></svg></div>
+      <div class="col">
+        <div class="controls"><label><span lang="zh">损失分布</span><span lang="en">loss distribution</span> <select id="ct-h"><option value="0">0×</option><option value="4" selected>4×</option></select></label></div>
+        <div class="legend" id="hs-leg"></div><svg class="chart" id="hs-chart" viewBox="0 0 520 220"></svg>
+      </div>
+    </div>
+    <div class="scroll"><table class="t" id="ct-items"></table></div>
+    <div class="stats" id="ct-stats"></div>
+    <div class="callout" id="ct-note"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与代码：</span><span lang="en">Write-up and code: </span>
+    <a href="../README.html">23 评测 · Evaluation</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+<script src="evaluation_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.EVAL_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 46, R = 12, T = 10, B = 34;
+    const lx = v => o.logx ? Math.log(v) : v;
+    const fx = v => L + (W - L - R) * (lx(v) - lx(o.x0)) / (lx(o.x1) - lx(o.x0)), fy = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${o.xfmt ? o.xfmt(v) : v}</text>`; });
+    if (o.vline !== undefined) s += `<line x1="${fx(o.vline)}" x2="${fx(o.vline)}" y1="${T}" y2="${H - B}" stroke="${css("--accent")}" stroke-dasharray="3 3"/>`;
+    (o.bars || []).forEach(b => { s += `<rect x="${fx(b.x0)}" y="${fy(b.y)}" width="${Math.max(1, fx(b.x1) - fx(b.x0) - 1)}" height="${fy(o.y0) - fy(b.y)}" fill="${b.color}" opacity="${b.op || 0.7}"/>`; });
+    series.forEach(se => {
+      const dash = se.dash ? 'stroke-dasharray="6 4"' : "";
+      if (!se.noline) s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" ${dash} opacity="${se.op || 1}" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      se.x.forEach((v, i) => { s += se.mark === "dash" ? `<line x1="${fx(v) - 12}" x2="${fx(v) + 12}" y1="${fy(se.y[i])}" y2="${fy(se.y[i])}" stroke="${se.color}" stroke-width="3"/>` : `<circle cx="${fx(v) + (se.jit ? se.jit[i] : 0)}" cy="${fy(se.y[i])}" r="${se.r || 3}" fill="${se.color}" opacity="${se.op || 1}"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 3}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+  function rng(seed) { let a = seed >>> 0 || 1; return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+  const gauss = r => Math.sqrt(-2 * Math.log(1 - r())) * Math.cos(2 * Math.PI * r());
+  const sig = x => 1 / (1 + Math.exp(-x));
+  const heat = (bits, max) => { const t = Math.min(1, bits / max); return `rgba(232,113,10,${(0.08 + 0.75 * t).toFixed(2)})`; };
+
+  // ================= 1. perplexity =================
+  let pxSel = 1;
+  function renderPx() {
+    const P = D.ppl, ex = P.examples[+$("px-s").value];
+    $("px-words").innerHTML = ex.words.map((w, i) => { const b = -Math.log2(w.p); return `<button class="${i === pxSel ? "sel" : ""}" data-i="${i}" style="background:${heat(b, 5)}">${esc(w.w)}<small>${w.p < 0.01 ? w.p.toExponential(0) : (100 * w.p).toFixed(0) + "%"}</small></button>`; }).join("");
+    $("px-words").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { pxSel = +b.dataset.i; renderPx(); }));
+    pxSel = Math.min(pxSel, ex.words.length - 1);
+    const w = ex.words[pxSel];
+    $("px-top-h").innerHTML = tr(`在 “${esc(ex.words.slice(0, pxSel).map(x => x.w).join(" ") || "（句首）")}” 之后，模型预测：`, `After “${esc(ex.words.slice(0, pxSel).map(x => x.w).join(" ") || "(start)")}”, the model predicts:`);
+    $("px-top").innerHTML = w.top.map(([t, p]) => `<div><span class="mono" style="${t === w.w ? "color:" + css("--accent") + ";font-weight:700" : ""}">${esc(t)}</span><span class="bar" style="width:${100 * p / w.top[0][1]}%"></span><span class="mono">${(100 * p).toFixed(1)}%</span></div>`).join("");
+    $("px-chars").innerHTML = [...ex.chars].map((c, i) => `<span style="background:${heat(-Math.log2(ex.char_p[i]), 5)}">${c === " " ? "&nbsp;" : esc(c)}</span>`).join("");
+    const n = ex.words.length, wn = ex.words.reduce((a, x) => a - Math.log(x.p), 0), cn = ex.char_p.reduce((a, p) => a - Math.log(p), 0);
+    $("px-stats").innerHTML = stat(tr("这句话：词级困惑度", "this sentence: word perplexity"), Math.exp(wn / n).toFixed(2), css("--primary")) + stat(tr("生成器给出的真实困惑度", "the generator's true perplexity"), Math.exp(-ex.true_logprob / n).toFixed(2), css("--muted")) +
+      stat(tr("字符级困惑度", "character perplexity"), Math.exp(cn / ex.char_p.length).toFixed(2), css("--accent")) +
+      stat(tr("每字符比特：词级 / 字符级", "bits per char: word / char"), `${(wn / Math.log(2) / ex.chars.length).toFixed(2)} / ${(cn / Math.log(2) / ex.chars.length).toFixed(2)}`);
+    $("px-note").innerHTML = tr(`400 个测试句子上：词级困惑度 <b>${P.word_ppl.toFixed(2)}</b>，而生成器本身的熵决定了最低可能是 <b>${P.floor_ppl.toFixed(2)}</b>：模型几乎学到了上限，剩下的“意外”都是生成器真正的随机选择（选哪个名词、加不加形容词）。字符级困惑度只有 ${P.char_ppl.toFixed(2)}，但这不说明它更好：它每次只猜一个字母。换算成每字符比特数，词级 ${P.word_bpc.toFixed(3)}、字符级 ${P.char_bpc.toFixed(3)}、下限 ${P.floor_bpc.toFixed(3)}：词级模型其实更好。`,
+      `On 400 test sentences: word perplexity <b>${P.word_ppl.toFixed(2)}</b>, while the generator's own entropy sets the lowest possible value at <b>${P.floor_ppl.toFixed(2)}</b>: the model has nearly reached the limit, and the remaining surprise is the generator's genuinely random choices (which noun, whether to add an adjective). Character perplexity is only ${P.char_ppl.toFixed(2)}, but that doesn't make it better: it guesses one letter at a time. In bits per character, word ${P.word_bpc.toFixed(3)}, character ${P.char_bpc.toFixed(3)}, floor ${P.floor_bpc.toFixed(3)}: the word-level model is actually the better one.`);
+  }
+
+  // ================= 2. benchmarks =================
+  const NS = [50, 100, 200, 500, 1000, 2000, 5000];
+  const ABIL = Array.from({ length: 10 }, (_, i) => 0.3 + 0.8 * i / 9);
+  let lbSeed = 1;
+  function trueAcc(th, shift) { const r = rng(99); let s = 0; for (let i = 0; i < 4000; i++) s += sig(th - (shift + 1.5 * gauss(r))); return s / 4000; }
+  function renderLb() {
+    const n = NS[+$("lb-n").value], easy = $("lb-easy").checked, shift = easy ? -3 : 0;
+    $("lb-n-v").textContent = n;
+    const r = rng(lbSeed * 7919 + n), items = Array.from({ length: n }, () => shift + 1.5 * gauss(r));
+    const rows = ABIL.map((th, m) => { let c = 0; items.forEach(d => { c += r() < sig(th - d); }); const p = c / n; return { m, p, se: Math.sqrt(p * (1 - p) / n), t: trueAcc(th, shift) }; });
+    const order = [...rows].sort((a, b) => b.p - a.p || r() - 0.5);
+    const lo = Math.min(...rows.map(x => x.t)) - 0.12, hi = Math.min(1, Math.max(...rows.map(x => x.t)) + 0.08), X = v => 100 * (v - lo) / (hi - lo);
+    $("lb-table").innerHTML = `<tr><th>${tr("名次", "rank")}</th><th>${tr("模型（真实名次）", "model (true rank)")}</th><th>${tr("得分", "score")}</th><th>${tr("95% 区间与真实值", "95% interval and truth")}</th></tr>` +
+      order.map((x, i) => `<tr><td>${i + 1}</td><td>${"KQDHAZRBMT"[x.m]} <span class="${10 - x.m === i + 1 ? "ok" : "no"}">(${10 - x.m})</span></td><td>${pct(x.p, 1)}</td><td><div class="ci"><i style="left:${X(x.p - 1.96 * x.se)}%;width:${X(x.p + 1.96 * x.se) - X(x.p - 1.96 * x.se)}%"></i><b style="left:${X(x.p)}%"></b><u style="left:${X(x.t)}%"></u></div></td></tr>`).join("");
+    let conc = 0, pairs = 0;
+    for (let i = 0; i < 10; i++) for (let j = i + 1; j < 10; j++) { pairs++; conc += Math.sign(rows[i].p - rows[j].p) * Math.sign(ABIL[i] - ABIL[j]); }
+    const right = order.filter((x, i) => 10 - x.m === i + 1).length;
+    $("lb-stats").innerHTML = stat("Kendall τ", (conc / pairs).toFixed(2), css("--primary")) + stat(tr("名次完全正确的模型", "models in their true place"), `${right} / 10`) +
+      stat(tr("第一名是真正最好的？", "is #1 truly the best?"), order[0].m === 9 ? "✓" : "✗", order[0].m === 9 ? css("--good") : css("--bad")) + stat(tr("这套题上每个分数的 95% 误差", "95% error of each score here"), "±" + (196 * Math.sqrt(0.62 * 0.38 / n)).toFixed(1) + tr(" 分", " pts"));
+    chart($("lb-chart"), [{ x: D.bench.sizes, y: D.bench.tau, color: css("--primary") }, { x: D.bench.sizes, y: D.bench.top, color: css("--accent") }, { x: D.bench.sizes, y: D.bench.tau_easy, color: css("--primary"), dash: 1, op: .5 }, { x: D.bench.sizes, y: D.bench.top_easy, color: css("--accent"), dash: 1, op: .5 }],
+      { x0: 40, x1: 6000, logx: true, y0: 0, y1: 1.02, xticks: D.bench.sizes, yticks: [0, .25, .5, .75, 1], vline: n, xlabel: tr("题目数", "questions") });
+    legend($("lb-leg"), [[css("--primary"), tr("Kendall τ（与真实排名的一致性）", "Kendall τ with the true ranking")], [css("--accent"), tr("第一名正确的比例", "top-1 right")]]);
+  }
+  const CATS = [["知识", "knowledge"], ["推理", "reasoning"], ["数学", "math"], ["代码", "code"], ["指令遵循", "instructions"], ["安全", "safety"]];
+  const PROF = { A: [0.9, 0.6, 0.5, 0.55, 0.85, 0.9], B: [0.6, 0.85, 0.9, 0.85, 0.65, 0.45] };
+  const USES = [[["平均（不加权）", "plain average"], [1, 1, 1, 1, 1, 1]], [["编程助手", "coding assistant"], [0, 3, 3, 4, 0, 0]], [["客服机器人", "customer-service bot"], [4, 0, 0, 0, 3, 3]], [["数学辅导", "math tutor"], [0, 3, 5, 0, 1, 1]]];
+  function renderRd() {
+    const svg = $("rd-svg"), cx = 210, cy = 165, R = 120, n = 6, ang = i => -Math.PI / 2 + 2 * Math.PI * i / n;
+    let s = "";
+    [0.25, 0.5, 0.75, 1].forEach(r => { s += `<polygon fill="none" stroke="${css("--line")}" points="${CATS.map((_, i) => `${cx + R * r * Math.cos(ang(i))},${cy + R * r * Math.sin(ang(i))}`).join(" ")}"/>`; });
+    CATS.forEach((c, i) => { s += `<line x1="${cx}" y1="${cy}" x2="${cx + R * Math.cos(ang(i))}" y2="${cy + R * Math.sin(ang(i))}" stroke="${css("--line")}"/><text x="${cx + (R + 22) * Math.cos(ang(i))}" y="${cy + (R + 22) * Math.sin(ang(i)) + 4}" text-anchor="middle">${tr(...c)}</text>`; });
+    const col = { A: css("--primary"), B: css("--accent") };
+    Object.entries(PROF).forEach(([k, v]) => { const pts = v.map((x, i) => `${cx + R * x * Math.cos(ang(i))},${cy + R * x * Math.sin(ang(i))}`).join(" "); s += `<polygon points="${pts}" fill="${col[k]}" fill-opacity=".15" stroke="${col[k]}" stroke-width="2"/>`; });
+    svg.innerHTML = s;
+    const u = USES[+$("rd-use").value], w = u[1], ws = w.reduce((a, b) => a + b, 0);
+    const score = k => PROF[k].reduce((a, v, i) => a + v * w[i], 0) / ws;
+    $("rd-stats").innerHTML = stat(tr("模型 A", "model A"), pct(score("A"), 1), col.A) + stat(tr("模型 B", "model B"), pct(score("B"), 1), col.B);
+    $("rd-note").innerHTML = tr("两个模型的平均分都是 71.7%，但一个擅长知识、指令和安全，另一个擅长推理、数学和代码。所以报告要分类别，选模型要按自己的用途加权。", "Both models average 71.7%, but one is strong at knowledge, instructions and safety, the other at reasoning, math and code. So report per category, and weight the categories by your own use when choosing.");
+  }
+
+  // ================= 3. judge =================
+  let jdSeed = 3;
+  function renderJd() {
+    const pos = +$("jd-pos").value, vb = +$("jd-len").value, noise = +$("jd-noise").value;
+    ["jd-pos", "jd-len", "jd-noise"].forEach(id => $(id + "-v").textContent = (+$(id).value).toFixed(2));
+    const r = rng(jdSeed), N = 3000, ans = () => [gauss(r), Math.exp(Math.log(150) + 0.5 * gauss(r))];
+    const firstWins = (q1, l1, q2, l2) => q1 + vb * Math.log(l1) + pos + noise * gauss(r) > q2 + vb * Math.log(l2) + noise * gauss(r);
+    let single = 0, cons = 0, consRight = 0, firstEq = 0, pad = 0;
+    for (let i = 0; i < N; i++) {
+      const [qa, la] = ans(), [qb, lb] = ans(), truth = qa > qb;
+      const ab = firstWins(qa, la, qb, lb), ba = !firstWins(qb, lb, qa, la);
+      single += ab === truth;
+      if (ab === ba) { cons++; consRight += ab === truth; }
+      firstEq += firstWins(qa, la, qa, la);
+      const pf = r() < 0.5, w = firstWins(qa, pf ? 2 * la : la, qa, pf ? la : 2 * la);
+      pad += pf ? w : !w;
+    }
+    $("jd-stats").innerHTML = stat(tr("只判一次：与专家一致", "judged once: agrees with the expert"), pct(single / N), css("--primary")) + stat(tr("相同答案，先出现的胜", "same answer, the first wins"), pct(firstEq / N), css("--accent")) +
+      stat(tr("加长一倍的同一答案胜", "padded copy wins"), pct(pad / N), css("--accent")) + stat(tr("调换顺序后结论一致", "same verdict after swapping"), pct(cons / N), css("--muted")) +
+      stat(tr("两种顺序都判，只算一致的", "both orders, consistent only"), pct(consRight / Math.max(1, cons)), css("--good"));
+    $("jd-note").innerHTML = tr(`无偏的评委在“相同答案”和“加长的同一答案”两项上都应该是 50%。修正办法：两种顺序各判一次，结论不一致就算平局（本章默认参数下，一致的结论与专家吻合 ${pct(D.judge.consistent_only)}，只判一次是 ${pct(D.judge.single)}）；用回归估计并扣除长度的影响（长度控制的 AlpacaEval），在 Python 版里把加长版的胜率从 ${pct(D.judge.padded)} 降到 ${pct(D.judge.lc)}，减轻但没有消除；以及给评委评分细则和参考答案。评委也会偏爱和自己风格相似的答案（自我偏好）。`,
+      `An unbiased judge would score 50% on both “same answer” and “padded copy”. Fixes: judge both orders and call it a tie when they disagree (with the default settings, consistent verdicts agree with the expert ${pct(D.judge.consistent_only)} of the time vs ${pct(D.judge.single)} judged once); estimate and remove the length effect by regression (length-controlled AlpacaEval), which in the Python version brings the padded copy from ${pct(D.judge.padded)} to ${pct(D.judge.lc)}: less, but not gone; and give the judge a rubric and reference answers. Judges also favour answers in their own style (self-preference).`);
+  }
+  let arSeed = 5, arOrder = 1, arCache = null;
+  function bt(a, b, w, m) {
+    const wins = new Array(m).fill(0), G = Array.from({ length: m }, () => new Array(m).fill(0));
+    a.forEach((x, i) => { wins[w[i] ? x : b[i]]++; G[x][b[i]]++; G[b[i]][x]++; });
+    let p = new Array(m).fill(1);
+    for (let it = 0; it < 200; it++) {
+      p = p.map((_, i) => wins[i] / G[i].reduce((s, g, j) => s + (j === i ? 0 : g / (p[i] + p[j])), 0));
+      const g = Math.exp(p.reduce((s, v) => s + Math.log(v), 0) / m); p = p.map(v => v / g);
+    }
+    return p.map(v => 400 * Math.log10(v) + 1000);
+  }
+  function elo(a, b, w, m, order) { const r = new Array(m).fill(1000); order.forEach(i => { const e = 1 / (1 + 10 ** ((r[b[i]] - r[a[i]]) / 400)), d = 32 * ((w[i] ? 1 : 0) - e); r[a[i]] += d; r[b[i]] -= d; }); return r; }
+  function renderAr() {
+    const n = +$("ar-n").value, m = 8, S = Array.from({ length: m }, (_, i) => -1.2 + 2.4 * i / 7);
+    if (!arCache || arCache.n !== n || arCache.seed !== arSeed) {
+      const r = rng(arSeed * 31 + n), a = [], b = [], w = [];
+      for (let i = 0; i < n; i++) { const x = Math.floor(r() * m), y = (x + 1 + Math.floor(r() * (m - 1))) % m; a.push(x); b.push(y); w.push(r() < sig(S[x] - S[y])); }
+      arCache = { n, seed: arSeed, a, b, w, bt: bt(a, b, w, m) };
+    }
+    const { a, b, w } = arCache, r = rng(arOrder * 977), elos = [];
+    for (let k = 0; k < 12; k++) { const o = Array.from({ length: n }, (_, i) => i); for (let i = n - 1; i > 0; i--) { const j = Math.floor(r() * (i + 1)); [o[i], o[j]] = [o[j], o[i]]; } elos.push(elo(a, b, w, m, o)); }
+    const truth = S.map(s => 400 * s / Math.log(10) + 1000);
+    const xs = [...Array(m).keys()];
+    const series = elos.map(e => ({ x: xs, y: e, color: css("--muted"), noline: 1, r: 2.5, op: .6, jit: xs.map(() => (r() - 0.5) * 14) }));
+    series.push({ x: xs, y: truth, color: css("--primary"), noline: 1, mark: "dash" }, { x: xs, y: arCache.bt, color: css("--accent"), noline: 1, r: 5 });
+    chart($("ar-chart"), series, { x0: -0.5, x1: 7.5, y0: 650, y1: 1350, xticks: xs, xfmt: v => "M" + (v + 1), yticks: [700, 900, 1100, 1300] });
+    const spread = xs.reduce((s, i) => { const v = elos.map(e => e[i]), mu = v.reduce((x, y) => x + y, 0) / v.length; return s + Math.sqrt(v.reduce((x, y) => x + (y - mu) ** 2, 0) / v.length); }, 0) / m;
+    legend($("ar-leg"), [[css("--primary"), tr("真实评分", "true rating")], [css("--accent"), tr("Bradley-Terry（与顺序无关）", "Bradley-Terry (order-free)")], [css("--muted"), tr(`在线 Elo，同样的票、12 种顺序：平均波动 ±${spread.toFixed(0)}`, `online Elo, same votes, 12 orders: ±${spread.toFixed(0)} on average`)]]);
+  }
+
+  // ================= 4. contamination =================
+  function renderCt() {
+    const C = D.contam;
+    chart($("ct-chart"), [{ x: C.reps, y: C.bench, color: css("--accent") }, { x: C.reps, y: C.fresh, color: css("--primary") }], { x0: -0.3, x1: 8.3, y0: 0, y1: 1, xticks: C.reps, yticks: [0, .25, .5, .75, 1], yfmt: v => pct(v), xlabel: tr("基准在训练数据中重复的次数", "times the benchmark appears in training") });
+    legend($("ct-leg"), [[css("--accent"), tr("基准题（泄漏）", "benchmark (leaked)")], [css("--primary"), tr("同分布的新题", "fresh problems")]]);
+    const h = C.hist[$("ct-h").value], bins = 24, mx = 12, cnt = arr => { const c = new Array(bins).fill(0); arr.forEach(v => c[Math.min(bins - 1, Math.floor(v / mx * bins))]++); return c; };
+    const cb = cnt(h.bench), cf = cnt(h.fresh), ymax = Math.max(...cb, ...cf);
+    const bars = [];
+    cb.forEach((v, i) => bars.push({ x0: i * mx / bins, x1: (i + 0.5) * mx / bins, y: v, color: css("--accent") }));
+    cf.forEach((v, i) => bars.push({ x0: (i + 0.5) * mx / bins, x1: (i + 1) * mx / bins, y: v, color: css("--primary") }));
+    chart($("hs-chart"), [], { x0: 0, x1: mx, y0: 0, y1: ymax * 1.05, xticks: [0, 2, 4, 6, 8, 10, 12], yticks: [0, Math.round(ymax / 2), ymax], bars, xlabel: tr("正确答案的损失（nats）", "loss of the true answer (nats)") });
+    legend($("hs-leg"), [[css("--accent"), tr("基准题", "benchmark")], [css("--primary"), tr("新题", "fresh")]]);
+    const mark = (p, t) => p === t ? `<span class="ok">${p} ✓</span>` : `<span class="no">${p} ✗</span>`;
+    $("ct-items").innerHTML = `<tr><th>${tr("题目", "problem")}</th><th>${tr("集合", "set")}</th><th>${tr("正确答案", "answer")}</th><th>${tr("干净模型", "clean model")}</th><th>${tr("泄漏 4 次的模型", "leaked 4x")}</th></tr>` +
+      C.items.map(it => `<tr><td class="mono">${it.q}</td><td>${it.set === "benchmark" ? tr("基准", "benchmark") : tr("新题", "fresh")}</td><td>${it.answer}</td><td>${mark(it.clean, it.answer)}</td><td>${mark(it.leaked, it.answer)}</td></tr>`).join("");
+    $("ct-stats").innerHTML = stat(tr("泄漏 4 次：基准 / 新题", "leaked 4x: benchmark / fresh"), `${pct(C.bench[3])} / ${pct(C.fresh[3])}`, css("--accent")) +
+      stat(tr("9 字符重叠检查：原样泄漏 / 换个写法", "9-char overlap check: verbatim / rewritten"), `${pct(C.overlap.verbatim)} / ${pct(C.overlap.rewritten)}`) +
+      stat(tr("换写法的泄漏：基准 / 新题", "rewritten leak: benchmark / fresh"), `${pct(C.rewritten[0])} / ${pct(C.rewritten[1])}`, css("--bad")) +
+      stat(tr("用损失区分（AUC），泄漏 4 次", "loss-based detection AUC, 4x"), C.auc[3].toFixed(2), css("--good"));
+    $("ct-note").innerHTML = tr("干净的模型在两组题上表现一样；被污染的模型在基准上的分数随泄漏次数上涨，在新题上却不变：它“背”了答案，没有学会乘法。常用的去污染办法是在训练数据里找与测试题重合的片段（GPT-3 用 13 个词的重叠），但题目换个写法（58*37 代替 37*58）就搜不到，模型照样受益。更可靠的信号是拿同分布的新题做对照（如 GSM1k 之于 GSM8K），或者比较模型在测试题和新题上的损失（成员推断，如 Min-K% Prob）。",
+      "The clean model does the same on both sets; the contaminated one gains on the benchmark with every repetition but not on fresh problems: it memorized answers instead of learning multiplication. The usual decontamination searches the training data for spans that overlap test items (GPT-3 used 13-word overlaps), but rewrite the problem (58*37 for 37*58) and the search finds nothing while the model still benefits. More reliable signals: compare with fresh problems from the same distribution (as GSM1k does for GSM8K), or compare the model's loss on test items and fresh ones (membership inference, e.g. Min-K% Prob).");
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["模型 X 的困惑度是 12（词级分词），模型 Y 是 3（字符级分词），同一个测试集。哪个更好？", "Model X has perplexity 12 (word tokenizer), model Y has 3 (character tokenizer), same test set. Which is better?"],
+      opts: [["Y，困惑度更低", "Y, lower perplexity"], ["不能直接比：要换算成每字符（或每字节）比特数", "Can't compare directly: convert to bits per character (or byte)"], ["X，词级更先进", "X, word-level is more advanced"]],
+      a: 1, ex: ["困惑度是“每个词元”的，词元大小不同就没法比。按字符或字节归一化后，比较的是同一段文本需要多少比特。", "Perplexity is per token; different token sizes make it incomparable. Normalized per character or byte, it measures the bits needed for the same text."] },
+    { q: ["一个基准有 100 道题，模型 A 得 72%，模型 B 得 68%。能说 A 更好吗？", "A benchmark has 100 questions; model A scores 72%, model B 68%. Is A better?"],
+      opts: [["能，高了 4 分", "Yes, 4 points higher"], ["不一定：每个分数的 95% 误差约 ±9 分；至少要做配对检验，最好用更多题", "Not necessarily: each score is ±9 points at 95%; at least run a paired test, ideally use more questions"], ["不能，分数没有意义", "No, scores mean nothing"]],
+      a: 1, ex: ["标准误差 = sqrt(p(1−p)/n) ≈ 4.5 分。在同一批题上逐题比较（配对）能去掉题目难度带来的噪声，比直接比两个分数更灵敏。", "Standard error = sqrt(p(1−p)/n) ≈ 4.5 points. Comparing question by question on the same items (paired) removes the noise from question difficulty and is more sensitive than comparing two scores."] },
+    { q: ["用大模型评委比较两个答案，怎样减轻位置偏差？", "How do you reduce position bias when an LLM judge compares two answers?"],
+      opts: [["总把好的答案放前面", "Always put the better answer first"], ["两种顺序各判一次，结论不一致就算平局", "Judge both orders and call it a tie when the verdicts disagree"], ["换一个更大的模型就行", "Just use a bigger model"]],
+      a: 1, ex: ["交换顺序是最常用的做法。还可以加评分细则、参考答案，并对长度做控制。评委的结论最好定期和人工标注对一对。", "Swapping is the standard fix. Add a rubric, reference answers and length control too, and check the judge against human labels from time to time."] },
+    { q: ["Chatbot Arena 这类排行榜为什么从在线 Elo 改用 Bradley-Terry 拟合？", "Why do arena leaderboards such as Chatbot Arena fit Bradley-Terry instead of using online Elo?"],
+      opts: [["Bradley-Terry 更新更快", "Bradley-Terry updates faster"], ["模型不会变强变弱，用所有投票一起拟合，结果与投票顺序无关，还能用自助法给出置信区间", "Models don't change over time, so fitting all votes at once gives order-independent ratings with bootstrap confidence intervals"], ["Elo 只能用于国际象棋", "Elo only works for chess"]],
+      a: 1, ex: ["Elo 为会进步的棋手设计，逐场更新，最近的比赛权重更大。模型的能力固定，同样的票换个顺序就得到不同的 Elo，Bradley-Terry 没有这个问题。", "Elo was designed for players who improve, updating game by game and weighting recent games more. A model's ability is fixed; the same votes in another order give different Elo ratings, which Bradley-Terry avoids."] },
+    { q: ["怎样判断一个模型可能见过某个基准的测试题？", "How can you tell that a model may have seen a benchmark's test questions?"],
+      opts: [["分数很高就是污染", "A high score means contamination"], ["对比它在测试题和同分布新题上的表现或损失：差距大说明可能背过答案", "Compare its accuracy or loss on the test items with fresh items from the same distribution: a big gap suggests memorized answers"], ["只能问模型自己", "Only by asking the model"]],
+      a: 1, ex: ["本章中泄漏 4 次的模型，基准 44.5%、新题 11%；而在训练数据里做精确匹配，换个写法的泄漏就漏掉了。", "In this chapter the model leaked 4x scores 44.5% on the benchmark and 11% on fresh problems; exact matching in the training data misses a rewritten leak."] },
+    { q: ["一个基准上所有模型都得了 95% 以上，它还有用吗？", "Every model scores above 95% on a benchmark. Is it still useful?"],
+      opts: [["很有用，说明模型都很强", "Very, it shows models are strong"], ["区分度很差：大部分题谁都会，剩下的差异主要是噪声和标注错误；需要更难的新基准", "It discriminates poorly: most questions are easy for all, and the remaining differences are mostly noise and label errors; a harder benchmark is needed"], ["只要再多加题就行", "Just add more questions"]],
+      a: 1, ex: ["这就是基准饱和。本章模拟中，饱和的基准用 500 道题排名的一致性（τ）从 0.82 降到 0.62。好的题目难度应该接近被比较模型的能力。", "This is saturation. In this chapter's simulation, a saturated benchmark of 500 questions ranks models with τ 0.62 instead of 0.82. Good questions have difficulty near the abilities being compared."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fill() {
+    const sv = $("px-s").value || "0";
+    $("px-s").innerHTML = D.ppl.examples.map((e, i) => `<option value="${i}">${esc(e.chars)}</option>`).join("");
+    $("px-s").value = sv;
+    const uv = $("rd-use").value || "0";
+    $("rd-use").innerHTML = USES.map((u, i) => `<option value="${i}">${tr(...u[0])}</option>`).join("");
+    $("rd-use").value = uv;
+  }
+  function renderAll() { fill(); renderPx(); renderLb(); renderRd(); renderJd(); renderAr(); renderCt(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("px-s").addEventListener("input", () => { pxSel = 1; renderPx(); });
+  ["lb-n", "lb-easy"].forEach(id => $(id).addEventListener("input", renderLb));
+  $("lb-draw").addEventListener("click", () => { lbSeed++; renderLb(); });
+  $("rd-use").addEventListener("input", renderRd);
+  ["jd-pos", "jd-len", "jd-noise"].forEach(id => $(id).addEventListener("input", renderJd));
+  $("ar-n").addEventListener("input", renderAr);
+  $("ar-shuffle").addEventListener("click", () => { arOrder++; renderAr(); });
+  $("ar-new").addEventListener("click", () => { arSeed++; renderAr(); });
+  $("ct-h").addEventListener("input", renderCt);
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

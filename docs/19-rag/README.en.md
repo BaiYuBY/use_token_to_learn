@@ -179,7 +179,7 @@ LCEL's pipe operator chains them: retriever → format the sources → prompt te
 Evaluate RAG in two stages:
 
 - **Retrieval**: recall@k, MRR (the mean reciprocal rank of the first correct result) and nDCG. This needs a set of questions with their correct documents.
-- **Generation**: is the answer correct, is it **faithful to the retrieved material** (nothing invented beyond it), and are the citations accurate? Tools such as RAGAS use a model to score these automatically, but it is best to calibrate them against human-labelled samples (chapter 23, planned).
+- **Generation**: is the answer correct, is it **faithful to the retrieved material** (nothing invented beyond it), and are the citations accurate? Tools such as RAGAS use a model to score these automatically, but it is best to calibrate them against human-labelled samples (see [chapter 23](../23-evaluation/README.en.md)).
 
 Common failures:
 

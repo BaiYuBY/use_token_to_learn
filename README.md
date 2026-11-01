@@ -38,6 +38,7 @@
 | 20 知识图谱与图数据库 Knowledge Graphs | [中文](docs/20-knowledge-graphs/README.md) · [EN](docs/20-knowledge-graphs/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/20-knowledge-graphs/interactive/knowledge_graph.html) | [knowledge_graph.py](docs/20-knowledge-graphs/code/knowledge_graph.py) |
 | 21 Agent 与 agent loop Agents & the Agent Loop | [中文](docs/21-agents/README.md) · [EN](docs/21-agents/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/21-agents/interactive/agents.html) | [agent_loop.py](docs/21-agents/code/agent_loop.py) · [langgraph_agent.py](docs/21-agents/code/langgraph_agent.py) |
 | 22 MCP、Skills 与 SOP MCP, Skills & SOPs | [中文](docs/22-mcp-skills-sop/README.md) · [EN](docs/22-mcp-skills-sop/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/22-mcp-skills-sop/interactive/mcp.html) | [mcp_from_scratch.py](docs/22-mcp-skills-sop/code/mcp_from_scratch.py) · [mcp_sdk.py](docs/22-mcp-skills-sop/code/mcp_sdk.py) · [skills.py](docs/22-mcp-skills-sop/code/skills.py) · [sop.py](docs/22-mcp-skills-sop/code/sop.py) |
+| 23 评测 Evaluation | [中文](docs/23-evaluation/README.md) · [EN](docs/23-evaluation/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/23-evaluation/interactive/evaluation.html) | [perplexity.py](docs/23-evaluation/code/perplexity.py) · [benchmarks.py](docs/23-evaluation/code/benchmarks.py) · [llm_judge.py](docs/23-evaluation/code/llm_judge.py) · [contamination.py](docs/23-evaluation/code/contamination.py) |
 
 ## 前沿问答
 
