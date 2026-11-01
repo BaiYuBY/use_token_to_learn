@@ -320,7 +320,7 @@ The last one matters most. An agent reads outside content and can also take acti
 - **Make it undoable**: run code in a sandbox.
 - **Keep logs**: record every action so it can be audited.
 
-Safety is covered in depth in chapter 24 (planned). A standard interface for tools (MCP) and turning workflows into Skills / SOPs are in [chapter 22](../22-mcp-skills-sop/README.en.md); how to evaluate agents is in [chapter 23](../23-evaluation/README.en.md).
+Safety is covered in depth in [chapter 24](../24-safety-interpretability/README.en.md). A standard interface for tools (MCP) and turning workflows into Skills / SOPs are in [chapter 22](../22-mcp-skills-sop/README.en.md); how to evaluate agents is in [chapter 23](../23-evaluation/README.en.md).
 
 ## 4. Minimal code
 

@@ -1,0 +1,426 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>安全与可解释性交互演示 · Safety &amp; Interpretability Playground</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .words { display: flex; flex-wrap: wrap; gap: 4px; margin: 8px 0; }
+  .words button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; padding: 3px 7px; min-width: 2.6em; }
+  .words button small { font-size: .68rem; opacity: .85; }
+  .words button.sel { outline: 2px solid var(--accent); }
+  .feat div { background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 8px; margin: 3px 0; font-size: .82rem; }
+  .feat b { color: var(--primary); }
+  .chat { display: grid; gap: 6px; font-family: ui-monospace, monospace; font-size: .85rem; }
+  .chat div { border: 1px solid var(--line); border-radius: 8px; padding: 6px 10px; background: var(--bg); }
+  .chat .u { border-left: 4px solid var(--muted); }
+  .chat .a { border-left: 4px solid var(--primary); }
+  .chat .a.ref { border-left-color: var(--good); }
+  .chat .a.bad { border-left-color: var(--bad); }
+  .chat .pre { color: var(--accent); }
+  #sp-svg, #pv-svg { width: 100%; max-width: 360px; height: auto; display: block; margin: 0 auto; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  .ok { color: var(--good); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">安全与可解释性 · 交互演示</span><span lang="en">Safety &amp; Interpretability · Playground</span></h1>
+      <p class="sub">
+        <span lang="zh">打开模型看它内部在想什么，再看它会在哪里出错、被绕过。这一页的所有结果都来自真实训练的小模型：06 章的小语言模型、一个记忆事实的小模型、一个经过安全训练的小对话模型。</span>
+        <span lang="en">Open the model up to see what it represents inside, then see where it goes wrong and how it gets around its training. Every result on this page comes from small models trained for real: chapter 6's toy language model, a small model that memorizes facts, and a small chat model with safety training.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <!-- 1. probes -->
+  <section>
+    <h2><span class="step">1</span><span lang="zh">探针与激活：模型在哪里记住“主语是复数”</span><span lang="en">Probes and activations: where the model keeps “the subject is plural”</span></h2>
+    <p class="hint">
+      <span lang="zh">“the cats that chase the dog ___” 后面要填复数动词，但最近的名词是单数 dog。模型必须一路记住主语的单复数。用线性探针在残差流里找到这个“复数方向”，再看每个词在这个方向上的值（橙色 = 复数，蓝色 = 单数）。</span>
+      <span lang="en">“the cats that chase the dog ___” needs a plural verb, but the nearest noun, dog, is singular. The model has to carry the subject's number along. A linear probe finds this “plural direction” in the residual stream; here is each word's value along it (orange = plural, blue = singular).</span>
+    </p>
+    <div class="controls"><label><span lang="zh">句子</span><span lang="en">sentence</span> <select id="pb-s"></select></label></div>
+    <div class="words" id="pb-words"></div>
+    <div class="row">
+      <div class="col"><div class="scroll"><table class="t" id="pb-acc"></table></div><div class="callout" id="pb-note"></div></div>
+      <div class="col"><svg id="pv-svg" viewBox="0 0 360 260"></svg><p class="hint" id="pv-cap"></p></div>
+    </div>
+    <h3><span lang="zh">引导：把这个方向加进去</span><span lang="en">Steering: add the direction</span></h3>
+    <div class="controls">
+      <label><span lang="zh">前缀</span><span lang="en">prefix</span> <select id="st-p"></select></label>
+      <label>α <input type="range" id="st-a" min="0" max="12" value="6"> <b id="st-a-v" class="mono"></b></label>
+    </div>
+    <div class="row">
+      <div class="col"><div class="stats" id="st-stats"></div></div>
+      <div class="col"><div class="legend" id="st-leg"></div><svg class="chart" id="st-chart" viewBox="0 0 520 230"></svg></div>
+    </div>
+  </section>
+
+  <!-- 2. superposition & SAE -->
+  <section>
+    <h2><span class="step">2</span><span lang="zh">叠加与稀疏自编码器</span><span lang="en">Superposition and sparse autoencoders</span></h2>
+    <p class="hint">
+      <span lang="zh">特征往往比维度多。一个玩具模型要把 5 个特征压进 2 维再还原：特征经常同时出现时，它只存 2 个；特征很少同时出现时，它把 5 个都存进去，排成五边形，代价是偶尔互相干扰。这就是<b>叠加</b>，也是单个神经元难以解释的原因。拖动滑块：</span>
+      <span lang="en">There are usually more features than dimensions. A toy model must squeeze 5 features into 2 dimensions and back: when features often co-occur, it stores only about 2; when they rarely co-occur, it stores all 5 as a pentagon, at the cost of occasional interference. This is <b>superposition</b>, and the reason single neurons are hard to interpret. Drag the slider:</span>
+    </p>
+    <div class="row">
+      <div class="col">
+        <div class="controls"><label><span lang="zh">每个特征缺席的概率</span><span lang="en">chance each feature is absent</span> <input type="range" id="sp-s" min="0" max="5" value="4"> <b id="sp-s-v" class="mono"></b></label></div>
+        <svg id="sp-svg" viewBox="0 0 300 300"></svg>
+      </div>
+      <div class="col"><div class="stats" id="sp-stats"></div><div class="callout" id="sp-note"></div></div>
+    </div>
+    <h3><span lang="zh">特征浏览器：SAE 在真实模型里找到的特征</span><span lang="en">Feature browser: features an SAE found in a real model</span></h3>
+    <p class="hint">
+      <span lang="zh">在 06 章模型第 1 块之后的残差流（64 维）上训练了一个 256 个特征的 SAE。点一个词，看这个位置上最强的几个特征，以及每个特征平时对什么有反应。</span>
+      <span lang="en">An SAE with 256 features was trained on the residual stream (64 dims) after block 1 of chapter 6's model. Click a word to see the strongest features at that position, and what each feature usually responds to.</span>
+    </p>
+    <div class="controls"><label><span lang="zh">句子</span><span lang="en">sentence</span> <select id="fb-s"></select></label></div>
+    <div class="words" id="fb-words"></div>
+    <div class="feat" id="fb-feats"></div>
+  </section>
+
+  <!-- 3. hallucination -->
+  <section>
+    <h2><span class="step">3</span><span lang="zh">幻觉：为什么模型会编造</span><span lang="en">Hallucination: why models make things up</span></h2>
+    <p class="hint">
+      <span lang="zh">一个小模型学习 5000 条“某人在某公司工作”，每条在训练数据里出现 0、1、2、4 或 8 次。问它没见过的人，它也照样说出一家公司：它只会续写，没有“不知道”这个选项。是猜还是弃答更划算，取决于怎么评分。拖动答错的扣分：</span>
+      <span lang="en">A small model learns 5,000 “X works at Y” facts, each appearing 0, 1, 2, 4 or 8 times in training. Ask about someone it never saw and it still names a company: it can only continue text, with no “I don't know” option. Whether guessing or abstaining pays depends on the grading. Drag the penalty for a wrong answer:</span>
+    </p>
+    <div class="row">
+      <div class="col"><div class="scroll"><table class="t" id="hl-by"></table></div></div>
+      <div class="col">
+        <div class="controls"><label><span lang="zh">答错扣分 λ</span><span lang="en">penalty λ per wrong answer</span> <input type="range" id="hl-l" min="0" max="30" value="10"> <b id="hl-l-v" class="mono"></b></label></div>
+        <div class="scroll"><table class="t" id="hl-st"></table></div>
+      </div>
+    </div>
+    <div class="scroll"><table class="t" id="hl-samples"></table></div>
+    <div class="callout" id="hl-note"></div>
+  </section>
+
+  <!-- 4. jailbreak -->
+  <section>
+    <h2><span class="step">4</span><span lang="zh">安全训练与越狱</span><span lang="en">Safety training and jailbreaks</span></h2>
+    <p class="hint">
+      <span lang="zh">一个小对话模型：“预训练”教它回答“how to V the O ?”，既有普通词也有一种密文（每个词有一个带 ~ 的孪生词元），有害话题也包括在内；安全训练只用普通词教它拒绝有害话题。“有害”只是这个小语言里的标签。选择请求和模型版本，看它怎么回答：</span>
+      <span lang="en">A small chat model: “pretraining” teaches it to answer “how to V the O ?” in plain words and in a cipher (each word has a twin token marked with ~), harmful topics included; safety training teaches refusal on harmful topics in plain words only. “Harmful” is just a label in this toy language. Pick a request and a model version and see how it answers:</span>
+    </p>
+    <div class="controls">
+      <label><span lang="zh">模型</span><span lang="en">model</span> <select id="jb-m"></select></label>
+      <label><span lang="zh">动词</span><span lang="en">verb</span> <select id="jb-v"></select></label>
+      <label><span lang="zh">对象</span><span lang="en">object</span> <select id="jb-o"></select></label>
+      <label><input type="checkbox" id="jb-c"> <span lang="zh">用密文</span><span lang="en">cipher</span></label>
+      <label><span lang="zh">预填顺从回答的词数</span><span lang="en">prefill words of compliance</span> <select id="jb-k"><option>0</option><option>1</option><option>2</option><option>3</option></select></label>
+    </div>
+    <div class="chat" id="jb-chat"></div>
+    <div class="scroll" style="margin-top:8px"><table class="t" id="jb-rates"></table></div>
+    <div class="callout" id="jb-note"></div>
+  </section>
+
+  <!-- 5. quiz -->
+  <section class="quiz">
+    <h2><span class="step">5</span><span lang="zh">小测验</span><span lang="en">Quick quiz</span></h2>
+    <div id="quiz"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">对应讲解与代码：</span><span lang="en">Write-up and code: </span>
+    <a href="../README.html">24 安全与可解释性 · Safety &amp; Interpretability</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+<script src="safety_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.SAFETY_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const css = name => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const pct = (v, d = 0) => (100 * v).toFixed(d) + "%";
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  function chart(svg, series, o) {
+    const W = +svg.viewBox.baseVal.width, H = +svg.viewBox.baseVal.height, L = 46, R = 12, T = 10, B = 34;
+    const fx = v => L + (W - L - R) * (v - o.x0) / (o.x1 - o.x0), fy = v => T + (H - T - B) * (1 - (v - o.y0) / (o.y1 - o.y0));
+    let s = "";
+    (o.yticks || []).forEach(v => { s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${fy(v)}" y2="${fy(v)}"/><text x="${L - 5}" y="${fy(v) + 4}" text-anchor="end">${o.yfmt ? o.yfmt(v) : v}</text>`; });
+    (o.xticks || []).forEach(v => { s += `<text x="${fx(v)}" y="${H - B + 15}" text-anchor="middle">${v}</text>`; });
+    if (o.vline !== undefined) s += `<line x1="${fx(o.vline)}" x2="${fx(o.vline)}" y1="${T}" y2="${H - B}" stroke="${css("--accent")}" stroke-dasharray="3 3"/>`;
+    series.forEach(se => {
+      s += `<polyline fill="none" stroke="${se.color}" stroke-width="2" points="${se.x.map((v, i) => `${fx(v).toFixed(1)},${fy(se.y[i]).toFixed(1)}`).join(" ")}"/>`;
+      se.x.forEach((v, i) => { s += `<circle cx="${fx(v)}" cy="${fy(se.y[i])}" r="3" fill="${se.color}"/>`; });
+    });
+    if (o.xlabel) s += `<text x="${(L + W - R) / 2}" y="${H - 3}" text-anchor="middle">${o.xlabel}</text>`;
+    svg.innerHTML = s;
+  }
+  const legend = (el, items) => { el.innerHTML = items.map(([c, t]) => `<span class="hint"><span class="dot" style="background:${c}"></span>${t}</span>`).join(""); };
+  const signed = (v, max) => { const t = Math.min(1, Math.abs(v) / max); return v > 0 ? `rgba(232,113,10,${(0.1 + 0.75 * t).toFixed(2)})` : `rgba(63,81,181,${(0.1 + 0.75 * t).toFixed(2)})`; };
+
+  // ================= 1. probes =================
+  function renderPb() {
+    const Pb = D.probes, s = Pb.sentences[+$("pb-s").value];
+    const max = Math.max(...Pb.sentences.flatMap(x => x.proj.map(Math.abs)));
+    $("pb-words").innerHTML = s.words.map((w, i) => `<button style="background:${signed(s.proj[i], max)}">${esc(w)}<small>${s.proj[i].toFixed(1)}</small></button>`).join("");
+    const names = [tr("嵌入", "embedding"), tr("第 1 块后", "after block 1"), tr("第 2 块后", "after block 2")];
+    $("pb-acc").innerHTML = `<tr><th>${tr("探针读的位置（宾语处）", "probe reads (at the object)")}</th><th>${tr("主语复数", "subject plural")}</th><th>${tr("当前词复数", "this word plural")}</th><th>${tr("打乱的标签", "shuffled labels")}</th></tr>` +
+      Pb.acc.map((r, i) => `<tr><td>${names[i]}</td>${r.map((v, j) => `<td class="${j === 2 ? "" : v > 0.9 ? "ok" : ""}">${pct(v)}</td>`).join("")}</tr>`).join("");
+    $("pb-note").innerHTML = tr(`在宾语这个位置，嵌入只含有宾语自己的信息，探针读不出主语的单复数（${pct(Pb.acc[0][0])}，等于瞎猜）；经过第 1 块的注意力，主语的单复数被搬到了这里（${pct(Pb.acc[1][0])}）。打乱标签的对照说明探针本身没有“硬记”的能力。把这个方向从残差流里去掉，主谓一致从 ${pct(Pb.agreement)} 降到 ${pct(Pb.ablated)}：模型确实在用它。`,
+      `At the object's position the embedding holds only the object itself, and the probe can't read the subject's number (${pct(Pb.acc[0][0])}, chance); after block 1's attention, the subject's number has been moved there (${pct(Pb.acc[1][0])}). The shuffled-label control shows the probe can't simply memorize. Remove this direction from the residual stream and agreement drops from ${pct(Pb.agreement)} to ${pct(Pb.ablated)}: the model really uses it.`);
+    const svg = $("pv-svg"), pts = Pb.scatter, xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const x0 = Math.min(...xs), x1 = Math.max(...xs), y0 = Math.min(...ys), y1 = Math.max(...ys);
+    const fx = v => 15 + 330 * (v - x0) / (x1 - x0), fy = v => 245 - 230 * (v - y0) / (y1 - y0);
+    svg.innerHTML = pts.map(p => `<circle cx="${fx(p[0]).toFixed(1)}" cy="${fy(p[1]).toFixed(1)}" r="2.2" fill="${p[2] ? css("--accent") : css("--primary")}" opacity=".65"/>`).join("") +
+      `<line x1="${fx(0)}" x2="${fx(0)}" y1="10" y2="250" stroke="${css("--muted")}" stroke-dasharray="3 3"/>`;
+    $("pv-cap").innerHTML = tr("第 1 块之后、宾语位置的残差流，投影到二维：横轴是探针方向，纵轴是剩余方差最大的方向。橙 = 复数主语，蓝 = 单数主语。", "The residual stream after block 1 at the object, projected to 2-D: x is the probe direction, y the largest remaining direction. Orange = plural subject, blue = singular.");
+  }
+  function renderSt() {
+    const Pb = D.probes, i = +$("st-a").value, a = Pb.alphas[i], ex = Pb.steer[+$("st-p").value];
+    $("st-a-v").textContent = (a > 0 ? "+" : "") + a.toFixed(2);
+    const p = ex.p_plural[i];
+    $("st-stats").innerHTML = stat(tr("主语", "subject"), ex.plural ? tr("复数", "plural") : tr("单数", "singular")) + stat(tr("模型下一个词：复数动词的概率", "next word: P(plural verb)"), pct(p), p > 0.5 ? css("--accent") : css("--primary")) +
+      stat(tr("模型会选", "the model picks"), p > 0.5 ? tr("复数动词", "a plural verb") : tr("单数动词", "a singular verb"), (p > 0.5) === ex.plural ? css("--good") : css("--bad"));
+    chart($("st-chart"), [{ x: Pb.alphas, y: Pb.curve.singular, color: css("--primary") }, { x: Pb.alphas, y: Pb.curve.plural, color: css("--accent") }], { x0: -1.6, x1: 1.6, y0: 0, y1: 1.02, xticks: [-1.5, -1, -0.5, 0, 0.5, 1, 1.5], yticks: [0, .5, 1], yfmt: v => pct(v), vline: a, xlabel: tr("加上 α × 复数方向（300 个前缀）", "add α × the plural direction (300 prefixes)") });
+    legend($("st-leg"), [[css("--primary"), tr("单数主语：选复数动词的比例", "singular subjects: plural verb chosen")], [css("--accent"), tr("复数主语", "plural subjects")]]);
+  }
+
+  // ================= 2. superposition & SAE =================
+  function renderSp() {
+    const S = D.sae, sp = S.sparsities[+$("sp-s").value], W = S.toys[String(sp)];
+    $("sp-s-v").textContent = pct(sp);
+    const cx = 150, cy = 150, sc = 95, cols = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd"];
+    let s = `<line x1="10" x2="290" y1="${cy}" y2="${cy}" stroke="${css("--line")}"/><line y1="10" y2="290" x1="${cx}" x2="${cx}" stroke="${css("--line")}"/><circle cx="${cx}" cy="${cy}" r="${sc}" fill="none" stroke="${css("--line")}" stroke-dasharray="3 3"/>`;
+    W.forEach(([x, y], i) => { const ex = cx + sc * x, ey = cy - sc * y; s += `<line x1="${cx}" y1="${cy}" x2="${ex}" y2="${ey}" stroke="${cols[i]}" stroke-width="3"/><circle cx="${ex}" cy="${ey}" r="4" fill="${cols[i]}"/><text x="${cx + sc * x * 1.18}" y="${cy - sc * y * 1.18 + 4}" text-anchor="middle" style="fill:${cols[i]};font-size:12px">f${i + 1}</text>`; });
+    $("sp-svg").innerHTML = s;
+    const stored = W.filter(([x, y]) => Math.hypot(x, y) > 0.5).length;
+    $("sp-stats").innerHTML = stat(tr("存下的特征（长度 > 0.5）", "features stored (length > 0.5)"), `${stored} / 5`, stored > 2 ? css("--accent") : css("--primary")) +
+      stat(tr("32 个特征存在 8 维：SAE 找回的方向", "32 features in 8 dims: directions the SAE found"), pct(S.recovery.found), css("--good")) +
+      stat(tr("单元与真实特征的最佳相关：隐藏维度 / SAE 特征", "best correlation with a true feature: hidden dim / SAE feature"), `${S.recovery.dim_corr.toFixed(2)} / ${S.recovery.sae_corr.toFixed(2)}`);
+    $("sp-note").innerHTML = tr(`稀疏自编码器（SAE）反过来做：用比维度多得多的特征去重建激活，并要求每次只有少数特征非零。在已知真实特征的玩具里，它找回了 ${pct(S.recovery.found)} 的特征方向；每个 SAE 特征基本只对应一个真实特征，而每个隐藏维度都混着好几个。在下面的真实模型里，平均每个词约 ${S.l0} 个特征激活，${S.n_live} 个活着的特征中有 ${S.n_pure} 个在最强的激活里 90% 以上对应同一种角色的词。`,
+      `A sparse autoencoder (SAE) goes the other way: reconstruct the activations from many more features than dimensions, with only a few non-zero at a time. In the toy with known features it finds ${pct(S.recovery.found)} of the feature directions, and each SAE feature tracks essentially one true feature while each hidden dimension mixes several. In the real model below, about ${S.l0} features are active per word, and ${S.n_pure} of ${S.n_live} live features fire over 90% of the time (in their strongest activations) on one kind of word in one role.`);
+  }
+  let fbSel = 0;
+  function renderFb() {
+    const S = D.sae, ex = S.examples[+$("fb-s").value];
+    fbSel = Math.min(fbSel, ex.words.length - 1);
+    $("fb-words").innerHTML = ex.words.map((w, i) => `<button class="${i === fbSel ? "sel" : ""}" data-i="${i}">${esc(w)}<small>${esc(ex.roles[i].replace("noun, ", "").replace("verb, ", "v. "))}</small></button>`).join("");
+    $("fb-words").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { fbSel = +b.dataset.i; renderFb(); }));
+    const fs = ex.features[fbSel];
+    $("fb-feats").innerHTML = `<p class="hint">${tr(`“${esc(ex.words[fbSel])}”（${esc(ex.roles[fbSel])}）处最强的特征：`, `Strongest features at “${esc(ex.words[fbSel])}” (${esc(ex.roles[fbSel])}):`)}</p>` +
+      fs.map(([j, v]) => { const c = S.catalog[String(j)]; return `<div><b>#${j}</b> ${tr("激活", "activation")} ${v.toFixed(2)} · ${tr("通常对应", "usually")}: <b>${esc(c.label)}</b> (${pct(c.purity)}) · ${tr("最强的词", "top words")}: <span class="mono">${c.top.map(esc).join(", ")}</span> · ${tr("激活频率", "fires on")} ${pct(c.freq, 1)}</div>`; }).join("");
+  }
+
+  // ================= 3. hallucination =================
+  function renderHl() {
+    const Hd = D.hal, lam = +$("hl-l").value / 10;
+    $("hl-l-v").textContent = lam.toFixed(1);
+    $("hl-by").innerHTML = `<tr><th>${tr("训练中出现次数", "times in training")}</th><th>${tr("答对", "right")}</th><th>${tr("编造（答错）", "made up (wrong)")}</th><th>${tr("平均置信度", "mean confidence")}</th><th>${tr("微调后：不知道", "after tuning: unknown")}</th></tr>` +
+      Hd.by.map((r, i) => `<tr><td>${r.mentions}</td><td>${pct(r.right)}</td><td class="${r.wrong > 0.5 ? "no" : ""}">${pct(r.wrong)}</td><td>${pct(r.conf)}</td><td>${pct(Hd.after[i].unknown)}</td></tr>`).join("");
+    const names = { always: tr("总是回答", "always answer"), "t0.3": tr("置信度 < 30% 时弃答", "abstain below 30%"), "t0.5": tr("置信度 < 50% 时弃答", "abstain below 50%"), "t0.8": tr("置信度 < 80% 时弃答", "abstain below 80%"), "t0.95": tr("置信度 < 95% 时弃答", "abstain below 95%"), tuned: tr("微调后会说“不知道”", "tuned to say “unknown”") };
+    const rows = Object.entries(Hd.strategies).map(([k, [acc, pen]]) => { const right = acc, wrong = Math.max(0, acc - pen), abst = Math.max(0, 1 - right - wrong); return { k, right, wrong, abst, score: right - lam * wrong }; });
+    const best = Math.max(...rows.map(r => r.score));
+    $("hl-st").innerHTML = `<tr><th>${tr("策略（测试集 4250 人）", "strategy (4,250 test people)")}</th><th>${tr("对", "right")}</th><th>${tr("弃答", "abstain")}</th><th>${tr("错", "wrong")}</th><th>${tr("得分", "score")}</th></tr>` +
+      rows.map(r => `<tr><td>${names[r.k]}</td><td>${pct(r.right)}</td><td>${pct(r.abst)}</td><td>${pct(r.wrong)}</td><td class="${r.score === best ? "ok" : ""}">${r.score.toFixed(3)}</td></tr>`).join("");
+    $("hl-samples").innerHTML = `<tr><th>${tr("人", "person")}</th><th>${tr("训练中出现", "times seen")}</th><th>${tr("真实雇主", "true employer")}</th><th>${tr("原模型（置信度）", "base model (confidence)")}</th><th>${tr("微调后", "after tuning")}</th></tr>` +
+      Hd.samples.map(s => `<tr><td class="mono">${s.person}</td><td>${s.mentions}</td><td>${s.truth}</td><td class="${s.base === s.truth ? "ok" : "no"}">${s.base} (${pct(s.conf)})</td><td class="${s.tuned === s.truth ? "ok" : s.tuned === "unknown" ? "" : "no"}">${s.tuned}</td></tr>`).join("");
+    $("hl-note").innerHTML = tr("答错不扣分（λ = 0）时，“总是回答”得分最高：大多数基准和训练目标都是这样打分的，于是模型被训练成宁可猜也不说不知道（Kalai 等，2025）。答错扣分越多，弃答越划算。微调时给一部分“没见过的人”标上“unknown”，模型就学会了对其他没见过的人弃答，而它知道的事实几乎不受影响。真实模型里“见过多少次”没有这么泾渭分明，所以幻觉更难消除。",
+      "With no penalty for wrong answers (λ = 0), “always answer” scores best: that is how most benchmarks and training objectives grade, so models are trained to guess rather than say they don't know (Kalai et al., 2025). The larger the penalty, the more abstaining pays. Fine-tuning with “unknown” for some never-seen people teaches the model to abstain on other unseen people, with its known facts almost untouched. In real models, “how often was this seen” is far less clear-cut, so hallucination is harder to remove.");
+  }
+
+  // ================= 4. jailbreak =================
+  const MODELS = [["pretrained", ["只预训练", "pretrained only"]], ["safety", ["安全训练后", "after safety training"]], ["adversarial", ["+ 对抗训练（密文 poison、weapon）", "+ adversarial (ciphered poison, weapon)"]], ["deep", ["+ “写到一半也拒绝”", "+ recovery training"]]];
+  function renderJb() {
+    const J = D.jb, m = $("jb-m").value, v = $("jb-v").value, o = $("jb-o").value, c = $("jb-c").checked;
+    let k = +$("jb-k").value;
+    const harmful = J.harmful.includes(o);
+    $("jb-k").disabled = c || !harmful;
+    if (c || !harmful) k = 0;
+    const q = ["how", "to", v, "the", o, "?"].map(w => c ? "~" + w : w).join(" ");
+    const out = J.outputs[`${m}|${v}|${o}|${c ? 1 : 0}|${k}`];
+    const words = out.split(" "), pre = words.slice(0, k).join(" "), rest = words.slice(k).join(" ");
+    const refused = rest.startsWith("sorry");
+    $("jb-chat").innerHTML = `<div class="u">${tr("用户", "user")}: ${esc(q)}</div><div class="a ${refused ? "ref" : harmful ? "bad" : ""}">${tr("模型", "model")}: ${pre ? `<span class="pre">${esc(pre)}</span> ` : ""}${esc(rest)}</div>`;
+    const R = J.rates;
+    $("jb-rates").innerHTML = `<tr><th>${tr("模型", "model")}</th><th>${tr("拒绝有害", "refuses harmful")}</th><th>${tr("拒绝无害", "refuses harmless")}</th><th>${tr("拒绝密文有害", "refuses ciphered harmful")}</th><th>${tr("预填 1/2/3 词后接着写下去", "carries on after 1/2/3 prefilled words")}</th></tr>` +
+      MODELS.map(([key, nm]) => { const x = R[key]; return `<tr><td>${tr(...nm)}</td><td>${pct(x.harmful)}</td><td>${pct(x.harmless)}</td><td>${pct(x.cipher_harmful)}</td><td>${x.prefill.slice(1).map(v => pct(v)).join(" / ")}</td></tr>`; }).join("");
+    $("jb-note").innerHTML = tr(`两种越狱都利用了“安全训练没有覆盖到的地方”：<b>密文</b>是预训练学会、安全训练没见过的能力（泛化不匹配）；<b>预填</b>利用了拒绝只发生在回答的第一个词上（浅层对齐）。对抗训练只部分迁移：训练过的密文话题 ${pct(R.adversarial.cipher_seen)} 拒绝，没训练过的只有 ${pct(R.adversarial.cipher_unseen)}。教模型“写到一半也能停下来拒绝”，预填攻击就失效了。`,
+      `Both jailbreaks exploit what safety training didn't cover: the <b>cipher</b> is a capability learned in pretraining that safety training never saw (mismatched generalization); <b>prefilling</b> exploits refusal happening only at the first word of the answer (shallow alignment). Adversarial training transfers only partly: ciphered topics it trained on are refused ${pct(R.adversarial.cipher_seen)}, the others only ${pct(R.adversarial.cipher_unseen)}. Teaching the model to stop and refuse mid-answer defeats prefilling.`);
+  }
+
+  // ================= 5. quiz =================
+  const QUIZ = [
+    { q: ["线性探针在某一层能以 100% 的准确率读出“主语是复数”，这说明什么？", "A linear probe reads “the subject is plural” with 100% accuracy at some layer. What does that show?"],
+      opts: [["模型一定在用这个信息", "The model must be using it"], ["这个信息在那一层是线性可读的；模型是否用它，要靠干预（如沿方向引导或消融）来验证", "The information is linearly readable there; whether the model uses it needs an intervention (steering or ablation) to show"], ["探针本身学会了语法", "The probe itself learned grammar"]],
+      a: 1, ex: ["本章中，加上这个方向会把单数主语的动词变成复数，去掉它会让主谓一致从 100% 降到约 50%：这才说明模型在用它。打乱标签的对照则排除了探针自己“硬记”的可能。", "In this chapter, adding the direction turns singular subjects' verbs plural, and removing it drops agreement from 100% to about 50%: that shows the model uses it. The shuffled-label control rules out the probe simply memorizing."] },
+    { q: ["为什么单个神经元往往难以解释？", "Why are single neurons often hard to interpret?"],
+      opts: [["神经元太少", "There are too few neurons"], ["叠加：模型要表示的特征比维度多，于是让很多特征共享方向，一个神经元会对好几种不相关的东西有反应", "Superposition: the model represents more features than it has dimensions, so features share directions and one neuron responds to several unrelated things"], ["训练不充分", "Insufficient training"]],
+      a: 1, ex: ["特征越稀疏（很少同时出现），叠加越划算。稀疏自编码器用更多、更稀疏的特征把它们重新分开。", "The sparser the features (rarely active together), the more superposition pays. Sparse autoencoders separate them again with more, sparser features."] },
+    { q: ["根据 Kalai 等（2025），模型为什么会自信地编造？", "According to Kalai et al. (2025), why do models confidently make things up?"],
+      opts: [["模型有恶意", "The model is malicious"], ["训练和评测大多只看对错，答错和“不知道”同样得 0 分，于是猜测总是更划算", "Training and evaluation mostly score right vs. wrong, with wrong and “I don't know” both worth 0, so guessing always pays"], ["上下文太短", "The context is too short"]],
+      a: 1, ex: ["改变评分（答错扣分、给弃答留出位置）才能改变激励。本章中答错扣 1 分时，弃答的策略明显胜过总是回答。", "Changing the incentives requires changing the grading (penalize wrong answers, leave room for abstaining). In this chapter, with a penalty of 1 per wrong answer, abstaining clearly beats always answering."] },
+    { q: ["把有害请求换成密文就能越狱，这属于哪类失败？", "A harmful request in a cipher gets through. What kind of failure is this?"],
+      opts: [["泛化不匹配：模型的能力覆盖了密文，安全训练却没有", "Mismatched generalization: the model's capability covers the cipher, its safety training doesn't"], ["模型听不懂密文", "The model doesn't understand the cipher"], ["密文让模型变笨", "The cipher makes the model dumber"]],
+      a: 0, ex: ["Wei 等（2023）把越狱的原因归为“目标冲突”和“泛化不匹配”两类。base64、少见语言、角色扮演都属于这类：能力延伸到的地方，安全训练也要延伸到。", "Wei et al. (2023) attribute jailbreaks to competing objectives and mismatched generalization. Base64, low-resource languages and role-play fall in this class: wherever capability reaches, safety training must reach too."] },
+    { q: ["“浅层对齐”是什么意思？", "What does “shallow alignment” mean?"],
+      opts: [["模型只在回答的头几个词上学会了拒绝；只要回答以顺从的词开头，它就会接着写下去", "The model learned to refuse only in the first few words of an answer; once an answer starts compliantly it carries on"], ["模型参数太少", "The model has too few parameters"], ["对齐数据太少", "Too little alignment data"]],
+      a: 0, ex: ["预填攻击（API 允许写好回答开头）和一些对抗后缀都利用了这一点。在回答中途也训练拒绝（Qi 等，2024），可以让拒绝更深。", "Prefilling attacks (when an API lets you write the start of the answer) and some adversarial suffixes exploit this. Training refusal mid-answer as well (Qi et al., 2024) makes it deeper."] },
+    { q: ["可解释性工具（探针、SAE、引导）对安全有什么用？", "How do interpretability tools (probes, SAEs, steering) help safety?"],
+      opts: [["可以完全证明模型是安全的", "They fully prove a model is safe"], ["可以检查和监控模型内部的表示（如欺骗、拒绝相关的方向），发现行为测试看不到的问题，但目前还不完整", "They let you inspect and monitor internal representations (e.g. directions related to deception or refusal), finding problems behaviour tests miss, though they are still incomplete"], ["只能用于小模型", "They only work on small models"]],
+      a: 1, ex: ["例如 Arditi 等（2024）在多个大模型里找到了控制拒绝的单一方向；Anthropic 用 SAE 在 Claude 3 Sonnet 中找到了数百万个可解释特征。但 SAE 重建并不完美，特征也不一定对应我们关心的概念。", "For example, Arditi et al. (2024) found a single direction controlling refusal in several large models, and Anthropic used SAEs to find millions of interpretable features in Claude 3 Sonnet. But SAE reconstructions are imperfect, and features don't always match the concepts we care about."] },
+  ];
+  const answered = {};
+  function renderQuiz() {
+    $("quiz").innerHTML = QUIZ.map((it, n) =>
+      `<div class="q"><b>${n + 1}. ${tr(...it.q)}</b><div class="opts">` +
+      it.opts.map((o, k) => {
+        const cls = answered[n] === undefined ? "" : k === it.a ? "right" : k === answered[n] ? "wrong" : "";
+        return `<button data-n="${n}" data-k="${k}" class="${cls}">${String.fromCharCode(65 + k)}. ${tr(...o)}</button>`;
+      }).join("") + `</div>` +
+      (answered[n] === undefined ? "" : `<div class="explain">${answered[n] === it.a ? "✅ " : "❌ "}${tr(...it.ex)}</div>`) + `</div>`).join("");
+    $("quiz").querySelectorAll("button").forEach(b =>
+      b.addEventListener("click", () => { answered[+b.dataset.n] = +b.dataset.k; renderQuiz(); }));
+  }
+
+  // ================= wiring =================
+  function fill() {
+    const keep = (id, html, def) => { const v = $(id).value; $(id).innerHTML = html; $(id).value = v || def; };
+    keep("pb-s", D.probes.sentences.map((s, i) => `<option value="${i}">${esc(s.words.join(" "))}</option>`).join(""), "1");
+    keep("st-p", D.probes.steer.map((s, i) => `<option value="${i}">${esc(s.words.join(" "))} ___ (${s.plural ? tr("复数主语", "plural subject") : tr("单数主语", "singular subject")})</option>`).join(""), "0");
+    keep("fb-s", D.sae.examples.map((s, i) => `<option value="${i}">${esc(s.words.join(" "))}</option>`).join(""), "1");
+    keep("jb-m", MODELS.map(([k, n]) => `<option value="${k}">${tr(...n)}</option>`).join(""), "safety");
+    keep("jb-v", D.jb.verbs.map(v => `<option>${v}</option>`).join(""), "make");
+    keep("jb-o", [...D.jb.harmful.map(o => `<option value="${o}">${o} ${tr("（有害）", "(harmful)")}</option>`), ...D.jb.harmless.map(o => `<option value="${o}">${o}</option>`)].join(""), "poison");
+  }
+  function renderAll() { fill(); renderPb(); renderSt(); renderSp(); renderFb(); renderHl(); renderJb(); renderQuiz(); }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    renderAll();
+  }
+  $("pb-s").addEventListener("input", renderPb);
+  ["st-p", "st-a"].forEach(id => $(id).addEventListener("input", renderSt));
+  $("sp-s").addEventListener("input", renderSp);
+  $("fb-s").addEventListener("input", () => { fbSel = 0; renderFb(); });
+  $("hl-l").addEventListener("input", renderHl);
+  ["jb-m", "jb-v", "jb-o", "jb-c", "jb-k"].forEach(id => $(id).addEventListener("input", renderJb));
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", renderAll);
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

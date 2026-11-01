@@ -121,7 +121,7 @@ How does in-context learning work inside the model? Olsson et al. (2022) found *
 - **Formatting details matter too.** Sclar et al. (2023) found that changing only separators, capitalization or spacing can move the same model's accuracy by tens of points. Compare important prompts on an evaluation set rather than by feel.
 - **Programs can optimize prompts.** APE (Zhou et al., 2022) has the model generate candidate instructions and picks by evaluation score; DSPy (Khattab et al., 2023) treats prompts as program modules that can be tuned automatically.
 
-Prompts have limits: knowledge the model lacks can't be written into a prompt by wishing (that needs retrieval, RAG, chapter 19, planned), and an ability the model lacks is hard to teach with any prompt (that needs fine-tuning, [chapter 08](../08-finetuning/README.en.md)).
+Prompts have limits: knowledge the model lacks can't be written into a prompt by wishing (that needs retrieval, RAG, [chapter 19](../19-rag/README.en.md)), and an ability the model lacks is hard to teach with any prompt (that needs fine-tuning, [chapter 08](../08-finetuning/README.en.md)).
 
 ### 3.4 Prompt injection
 
