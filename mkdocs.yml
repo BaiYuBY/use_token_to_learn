@@ -54,6 +54,7 @@ plugins:
           build: true
           nav_translations:
             总览: Overview
+            学习路线图: Study Roadmap
             核心原理: Core Concepts
             分词: Tokenization
             词嵌入: Embedding
@@ -118,6 +119,7 @@ extra_javascript:
 
 nav:
   - 总览: index.md
+  - 学习路线图: 00-overview/README.md
   - 核心原理:
       - 分词: 01-tokenization/README.md
       - 词嵌入: 02-embedding/README.md

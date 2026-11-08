@@ -11,11 +11,14 @@
 
 🌐 **在线阅读：** <https://baiyuby.github.io/use_token_to_learn/>
 
+🗺️ **从哪里开始：** [学习路线图](docs/00-overview/README.md)给出三条路线和每天的计划，[学习计划表](https://baiyuby.github.io/use_token_to_learn/00-overview/interactive/planner.html)可按你的日期生成计划。
+
 
 ## 已完成的章节
 
 | 章节 | 讲解 | 交互演示 | 代码 |
 | --- | --- | --- | --- |
+| 00 总览与学习路线图 Overview & Study Roadmap | [中文](docs/00-overview/README.md) · [EN](docs/00-overview/README.en.md) | [学习计划表 / Planner](https://baiyuby.github.io/use_token_to_learn/00-overview/interactive/planner.html) | [study_plan.py](docs/00-overview/code/study_plan.py) |
 | 01 分词 Tokenization | [中文](docs/01-tokenization/README.md) · [EN](docs/01-tokenization/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/01-tokenization/interactive/tokenizer.html) | [bpe.py](docs/01-tokenization/code/bpe.py) |
 | 02 词嵌入 Embedding | [中文](docs/02-embedding/README.md) · [EN](docs/02-embedding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/02-embedding/interactive/embedding.html) | [embedding.py](docs/02-embedding/code/embedding.py) |
 | 03 位置编码 Positional Encoding | [中文](docs/03-positional-encoding/README.md) · [EN](docs/03-positional-encoding/README.en.md) | [在线打开 / Open](https://baiyuby.github.io/use_token_to_learn/03-positional-encoding/interactive/positional.html) | [positional.py](docs/03-positional-encoding/code/positional.py) |
@@ -97,6 +100,8 @@ Learn large language models interactively. Every topic includes:
 - 🧑‍💻 **PyTorch code**: a minimal implementation checked against the built-in one, plus a Jupyter notebook per chapter that opens in Colab
 
 🌐 **Read online:** <https://baiyuby.github.io/use_token_to_learn/en/>
+
+🗺️ **Where to start:** the [study roadmap](docs/00-overview/README.en.md) gives three routes and a day-by-day plan, and the [study planner](https://baiyuby.github.io/use_token_to_learn/00-overview/interactive/planner.html?lang=en) dates it for you.
 
 **Browse locally:**
 
