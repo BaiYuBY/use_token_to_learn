@@ -6,6 +6,8 @@
 
 ## How to learn
 
+**New here?** Start with the [study roadmap](00-overview/README.md): the knowledge map, three routes (14-day sprint / 53-day standard / 77-day deep) and a day-by-day plan; the [study planner](00-overview/interactive/planner.html?lang=en) puts dates on it from your start date.
+
 Each chapter follows the same rhythm:
 
 1. **🎮 Play first**: drag sliders and click buttons to build intuition
@@ -16,6 +18,7 @@ Each chapter follows the same rhythm:
 
 | # | Topic | Playground | Status |
 | --- | --- | --- | --- |
+| 00 | [Overview & study roadmap](00-overview/README.md) | [Study planner](00-overview/interactive/planner.html?lang=en) | ✅ done |
 | 01 | [Tokenization](01-tokenization/README.md) | [Tokenizer playground](01-tokenization/interactive/tokenizer.html?lang=en) | ✅ done |
 | 02 | [Embedding](02-embedding/README.md) | [Embedding playground](02-embedding/interactive/embedding.html?lang=en) | ✅ done |
 | 03 | [Positional encoding](03-positional-encoding/README.md) | [Positional encoding playground](03-positional-encoding/interactive/positional.html?lang=en) | ✅ done |

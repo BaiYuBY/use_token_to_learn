@@ -1,0 +1,305 @@
+<!doctype html>
+<html lang="zh" data-lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>学习计划表 · Study Planner</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --panel: #f6f7fb;
+    --ink: #1f2328;
+    --muted: #5f6672;
+    --line: #dfe2ea;
+    --primary: #3f51b5;
+    --accent: #e8710a;
+    --good: #188038;
+    --bad: #c5221f;
+    --b1: #9fa8da;
+    --b2: #5c6bc0;
+    --b3: #3f51b5;
+    --b4: #e8710a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14161b;
+      --panel: #1d2027;
+      --ink: #e6e8ee;
+      --muted: #9aa1ad;
+      --line: #2f333d;
+      --primary: #8c9eff;
+      --accent: #ffa149;
+      --good: #6dd58c;
+      --bad: #f28b82;
+      --b1: #5c6bc0;
+      --b2: #8c9eff;
+      --b3: #c5cae9;
+      --b4: #ffa149;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font: 15px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+  }
+  html[data-lang="zh"] [lang="en"], html[data-lang="en"] [lang="zh"] { display: none !important; }
+  main { max-width: 1040px; margin: 0 auto; padding: 16px 16px 64px; }
+  header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.6rem; margin: 8px 0 4px; }
+  h2 { font-size: 1.2rem; margin: 0 0 4px; }
+  h3 { font-size: 1rem; margin: 12px 0 6px; }
+  .sub { color: var(--muted); margin: 0 0 8px; }
+  section { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin-top: 16px; }
+  .step { display: inline-block; background: var(--primary); color: var(--bg); border-radius: 999px; padding: 0 9px; margin-right: 6px; font-size: .85rem; }
+  button, select {
+    font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; cursor: pointer;
+  }
+  button:hover { border-color: var(--primary); }
+  button.on { background: var(--primary); color: var(--bg); border-color: var(--primary); }
+  .controls { display: flex; gap: 8px 14px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+  label { display: inline-flex; align-items: center; gap: 6px; }
+  input[type=range] { accent-color: var(--primary); }
+  .mono, code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+  .hint { color: var(--muted); font-size: .9rem; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; }
+  .col { flex: 1 1 320px; min-width: 0; }
+  .callout { border-left: 3px solid var(--accent); padding: 6px 10px; background: var(--bg); border-radius: 0 8px 8px 0; margin-top: 10px; }
+  .kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; font-size: .92rem; }
+  .kv b { font-variant-numeric: tabular-nums; }
+  .scroll { overflow-x: auto; }
+  table.t { border-collapse: collapse; width: 100%; font-size: .86rem; }
+  table.t th, table.t td { padding: 4px 6px; border-bottom: 1px solid var(--line); text-align: right; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  table.t th:first-child, table.t td:first-child { text-align: left; }
+  .good { color: var(--good); font-weight: 700; }
+  .bad { color: var(--bad); font-weight: 700; }
+  svg.chart { width: 100%; height: auto; display: block; background: var(--bg); border: 1px solid var(--line); border-radius: 8px; }
+  svg.chart .grid { stroke: var(--line); }
+  svg.chart text { fill: var(--muted); font-size: 11px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 6px; }
+  .legend button { padding: 2px 8px; font-size: .82rem; }
+  .legend button.off { opacity: .4; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
+  .quiz .q { margin: 12px 0; }
+  .quiz .opts { display: flex; flex-direction: column; gap: 6px; margin-top: 6px; }
+  .quiz .opts button { text-align: left; }
+  .quiz button.right { border-color: var(--good); color: var(--good); }
+  .quiz button.wrong { border-color: var(--bad); color: var(--bad); }
+  .quiz .explain { font-size: .9rem; color: var(--muted); margin-top: 4px; }
+  footer { margin-top: 24px; color: var(--muted); font-size: .85rem; }
+  a { color: var(--primary); }
+  .kv { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  table.t td:first-child { white-space: normal; min-width: 9em; }
+  .big { font-size: 1.4rem; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .stats { display: flex; gap: 10px 22px; flex-wrap: wrap; margin: 8px 0; }
+  .stats div { min-width: 7em; }
+  .stats small { display: block; color: var(--muted); font-size: .8rem; }
+  .sent { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .sent button { font-family: ui-monospace, monospace; display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px 8px; }
+  .sent button small { font-size: .72rem; opacity: .9; }
+  .sent button.sel { outline: 2px solid var(--accent); }
+  .heat { display: grid; gap: 2px; font-size: .75rem; }
+  .heat div { padding: 3px 2px; text-align: center; border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; margin-top: 8px; border-bottom: 1px solid var(--line); }
+  .bars div { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; font-size: .72rem; }
+  .bars div span { width: 100%; border-radius: 4px 4px 0 0; }
+  .bars div i { font-style: normal; color: var(--muted); }
+  .controls label { max-width: 100%; flex-wrap: wrap; }
+  .controls select { max-width: 100%; min-width: 0; }
+  input[type=number] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .route { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 8px; margin: 8px 0; }
+  .route button { text-align: left; padding: 8px 12px; }
+  .route button b { display: block; font-size: 1rem; }
+  .route button small { color: inherit; opacity: .8; }
+  .days { display: flex; gap: 4px; flex-wrap: wrap; }
+  .days label { border: 1px solid var(--line); border-radius: 8px; padding: 2px 8px; background: var(--bg); }
+  input[type=date] { font: inherit; background: var(--bg); color: var(--ink); border: 1px solid var(--line); border-radius: 6px; padding: 2px 6px; }
+  .progress { height: 12px; background: var(--bg); border: 1px solid var(--line); border-radius: 999px; overflow: hidden; margin: 6px 0; }
+  .progress span { display: block; height: 100%; background: var(--good); }
+  .week h3 { margin: 18px 0 6px; }
+  .card { display: grid; grid-template-columns: 2.2em 6.5em 1fr; gap: 8px; align-items: start; background: var(--bg); border: 1px solid var(--line); border-left: 5px solid var(--line); border-radius: 8px; padding: 8px 10px; margin: 6px 0; }
+  .card.done { opacity: .55; }
+  .card.today { outline: 2px solid var(--accent); }
+  .card input { width: 1.2em; height: 1.2em; margin-top: 3px; accent-color: var(--good); }
+  .card .date { font-variant-numeric: tabular-nums; color: var(--muted); font-size: .85rem; }
+  .card .date b { display: block; color: var(--ink); font-size: .95rem; }
+  .card .title { font-weight: 600; }
+  .card .title a { margin-left: 8px; font-weight: 400; font-size: .85rem; white-space: nowrap; }
+  .card ul { margin: 4px 0 0; padding-left: 1.1em; font-size: .88rem; }
+  .card .min { color: var(--muted); font-size: .8rem; font-weight: 400; margin-left: 6px; }
+  .tag { display: inline-block; font-size: .72rem; border-radius: 999px; padding: 0 7px; color: #fff; margin-left: 6px; vertical-align: middle; }
+  @media (max-width: 560px) { .card { grid-template-columns: 2em 1fr; } .card .body { grid-column: 1 / -1; } }
+  @media print { header .controls, .noprint { display: none !important; } section { border: none; } .card { break-inside: avoid; } }
+</style></head>
+<body>
+<main>
+  <header>
+    <div>
+      <h1><span lang="zh">学习计划表</span><span lang="en">Study Planner</span></h1>
+      <p class="sub">
+        <span lang="zh">选一条路线、开始日期和每周学习的日子，生成带日期的每日计划。勾选完成的天数，进度保存在这个浏览器里；也可以导出到日历，或打印成纸质计划。</span>
+        <span lang="en">Pick a route, a start date and the weekdays you study, and get a dated day-by-day plan. Tick off finished days (progress is saved in this browser), export it to your calendar, or print it.</span>
+      </p>
+    </div>
+    <div class="controls" style="margin:8px 0">
+      <button id="lang-zh" class="on">中文</button>
+      <button id="lang-en">English</button>
+    </div>
+  </header>
+
+  <section class="noprint">
+    <h2><span class="step">1</span><span lang="zh">选择路线</span><span lang="en">Choose a route</span></h2>
+    <div class="route" id="routes"></div>
+    <h2 style="margin-top:14px"><span class="step">2</span><span lang="zh">安排时间</span><span lang="en">Set your schedule</span></h2>
+    <div class="controls">
+      <label><span lang="zh">开始日期</span><span lang="en">start date</span> <input type="date" id="start"></label>
+    </div>
+    <div class="controls"><span lang="zh">每周学习的日子：</span><span lang="en">study on:</span> <span class="days" id="weekdays"></span></div>
+    <div class="controls">
+      <button id="ics">📅 <span lang="zh">导出日历（.ics）</span><span lang="en">export calendar (.ics)</span></button>
+      <button id="print">🖨️ <span lang="zh">打印</span><span lang="en">print</span></button>
+      <button id="reset">↺ <span lang="zh">清除这条路线的进度</span><span lang="en">clear this route's progress</span></button>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="step">3</span><span lang="zh">你的计划</span><span lang="en">Your plan</span></h2>
+    <div class="stats" id="stats"></div>
+    <div class="progress"><span id="bar" style="width:0%"></span></div>
+    <div class="legend" id="legend"></div>
+    <div id="plan"></div>
+  </section>
+
+  <footer>
+    <span lang="zh">完整说明：</span><span lang="en">Full guide: </span>
+    <a href="../README.html">00 总览与学习路线图 · Overview &amp; Roadmap</a> ·
+    <a href="https://github.com/BaiYuBY/use_token_to_learn">GitHub</a>
+  </footer>
+</main>
+<script src="plan_data.js"></script>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const D = window.PLAN_DATA;
+  let lang = "zh";
+  const tr = (zh, en) => lang === "zh" ? zh : en;
+  const L = () => lang === "zh" ? 0 : 1;
+  const stat = (label, value, color) => `<div><small>${label}</small><span class="big" style="color:${color || "inherit"}">${value}</span></div>`;
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+  const store = {
+    get(k, d) { try { const v = localStorage.getItem(k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+    set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
+  };
+  const ROUTES = [["speed", ["速通", "Sprint"], ["只玩演示、读直觉与误区、做自测，每天 2 章", "Demos, intuition, misconceptions and self-checks only, 2 chapters a day"]],
+                  ["standard", ["标准", "Standard"], ["每章玩、读、跑代码、做练习和自测，阶段末复盘", "Play, read, run, exercise and self-check every chapter, with stage reviews"]],
+                  ["deep", ["深入", "Deep"], ["标准路线 + 每章一天精读论文和拓展练习", "The standard route plus a day of papers and extensions per chapter"]]];
+  const WD = [["一", "Mon"], ["二", "Tue"], ["三", "Wed"], ["四", "Thu"], ["五", "Fri"], ["六", "Sat"], ["日", "Sun"]];
+  const iso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  let route = store.get("plan.route", "standard");
+  if (!D.routes[route]) route = "standard";
+  let days = store.get("plan.weekdays", [1, 1, 1, 1, 1, 1, 0]);
+  let start = store.get("plan.start", iso(new Date()));
+  const doneKey = () => `plan.done.${route}`;
+
+  function dates(n) {
+    const out = [], d = new Date(start + "T00:00:00");
+    if (!days.some(Boolean) || isNaN(d)) return out;
+    while (out.length < n) { if (days[(d.getDay() + 6) % 7]) out.push(new Date(d)); d.setDate(d.getDate() + 1); }
+    return out;
+  }
+  function chapterLinks(cid) {
+    const c = D.chapters[cid];
+    return `<a href="../../${c.dir}/README${lang === "zh" ? "" : ".en"}.html">📖 ${cid}</a><a href="../../${c.dir}/interactive/${c.page}?lang=${lang}">🎮 ${tr("演示", "demo")}</a>`;
+  }
+  function render() {
+    $("routes").innerHTML = ROUTES.map(([k, name, desc]) => {
+      const p = D.routes[k], h = p.reduce((a, d) => a + d.minutes, 0) / 60;
+      return `<button class="${k === route ? "on" : ""}" data-k="${k}"><b>${tr(...name)}</b>${p.length} ${tr("天", "days")} · ${tr("约 ", "~")}${Math.round(h)} ${tr("小时", "hours")}<br><small>${tr(...desc)}</small></button>`;
+    }).join("");
+    $("routes").querySelectorAll("button").forEach(b => b.addEventListener("click", () => { route = b.dataset.k; store.set("plan.route", route); render(); }));
+    $("weekdays").innerHTML = WD.map((w, i) => `<label><input type="checkbox" data-i="${i}" ${days[i] ? "checked" : ""}> ${tr(...w)}</label>`).join("");
+    $("weekdays").querySelectorAll("input").forEach(c => c.addEventListener("input", () => { days[+c.dataset.i] = c.checked ? 1 : 0; store.set("plan.weekdays", days); render(); }));
+    $("start").value = start;
+    const plan = D.routes[route], ds = dates(plan.length), done = store.get(doneKey(), {});
+    const today = iso(new Date());
+    const nDone = plan.filter((_, i) => done[i]).length;
+    const left = plan.reduce((a, d, i) => a + (done[i] ? 0 : d.minutes), 0) / 60;
+    const weeks = ds.length ? Math.ceil(((ds[ds.length - 1] - ds[0]) / 864e5 + 1) / 7) : 0;
+    $("stats").innerHTML = ds.length
+      ? stat(tr("完成日期", "finish date"), iso(ds[ds.length - 1])) + stat(tr("历时", "spans"), `${weeks} ${tr("周", "weeks")}`) +
+        stat(tr("已完成", "done"), `${nDone} / ${plan.length}`, "var(--good)") + stat(tr("剩余约", "left, about"), `${left.toFixed(0)} ${tr("小时", "hours")}`)
+      : `<p class="no">${tr("请至少选一个学习日。", "Pick at least one study day.")}</p>`;
+    $("bar").style.width = `${100 * nDone / plan.length}%`;
+    $("legend").innerHTML = D.stages.map((s, i) => `<span class="hint"><span class="dot" style="background:${D.colors[i]}"></span>${tr("阶段", "Stage")} ${i + 1}: ${esc(s[L()])}</span>`).join("") +
+      `<span class="hint"><span class="dot" style="background:#424242"></span>${tr("复盘与项目", "review & projects")}</span>`;
+    let html = "", week = -1;
+    const monday = ds.length ? new Date(ds[0].getFullYear(), ds[0].getMonth(), ds[0].getDate() - (ds[0].getDay() + 6) % 7) : null;
+    plan.forEach((d, i) => {
+      const date = ds[i];
+      if (!date) return;
+      const w = Math.floor(Math.round((date - monday) / 864e5) / 7);
+      if (w !== week) { week = w; html += `<div class="week"><h3>${tr(`第 ${w + 1} 周`, `Week ${w + 1}`)}</h3></div>`; }
+      const cid = d.chapters[0], stage = cid ? D.chapters[cid].stage : 0;
+      const color = d.kind === "review" ? "#424242" : D.colors[stage];
+      const tag = d.kind === "review" ? `<span class="tag" style="background:#424242">${tr("复盘", "review")}</span>` : d.kind === "deep" ? `<span class="tag" style="background:${color}">${tr("精读", "deep")}</span>` : "";
+      html += `<div class="card ${done[i] ? "done" : ""} ${iso(date) === today ? "today" : ""}" style="border-left-color:${color}">
+        <input type="checkbox" data-i="${i}" ${done[i] ? "checked" : ""} aria-label="${tr("完成", "done")}">
+        <div class="date"><b>${tr(`第 ${i + 1} 天`, `Day ${i + 1}`)}</b>${iso(date)} ${tr("周", "")}${tr(...WD[(date.getDay() + 6) % 7])}</div>
+        <div class="body"><div class="title">${esc(d.title[L()])}${tag}<span class="min">~${d.minutes} ${tr("分钟", "min")}</span>${d.chapters.map(chapterLinks).join("")}</div>
+        <ul>${d.tasks[L()].map(t => `<li>${esc(t)}</li>`).join("")}</ul></div></div>`;
+    });
+    $("plan").innerHTML = html;
+    $("plan").querySelectorAll("input").forEach(c => c.addEventListener("input", () => {
+      const s = store.get(doneKey(), {});
+      if (c.checked) s[c.dataset.i] = 1; else delete s[c.dataset.i];
+      store.set(doneKey(), s);
+      render();
+    }));
+  }
+  function ics() {
+    const plan = D.routes[route], ds = dates(plan.length), stamp = new Date().toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+    const escI = s => s.replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+    const enc = new TextEncoder();
+    const fold = line => {  // RFC 5545: lines of at most 75 octets, continued with a leading space / 每行不超过 75 字节
+      const out = []; let cur = "", n = 0;
+      for (const ch of line) { const b = enc.encode(ch).length; if (n + b > 74) { out.push(cur); cur = " "; n = 1; } cur += ch; n += b; }
+      out.push(cur); return out.join("\r\n");
+    };
+    const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//use_token_to_learn//planner//EN", "CALSCALE:GREGORIAN"];
+    plan.forEach((d, i) => {
+      if (!ds[i]) return;
+      const day = iso(ds[i]).replace(/-/g, ""), next = new Date(ds[i]);
+      next.setDate(next.getDate() + 1);
+      lines.push("BEGIN:VEVENT", `UID:utl-${route}-${i + 1}-${day}@use-token-to-learn`, `DTSTAMP:${stamp}`, `DTSTART;VALUE=DATE:${day}`, `DTEND;VALUE=DATE:${iso(next).replace(/-/g, "")}`,
+        fold(`SUMMARY:${escI(`${tr(`第 ${i + 1} 天`, `Day ${i + 1}`)}: ${d.title[L()]}`)}`), fold(`DESCRIPTION:${escI(d.tasks[L()].join("\n"))}`), "END:VEVENT");
+    });
+    lines.push("END:VCALENDAR");
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/calendar" }));
+    a.download = `llm-study-plan-${route}.ics`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+  }
+  function setLang(l) {
+    lang = l;
+    document.documentElement.dataset.lang = l;
+    document.documentElement.lang = l;
+    $("lang-zh").classList.toggle("on", l === "zh");
+    $("lang-en").classList.toggle("on", l === "en");
+    try { localStorage.setItem("lang", l); } catch (e) {}
+    render();
+  }
+  $("start").addEventListener("input", () => { if ($("start").value) { start = $("start").value; store.set("plan.start", start); render(); } });
+  $("ics").addEventListener("click", ics);
+  $("print").addEventListener("click", () => window.print());
+  $("reset").addEventListener("click", () => { if (confirm(tr("确定清除这条路线的完成记录？", "Clear the ticks for this route?"))) { store.set(doneKey(), {}); render(); } });
+  $("lang-zh").addEventListener("click", () => setLang("zh"));
+  $("lang-en").addEventListener("click", () => setLang("en"));
+  let initial = new URLSearchParams(location.search).get("lang");
+  if (!initial) { try { initial = localStorage.getItem("lang"); } catch (e) {} }
+  if (!initial && !/^zh/i.test(navigator.language || "")) initial = "en";
+  setLang(initial === "en" ? "en" : "zh");
+})();
+</script>
+</body>
+</html>

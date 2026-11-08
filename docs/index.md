@@ -6,6 +6,8 @@
 
 ## 怎么学
 
+**第一次来？** 先看 [学习路线图](00-overview/README.md)：知识地图、三条路线（速通 14 天 / 标准 53 天 / 深入 77 天）和每天的计划；用 [学习计划表](00-overview/interactive/planner.html) 按你的开始日期生成带日期的计划。
+
 每一章都按同一个节奏展开：
 
 1. **🎮 先玩交互演示**：拖滑块、点按钮，先建立直觉
@@ -16,6 +18,7 @@
 
 | 编号 | 主题 | 交互演示 | 状态 |
 | --- | --- | --- | --- |
+| 00 | [总览与学习路线图](00-overview/README.md) | [学习计划表](00-overview/interactive/planner.html) | ✅ 已完成 |
 | 01 | [分词 Tokenization](01-tokenization/README.md) | [分词演示](01-tokenization/interactive/tokenizer.html) | ✅ 已完成 |
 | 02 | [词嵌入 Embedding](02-embedding/README.md) | [词嵌入演示](02-embedding/interactive/embedding.html) | ✅ 已完成 |
 | 03 | [位置编码 Positional Encoding](03-positional-encoding/README.md) | [位置编码演示](03-positional-encoding/interactive/positional.html) | ✅ 已完成 |
